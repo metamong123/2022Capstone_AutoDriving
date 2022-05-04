@@ -1,0 +1,22 @@
+<launch>
+    <remap from="ublox_gps/fix" to="gps/fix" />
+    <arg name="node_name" value="ublox_gps"/>
+    <arg name="param_file_name" value="zed-f9p" />
+    <arg name="output" value="screen" />
+    <arg name="respawn" value="true" />
+    <arg name="respawn_delay" value="30" />
+    <arg name="clear_params" value="false" />
+
+    <node pkg="ublox_gps" type="ublox_gps" name="$(arg node_name)"
+        output="$(arg output)" 
+        clear_params="$(arg clear_params)"
+        respawn="$(arg respawn)" 
+        respawn_delay="$(arg respawn_delay)">
+    <rosparam command="load" 
+              file="$(find ublox_gps)/config/$(arg param_file_name).yaml" />
+    </node>
+
+    
+    <node name="gps_to_vo" pkg="gps_to_vo" type="gps_to_vo.py" output="screen"/>
+    <node name="odom_with_cov" pkg="odomcov" type="cov.py" output="screen"/>
+</launch>

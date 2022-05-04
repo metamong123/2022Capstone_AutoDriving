@@ -1,0 +1,4 @@
+<launch>
+  <node name="gps_to_vo" pkg="gps_to_vo" type="gps_to_vo.py" output="screen"/>
+  <node name="odom_with_cov" pkg="odomcov" type="cov.py" output="screen"/>
+</launch>
