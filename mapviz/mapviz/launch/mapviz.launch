@@ -1,0 +1,27 @@
+<launch>
+
+  <node pkg="mapviz" type="mapviz" name="mapviz"></node>
+
+  <node pkg="swri_transform_util" type="initialize_origin.py" name="initialize_origin" >
+    <param name="local_xy_frame" value="/map"/>
+    <param name="local_xy_origin" value="swri"/>
+    <rosparam param="local_xy_origins">
+      [{ name: EPSG5179,
+         latitude: 37,
+         longitude: 127.5,
+         altitude: 200.0,
+         heading: 0.0},
+
+       { name: swri,
+         latitude: 37.632036,
+         longitude: 127.0759777,
+         altitude: 233.719,
+         heading: 0.0}]
+    </rosparam>
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="swri_transform" args="0 0 0 0 0 0 /map /origin 100"  />
+
+
+
+</launch>
