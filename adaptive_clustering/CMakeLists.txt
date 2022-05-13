@@ -4,8 +4,8 @@ project(adaptive_clustering)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#find_package(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs visualization_msgs geometry_msgs pcl_conversions pcl_ros)
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs visualization_msgs geometry_msgs pcl_conversions pcl_ros vision_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs visualization_msgs geometry_msgs pcl_conversions pcl_ros)
+#find_package(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs visualization_msgs geometry_msgs pcl_conversions pcl_ros vision_msgs)
 
 find_package(PCL REQUIRED)
 
@@ -14,7 +14,6 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 add_message_files(FILES ClusterArray.msg Bboxes2d.msg)
 
 generate_messages(DEPENDENCIES std_msgs sensor_msgs vision_msgs)
-#generate_messages(DEPENDENCIES std_msgs sensor_msgs)
 
 catkin_package()
 
