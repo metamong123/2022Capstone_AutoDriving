@@ -16,8 +16,6 @@ import numpy as np
 
 vo_Pub=rospy.Publisher('/odom',Odometry,queue_size=1)
 
-now_gps_x=0
-now_gps_y=0
 
 def callback(msg):
 
@@ -29,20 +27,13 @@ def callback(msg):
 		wgs84=Proj(init='epsg:4326')
 		a,b=transform(wgs84,kcity,msg.longitude,msg.latitude)
 
-########### cov check ################
-	cov1 = gps.position_covariance[0] 
-	cov2 = gps.position_covariance[4]
-######################################
-	if (cov1 <= 0.0003 or cov2 <= 0.0003 ) :
-		rpose.pose.pose.position.x=a #-962614+27.7457989061-0.28
-		rpose.pose.pose.position.y=b #-1959199-56.3029978438-4.13
-		rpose.pose.covariance[0]=msg.position_covariance[0]
-		rpose.pose.covariance[7]=msg.position_covariance[4]
-		rpose.pose.covariance[14]=msg.position_covariance[8]
-		
-	else:
-		gps_jumping()
 
+	rpose.pose.pose.position.x=a #-962614+27.7457989061-0.28
+	rpose.pose.pose.position.y=b #-1959199-56.3029978438-4.13
+	rpose.pose.covariance[0]=msg.position_covariance[0]
+	rpose.pose.covariance[7]=msg.position_covariance[4]
+	rpose.pose.covariance[14]=msg.position_covariance[8]
+		
 
 def callback1(msg):
 	
@@ -81,20 +72,13 @@ def callback1(msg):
 	vo_Pub.publish(rpose)
 	
 	i=i+1
-######################## gps covariance increased, jumping#########################
-def gps_jumping():
-	if 	
 
 
-
-
-
-#####################################################################################
 if __name__=='__main__':
 	
 	rospy.init_node('gps_to_vo')
 
-	global rpose, a, b, heading, now_gps_x, now_gps_y
+	global rpose, a, b, heading
 	a=0
 	b=0
 	heading=0
@@ -104,12 +88,6 @@ if __name__=='__main__':
 
 	rospy.Subscriber("/gps/fix",NavSatFix,callback)
 	rospy.Subscriber("/ublox_gps/fix_velocity",TwistWithCovarianceStamped,callback1)
-	
-	
-	with open(path_map + "/src/route.pkl", "rb") as f:
-		nodes = pickle.load(f)
-	nodes[0]={}
-	nodes[0]={'x':nodes[0]['x'][:], 'y':nodes[0]['y'][:]}
-	
+
         
 	rospy.spin()
