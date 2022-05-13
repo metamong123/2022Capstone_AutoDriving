@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 2.8.3)
 project(vision_msgs)
 
 find_package(catkin REQUIRED COMPONENTS
@@ -13,9 +13,7 @@ add_message_files(
   DIRECTORY msg
   FILES
   BoundingBox2D.msg
-  BoundingBox2DArray.msg
   BoundingBox3D.msg
-  BoundingBox3DArray.msg
   Classification2D.msg
   Classification3D.msg
   Detection2DArray.msg
@@ -48,5 +46,3 @@ install(DIRECTORY include/${PROJECT_NAME}/
 if (CATKIN_ENABLE_TESTING)
   add_subdirectory(test)
 endif()
-
-set(ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
