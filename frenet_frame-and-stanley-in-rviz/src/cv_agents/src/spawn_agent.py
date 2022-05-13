@@ -294,7 +294,7 @@ if __name__ == "__main__":
 	prev_v = state.v
 	error_ia = 0
 	r = rospy.Rate(10)
-	ai = 0
+	ai = 2
 
 	if my_wp >= (link_len[link_ind]-1):
 		link_ind+=1

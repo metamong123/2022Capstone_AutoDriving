@@ -1,0 +1,8 @@
+prefix=/home/mbsnscl/map_ws/src/frenet_frame-and-stanley-in-rviz/install
+
+Name: object_msgs
+Description: Description of object_msgs
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: geometry_msgs std_msgs message_runtime

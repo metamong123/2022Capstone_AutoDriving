@@ -20,18 +20,19 @@ from separation_axis_theorem import *
 LANE_WIDTH = 2.0  # lane width [m]
 WB = 1.04
 
-MIN_T = 3.0 # minimum terminal time [s]
-MAX_T = 6.0 # maximum terminal time [s], default = 2
+MIN_T = 2.0 # minimum terminal time [s]
+MAX_T = 10.0 # maximum terminal time [s], default = 2
 # MIN_T = 1.5 # minimum terminal time [s]
 # MAX_T = 2.5 # maximum terminal time [s], default = 2
 # DT_T = 0.5 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
-DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+DT_T = 4.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 DT = 0.1 # timestep for update
 
 V_MAX = 20 / 3.6	  # maximum velocity [m/s]
-ACC_MAX = V_MAX / MIN_T # maximum acceleration [m/ss]
+ACC_MAX=2.0
+# ACC_MAX = V_MAX / MIN_T # maximum acceleration [m/ss]
 #ACC_MAX = 99999999999999999999999999999999999999999999
-STEER_MAX = math.radians(60)
+STEER_MAX = math.radians(45)
 K_MAX = STEER_MAX / WB	 # maximum curvature [1/m]
 #K_MAX = 100
 # cost weights
@@ -371,7 +372,7 @@ def check_path(fplist, obs_info, mapx, mapy, maps):
 	col = 0
 	for i, _path in enumerate(fplist):
 		acc_squared = [(abs(a_s**2 + a_d**2)) for (a_s, a_d) in zip(_path.s_dd, _path.d_dd)]
-		#print("kappa:" + str(fplist[i].kappa))
+		# print("kappa:" + str(fplist[i].kappa))
 		if any([v > V_MAX for v in _path.s_d]):  # Max speed check
 			vel += 1
 			#print("a")
