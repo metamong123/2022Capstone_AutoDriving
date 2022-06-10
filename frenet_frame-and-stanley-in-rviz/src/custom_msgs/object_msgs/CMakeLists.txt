@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 set(MSG_FILES
   "Object.msg"
+  "ObjectArray.msg"
   "Prediction.msg"
   "Control.msg"
   "Trajectory.msg"

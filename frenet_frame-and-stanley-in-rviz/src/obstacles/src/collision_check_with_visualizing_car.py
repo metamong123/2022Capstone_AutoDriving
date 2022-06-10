@@ -7,30 +7,42 @@ import itertools
 import argparse
 import math
 
-from visualization_msgs.msg import Marker
+from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Quaternion, Point
-from object_msgs.msg import Object
+from object_msgs.msg import Object, ObjectArray
 from separation_axis_theorem import separating_axis_theorem, get_vertice_rect
 
 
 class collision_check_marker():
     def __init__(self, num_objects = None):
-        self.object_msg = {}
-        self.marker_pub = {}
+        self.object_msg = [] # [(x, y, yaw, L, W), (x, y, yaw, L, W), ... ]
+        self.car_msg = []    # [x, y, yaw, L, W]
         self.marker_msg = {}
-        self.collision_check = {}
+		self.collision_check_obs = []
+		self.collision_check_car = False
         self.num_objects = num_objects
 
-        for i in range(self.num_objects):
-            rospy.Subscriber("/objects/car_" + str(i+1), Object, self.callback_object)
-            self.marker_pub[str(i + 1)] = rospy.Publisher("/objects/marker/car_" + str(i+1), Marker, queue_size=1)
+		#Car, Obstacle Array Subscriber
+		self.sub_car = rospy.Subscriber('/objects/car_1', Object, self.callback_car)
+		self.sub_obstacle = rospy.Subscriber('obstacles', ObjectArray, self.callback_obstacle)
+        
+		#self.car_marker_pub = rospy.Publisher("/objects/marker/car_1", Marker, queue_size=1)
+		self.obstacle_marker_pub = rospy.Publisher("/objects/marker/obstacles", MarkerArray, queue_size=1)
 
-    def callback_object(self, msg):
-        id = str(msg.id)
-        yaw = msg.yaw
-        center_x = msg.x + 1.3 * math.cos(yaw)
-        center_y = msg.y + 1.3 * math.sin(yaw)
-        self.object_msg[id] = (center_x, center_y, yaw, msg.L, msg.W)
+	def callback_car(self, msg):
+		self.car_msg = [msg.x, msg.y, msg.yaw, msg.L, msg.W]
+
+	def callback_obstacle(self, msg):
+		self.obstacle_msg = []
+		for o in msg.object_list:
+			'''
+            #####(x, y) 좌표가 중심이 아니라 시작점인지?
+            yaw = o.yaw           
+            center_x = o.x + 1.3 * math.cos(yaw)
+            center_y = o.y + 1.3 * math.sin(yaw)
+            '''
+            #id(=i)가 문자열이어야 하는지 확인 필요
+			self.obstacle_msg.append((o.x, o.y, o.yaw, o.L, o.W))
 
     def get_marker_msg(self, msg_tuple, id, is_collide):
 
@@ -69,6 +81,7 @@ class collision_check_marker():
 
         return m
 
+    '''
     def get_sphere_marker_list_msg(self, vertice_all):
         m = Marker()
         m.header.frame_id = "/map"
@@ -91,38 +104,38 @@ class collision_check_marker():
                 point.y = vertex[1]
                 m.points.append(point)
         return m
-
+    '''
 
     def collision_check_and_publish(self):
-        ids = self.object_msg.keys()
-        for id in ids:
-            self.collision_check[id] = False
+		marray = MarkerArray()
+		obs_msg = self.obstacle_msg
+		car_msg = self.car_msg
+		self.collision_check_obs = []
+		self.collision_check_car = False
+		idx = len(obs_msg)
 
-        if len(ids) >= 2:
-            ids_com = itertools.combinations(ids, 2)
-            for pair in ids_com:
-                first_id = pair[0]
-                second_id = pair[1]
-                first_object_msg = self.object_msg[first_id]
-                second_object_msg = self.object_msg[second_id]
-                first_object_vertices = get_vertice_rect(first_object_msg)
-                second_object_vertices = get_vertice_rect(second_object_msg)
-                is_collide = separating_axis_theorem(first_object_vertices, second_object_vertices)
-                if is_collide:
-                    self.collision_check[first_id] = True
-                    self.collision_check[second_id] = True
+		if idx and car_msg:
+			self.collision_check_car = False
+			for i in range(idx):
+				self.collision_check_obs.append(False)
 
-        else:
-            print("Initialized object is not sufficient")
+			for i in range(idx):
+				car_vertices = get_vertice_rect(car_msg)
+				obstacle_vertices = get_vertice_rect(obs_msg[i])
+				is_collide = separating_axis_theorem(car_vertices, obstacle_vertices)
+				if is_collide:
+					self.collision_check_car = True
+					self.collision_check_obs[i] = True
 
-        for id in ids:
-            self.marker_msg[id] = self.get_marker_msg(self.object_msg[id], id, self.collision_check[id])
-            self.marker_pub[id].publish(self.marker_msg[id])
+			for id in range(idx):
+				marker = self.get_marker_msg(obs_msg[id], id + 2, self.collision_check_obs[id])
+				marray.markers.append(marker)
+
+			self.obstacle_marker_pub.publish(marray)
 
 
 if __name__ == "__main__":
     rospy.init_node("collision_checking_marker_node")
-    num_objects = 3
     collision_check = collision_check_marker(num_objects)
 
     r = rospy.Rate(100)

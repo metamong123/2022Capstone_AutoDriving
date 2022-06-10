@@ -15,7 +15,7 @@ from scipy.interpolate import interp1d
 
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Quaternion
-from object_msgs.msg import Object
+from object_msgs.msg import Object, ObjectArray
 
 import pickle
 import argparse
@@ -161,8 +161,8 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 		"ackermann_msg" : c
 	}
 
-obs_init1 = Object(x=1, y=11, yaw=1, L=4, W=5)
-obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)
+#obs_init1 = Object(x=1, y=11, yaw=1, L=4, W=5)
+#obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)
 # hightech
 # obj_msg = Object(x=962581.2429941624, y=1959229.97720466, yaw=1.2871297862692013, L=4.475, W=1.85)
 # playground short
@@ -171,8 +171,24 @@ obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)
 # obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
 
 obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
-obs_info = [obs_init1, obs_init2]
+obs_info = []
 
+def callback_obstacle(msg):
+	global obs_info
+	obs_info = []
+	for o in msg.object_list:
+	    obj = [o.x, o.y, o.yaw, o.L, o.W]
+
+	    '''
+	    #####(x, y) 좌표가 중심이 아니라 시작점인지?
+	    yaw = o.yaw           
+	    center_x = o.x + 1.3 * math.cos(yaw)
+	    center_y = o.y + 1.3 * math.sin(yaw)
+	    '''
+	    #id(=i)가 문자열이어야 하는지 확인 필요
+	    obs_info.append(obj)
+
+'''
 def callback1(msg):
 	global obs_info
 	obs_info[0] = msg
@@ -180,7 +196,7 @@ def callback1(msg):
 def callback2(msg):
 	global obs_info
 	obs_info[1] = msg
-
+'''
 def callback3(msg):
 	global obj_msg
 	obj_msg = msg
@@ -199,9 +215,10 @@ if __name__ == "__main__":
 	args, unknown = parser.parse_known_args()
 
 	rospy.init_node("three_cv_agents_node_" + str(args.id))
+	obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
 	#sub_obs = rospy.Subscriber("/objects/marker/car_1", Marker, queue_size=1)
-	sub_obs2 = rospy.Subscriber("/objects/car_2", Object, callback1, queue_size=1)
-	sub_obs3 = rospy.Subscriber("/objects/car_3", Object, callback2, queue_size=1)
+	#sub_obs2 = rospy.Subscriber("/objects/car_2", Object, callback1, queue_size=1)
+	#sub_obs3 = rospy.Subscriber("/objects/car_3", Object, callback2, queue_size=1)
 	sub_state = rospy.Subscriber("/objects/car_1", Object, callback3, queue_size=1)
 	WB = 1.04
 	while sub_obs2.get_num_connections() == 0 or sub_obs3.get_num_connections() == 0:

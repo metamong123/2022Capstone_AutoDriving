@@ -6,8 +6,8 @@ dt = 0.1
 k = 0.5  # control gain
 
 # GV70 PARAMETERS
-LENGTH = 4.715
-WIDTH = 1.910
+#LENGTH = 4.715
+#WIDTH = 1.910
 
 def normalize_angle(angle):
 	while angle > np.pi:
