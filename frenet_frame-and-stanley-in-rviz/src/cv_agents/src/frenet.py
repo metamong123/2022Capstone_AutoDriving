@@ -25,24 +25,25 @@ MAX_T = 10.0 # maximum terminal time [s], default = 2
 # MIN_T = 1.5 # minimum terminal time [s]
 # MAX_T = 2.5 # maximum terminal time [s], default = 2
 # DT_T = 0.5 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
-DT_T = 4.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
-DT = 0.1 # timestep for update
+DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+DT = 0.5 # timestep for update
 
 V_MAX = 20 / 3.6	  # maximum velocity [m/s]
-ACC_MAX=2.0
-# ACC_MAX = V_MAX / MIN_T # maximum acceleration [m/ss]
+# ACC_MAX=2.0
+ACC_MAX=V_MAX/DT_T
+#ACC_MAX = V_MAX / MIN_T # maximum acceleration [m/ss]
 #ACC_MAX = 99999999999999999999999999999999999999999999
-STEER_MAX = math.radians(45)
+STEER_MAX = math.radians(20)
 K_MAX = STEER_MAX / WB	 # maximum curvature [1/m]
 #K_MAX = 100
 # cost weights
-K_J = 0.1 # weight for jerk, default = 0.1
-K_T = 0.1 # weight for terminal time
-K_D = 1.0 # weight for consistency, default = 1.0
-K_GD = 7.0 # weight for global path tracking
-K_V = 1.0 # weight for getting to target speed
-K_LAT = 1.0 # weight for lateral direction, default = 1.0
-K_LON = 1.0 # weight for longitudinal direction, 
+K_J = 0.1 # weight for jerk, default = 0.1 (가가속도를 위한 웨이트)
+K_T = 0.1 # weight for terminal time (터미널 타임을 위한 웨이트)
+K_D = 1.0 # weight for consistency, default = 1.0 (일관성을 위한 웨이트?)
+K_GD = 7.0 # weight for global path tracking (글로벌 패스를 따르는 것에 대한 웨이트)
+K_V = 1.0 # weight for getting to target speed (목표 속도로 도달하는 것을 위한 웨이트)
+K_LAT = 1.0 # weight for lateral direction, default = 1.0 (횡방향을 위한 웨이트)
+K_LON = 1.0 # weight for longitudinal direction (종방향을 위한 웨이트)
 
 # lateral planning 시 terminal position condition 후보  (양 차선 중앙), default len(DF_SET) = 2
 DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
@@ -189,10 +190,8 @@ class QuarticPolynomial:
 		self.a1 = vi
 		self.a2 = 0.5*ai
 
-		A = np.array([[3*T**2, 4*T**3],
-							 [6*T, 12*T**2]])
-		b = np.array([vf - self.a1 - 2*self.a2*T,
-							 af - 2*self.a2])
+		A = np.array([[3*T**2, 4*T**3], [6*T, 12*T**2]])
+		b = np.array([vf - self.a1 - 2*self.a2*T, af - 2*self.a2])
 
 		x = np.linalg.solve(A, b)
 

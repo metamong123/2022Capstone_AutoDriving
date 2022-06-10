@@ -11,7 +11,7 @@ from geometry_msgs.msg import TransformStamped
 from scipy import signal
 
 old_time=0
-port = str(rospy.get_param("~imu_port","/dev/ttyUSB1"))
+port = str(rospy.get_param("~imu_port","/dev/ttyUSB0"))
 rpy=[0,0,0]
 w_speed=[0,0,0]
 accel=[0,0,0]
@@ -63,6 +63,7 @@ if __name__ == '__main__':
     #br = tf2_ros.TransformBroadcaster()
     mag_pub = rospy.Publisher("/imu_mag", MagneticField, queue_size=10)
     mag_yaw_pub = rospy.Publisher("/imu_mag_yaw",Float64, queue_size=10)
+    vel_pub = rospy.Publisher("imu_vel",Float64, queue_size=1)
     #r=rospy.Rate(20)
     mag=MagneticField()
     imu=Imu()
@@ -115,6 +116,8 @@ if __name__ == '__main__':
             imu.linear_acceleration.y = accel[1]
             imu.linear_acceleration.z = accel[2]
 	    
+            velocity = accel[0]
+        
             t=rospy.Time.now()
             time=t.to_sec()
             delta_time=time-old_time
@@ -124,7 +127,9 @@ if __name__ == '__main__':
             if (yaw_z >= np.pi):
                 yaw_z=yaw_z-2*np.pi
             elif (yaw_z <= -np.pi):
-            yaw_z=yaw_z+2*np.pi
+                yaw_z=yaw_z+2*np.pi
+
+            velocity = accel[0] * delta_time
 
             mag.header=imu.header
             mag.magnetic_field.x=float(data[10])
@@ -134,27 +139,28 @@ if __name__ == '__main__':
             mag_x=-mag.magnetic_field.y
             mag_y=-mag.magnetic_field.x
 
-        if mag_x == 0 :
-            if mag_y > 0 :
-                mag_yaw=90
-            else :
-                mag_yaw=-90
+            if mag_x == 0 :
+                if mag_y > 0 :
+                    mag_yaw=90
+                else :
+                    mag_yaw=-90
             else :
                 mag_yaw=np.arctan( mag_y / mag_x ) *180/np.pi
-            if mag_x < 0 :
-                mag_yaw=mag_yaw+180
-                mag_yaw=mag_yaw*np.pi/180
-                battery=round(float(data[13]),3)
-                imu_pub.publish(imu)
-            #pub_tf_transform(roll,pitch,yaw,w_speed,accel)
-            print("yaw:",rpy[2], "battery:",battery, "yaw_radian:",yaw , "yaw_from_ang.z:",yaw_z, "delta_time: ",delta_time)
-            #r.sleep()
-	    yaw_pub.publish(yaw) #yaw
-	    #mag_pub.publish(mag)
-	    #mag_yaw_pub.publish(mag_yaw)
-	    #yaw_z_pub.publish(yaw_z)
+                if mag_x < 0 :
+                    mag_yaw=mag_yaw+180
+                    mag_yaw=mag_yaw*np.pi/180
+                    battery=round(float(data[13]),3)
+                    imu_pub.publish(imu)
+                    vel_pub.publish(velocity)
+                    #pub_tf_transform(roll,pitch,yaw,w_speed,accel)
+                    print("yaw:",rpy[2], "battery:",battery, "yaw_radian:",yaw , "yaw_from_ang.z:",yaw_z, "delta_time: ",delta_time)
+                    #r.sleep()
+                    #yaw_pub.publish(yaw) #yaw
+                    #mag_pub.publish(mag)
+                    #mag_yaw_pub.publish(mag_yaw)
+                    #yaw_z_pub.publish(yaw_z)
+                else:
+                    pass
         else:
             pass
-    else:
-        pass
         #mainloop()
