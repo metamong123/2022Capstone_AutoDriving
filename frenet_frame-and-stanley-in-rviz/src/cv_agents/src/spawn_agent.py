@@ -30,8 +30,8 @@ from map_visualizer import Converter
 
 rn_id = dict()
 
-rn_id[5] = {'right': [0]}  # ego route
-
+# rn_id[5] = {'right': [0, 1, 2, 3, 4, 5, 6]}  # ego route
+rn_id[5] = {'right': [0]}
 
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
@@ -163,7 +163,14 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 
 obs_init1 = Object(x=1, y=11, yaw=1, L=4, W=5)
 obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)
-obj_msg = Object(x=962581.2429941624, y=1959229.97720466, yaw=1.2871297862692013, L=4.475, W=1.85)
+# hightech
+# obj_msg = Object(x=962581.2429941624, y=1959229.97720466, yaw=1.2871297862692013, L=4.475, W=1.85)
+# playground short
+# obj_msg = Object(x=962692.1184323871, y=1959011.6193129763, yaw=1.2871297862692013, L=4.475, W=1.85)
+# playground long
+# obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
+
+obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
 obs_info = [obs_init1, obs_init2]
 
 def callback1(msg):
@@ -216,6 +223,26 @@ if __name__ == "__main__":
 	with open(path_map + "/src/route.pkl", "rb") as f:
 		nodes = pickle.load(f)
 
+	with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
+		nodes = pickle.load(f)
+	# nodes[6]={}
+	# nodes[6]={'x':nodes[0]['x'][600:], 'y':nodes[0]['y'][600:], 's':nodes[0]['s'][600:], 'yaw':nodes[0]['yaw'][600:]}
+	# nodes[5]={}
+	# nodes[5]={'x':nodes[0]['x'][500:600], 'y':nodes[0]['y'][500:600], 's':nodes[0]['s'][500:600], 'yaw':nodes[0]['yaw'][500:600]}
+	# nodes[4]={}
+	# nodes[4]={'x':nodes[0]['x'][400:500], 'y':nodes[0]['y'][400:500], 's':nodes[0]['s'][400:500], 'yaw':nodes[0]['yaw'][400:500]}
+	# nodes[3]={}
+	# nodes[3]={'x':nodes[0]['x'][300:400], 'y':nodes[0]['y'][300:400], 's':nodes[0]['s'][300:400], 'yaw':nodes[0]['yaw'][300:400]}
+	# nodes[2]={}
+	# nodes[2]={'x':nodes[0]['x'][200:300], 'y':nodes[0]['y'][200:300], 's':nodes[0]['s'][200:300], 'yaw':nodes[0]['yaw'][200:300]}
+	# nodes[1]={}
+	# nodes[1]={'x':nodes[0]['x'][100:200], 'y':nodes[0]['y'][100:200], 's':nodes[0]['s'][100:200], 'yaw':nodes[0]['yaw'][100:200]}
+	# nodes[0]['x'] = nodes[0]['x'][:100]
+	# nodes[0]['y'] = nodes[0]['y'][:100]
+	# nodes[0]['s'] = nodes[0]['s'][:100]
+	# nodes[0]['yaw'] = nodes[0]['yaw'][:100]
+ 
+
 	link_i=-1
 	link_len=[]
 	for i in range(len(nodes)):
@@ -260,6 +287,9 @@ if __name__ == "__main__":
 	state.x=obj_msg.x
 	state.y=obj_msg.y
 	state.yaw=obj_msg.yaw
+	#############
+	# state.v=obj_msg.v
+	#############
  	#state = obj_car
 	v_list.append(state.v)
 	my_wp=0
@@ -343,17 +373,18 @@ if __name__ == "__main__":
 			opt_d = path[opt_ind].d[-1]
 			prev_opt_d = path[opt_ind].d[-1]
 		
-
+		ai=a
 		# vehicle state --> topic msg
 		state.update(a, steer)
-		a_list.append(a)
-		steer_list.append(steer)
-		v_list.append(v)
+		#a_list.append(a)
+		#steer_list.append(steer)
+		#v_list.append(v)
 		print("speed = " + str(state.v) + ",steer = " + str(steer))
 		prev_v = state.v
 		state.x=obj_msg.x
 		state.y=obj_msg.y
 		state.yaw=obj_msg.yaw
+		# state.v=obj_msg.v
 		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 
 		if my_wp >= (link_len[link_ind]-10):

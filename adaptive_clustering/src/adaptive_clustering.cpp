@@ -188,7 +188,8 @@ void pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& ros_pc2_in) {
       
       visualization_msgs::Marker marker;
       marker.header.stamp = ros::Time::now();
-      marker.header.frame_id = frame_id_;
+      //marker.header.frame_id = frame_id_;
+      marker.header.frame_id = "car_1";
       marker.ns = "adaptive_clustering";
       marker.id = i;
       marker.type = visualization_msgs::Marker::LINE_LIST;

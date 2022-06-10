@@ -4,6 +4,7 @@ import rospy
 import serial
 import time
 import math
+import pickle
 
 from std_msgs.msg import Header, Float64, Int8
 from sensor_msgs.msg import NavSatFix, NavSatStatus, Imu
@@ -18,18 +19,21 @@ vo_Pub=rospy.Publisher('/odom',Odometry,queue_size=1)
 
 def callback(msg):
 
+	global cov1,cov2
+
 	rpose.header.stamp=rospy.Time.now()
 	if msg.latitude !=float("inf"):
 		kcity=Proj(init='epsg:5179')
 		wgs84=Proj(init='epsg:4326')
 		a,b=transform(wgs84,kcity,msg.longitude,msg.latitude)
 
+
 	rpose.pose.pose.position.x=a #-962614+27.7457989061-0.28
 	rpose.pose.pose.position.y=b #-1959199-56.3029978438-4.13
 	rpose.pose.covariance[0]=msg.position_covariance[0]
 	rpose.pose.covariance[7]=msg.position_covariance[4]
 	rpose.pose.covariance[14]=msg.position_covariance[8]
-	
+		
 
 def callback1(msg):
 	
@@ -68,6 +72,8 @@ def callback1(msg):
 	vo_Pub.publish(rpose)
 	
 	i=i+1
+
+
 if __name__=='__main__':
 	
 	rospy.init_node('gps_to_vo')
@@ -82,9 +88,6 @@ if __name__=='__main__':
 
 	rospy.Subscriber("/gps/fix",NavSatFix,callback)
 	rospy.Subscriber("/ublox_gps/fix_velocity",TwistWithCovarianceStamped,callback1)
-	
-	
-	
-	
+
         
 	rospy.spin()
