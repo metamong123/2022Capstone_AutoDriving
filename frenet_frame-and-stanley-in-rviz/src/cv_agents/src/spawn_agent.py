@@ -221,8 +221,11 @@ if __name__ == "__main__":
 	#sub_obs3 = rospy.Subscriber("/objects/car_3", Object, callback2, queue_size=1)
 	sub_state = rospy.Subscriber("/objects/car_1", Object, callback3, queue_size=1)
 	WB = 1.04
+
+	'''
 	while sub_obs2.get_num_connections() == 0 or sub_obs3.get_num_connections() == 0:
 		continue
+	'''
 
 	id = args.id
 	tf_broadcaster = tf.TransformBroadcaster()
