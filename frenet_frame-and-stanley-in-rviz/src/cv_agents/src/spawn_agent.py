@@ -125,9 +125,9 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 	m.pose.position.z = 0.75
 	m.pose.orientation = Quaternion(*quat)
 
-	m.scale.x = 4.475
-	m.scale.y = 1.850
-	m.scale.z = 1.645
+	m.scale.x = 1.600
+	m.scale.y = 1.650
+	m.scale.z = 0.110
 
 	m.color.r = 93 / 255.0
 	m.color.g = 122 / 255.0
@@ -334,7 +334,7 @@ if __name__ == "__main__":
 
 		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed)
 		# update state with acc, delta
-		if opt_ind == -1:
+		if opt_ind == -1: ## No solution!
 			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
   
 			if my_wp >= (link_len[link_ind]-10):
@@ -351,6 +351,8 @@ if __name__ == "__main__":
 			a = 0
 			opt_d = prev_opt_d
 		else:
+			## PID control
+
 			error_pa = target_speed - state.v
 			error_da = state.v - prev_v
 			error_ia += target_speed - state.v

@@ -340,10 +340,10 @@ def calc_global_paths(fplist, mapx, mapy, maps):
 
 
 def collision_check(fp, obs_info, mapx, mapy, maps):
-
+	
 	# get obstacle's position (x,y)
 	#obs_xy = get_cartesian( obs[i, 0], obs[i, 1], mapx, mapy, maps)
-	car1s = [[f[0], f[1], f[2], 4.475, 1.850] for f in zip(fp.x, fp.y, fp.yaw)]
+	car1s = [[f[0], f[1], f[2], 1.600, 1.160] for f in zip(fp.x, fp.y, fp.yaw)]
 	parked1 = obs_info[0]
 	parked2 = obs_info[1]
 	
