@@ -164,13 +164,13 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 obs_init1 = Object(x=1, y=11, yaw=1, L=4, W=5)
 obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)
 # hightech
-# obj_msg = Object(x=962581.2429941624, y=1959229.97720466, yaw=1.2871297862692013, L=4.475, W=1.85)
+obj_msg = Object(x=962581.2429941624, y=1959229.97720466, yaw=1.2871297862692013, L=4.475, W=1.85)
 # playground short
 # obj_msg = Object(x=962692.1184323871, y=1959011.6193129763, yaw=1.2871297862692013, L=4.475, W=1.85)
 # playground long
 # obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
 
-obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
+#obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
 obs_info = [obs_init1, obs_init2]
 
 def callback1(msg):

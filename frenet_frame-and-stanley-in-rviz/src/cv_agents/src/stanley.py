@@ -3,7 +3,8 @@ import numpy as np
 # paramters
 dt = 0.1
 
-k = 0.5  # control gain
+# k =0.5
+k = 4  # control gain
 
 # ERP42 PARAMETERS
 LENGTH = 1.600
@@ -51,15 +52,16 @@ def stanley_control(x, y, yaw, v, map_xs, map_ys, map_yaws, L):
 	dy = map_y - front_y
 
 	perp_vec = [np.cos(yaw + np.pi/2), np.sin(yaw + np.pi/2)]
-	cte = np.dot([dx, dy], perp_vec) # Cross track error인듯
+	cte = np.dot([dx, dy], perp_vec)
 
 	# control law
 #	yaw_term = normalize_angle(map_yaw - yaw) * np.sin(np.pi/2 / (1+v/5))
-	yaw_term = normalize_angle(map_yaw - yaw)
-	cte_term = np.arctan2(k*cte, v)
+	yaw_term = normalize_angle(map_yaw - yaw) #heading error
+	cte_term = np.arctan2(k*cte, v) # cross track error
 	w_yaw = 0.9
 	w_cte = 0.65
-	k = 0.5
+	# k =0.5
+	# k = 0.5
 	# steering
 	steer = w_yaw * yaw_term + w_cte * cte_term
 	
