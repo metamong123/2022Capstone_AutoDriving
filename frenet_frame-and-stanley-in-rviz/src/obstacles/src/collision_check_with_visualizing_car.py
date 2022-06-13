@@ -15,7 +15,7 @@ from separation_axis_theorem import separating_axis_theorem, get_vertice_rect
 
 class collision_check_marker():
     def __init__(self, num_objects = None):
-        self.object_msg = [] # [(x, y, yaw, L, W), (x, y, yaw, L, W), ... ]
+        self.obstacle_msg = [] # [(x, y, yaw, L, W), (x, y, yaw, L, W), ... ]
         self.car_msg = []    # [x, y, yaw, L, W]
         self.marker_msg = {}
         self.collision_check_obs = []
@@ -136,9 +136,9 @@ class collision_check_marker():
 
 if __name__ == "__main__":
     rospy.init_node("collision_checking_marker_node")
-    collision_check = collision_check_marker(num_objects)
+    collision_check = collision_check_marker()
 
-    r = rospy.Rate(100)
+    r = rospy.Rate(10)
     while not rospy.is_shutdown():
         collision_check.collision_check_and_publish()
         r.sleep()

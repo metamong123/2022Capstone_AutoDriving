@@ -49,12 +49,12 @@ class ObstaclePub():
 				self.listener.waitForTransform(self.world_frame,self.detection_frame, rospy.Time(),rospy.Duration(10))
 				t, r = self.listener.lookupTransform(self.world_frame,self.detection_frame, rospy.Time(0))
 
-				tf_matrix = numpy.matrix(tf.transformations.quaternion_matrix(r))
+				tf_matrix = np.matrix(tf.transformations.quaternion_matrix(r))
 				tf_matrix[0, 3] = t[0]
 				tf_matrix[1, 3] = t[1]
 				tf_matrix[2, 3] = t[2]
         
-				result = numpy.array(numpy.dot(tf_matrix, pose))
+				result = np.array(np.dot(tf_matrix, pose))
 
 				o.x = result[0, 3]
 				o.y = result[1, 3]
