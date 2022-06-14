@@ -2,6 +2,9 @@
   <node pkg="adaptive_clustering_v1" name="adaptive_clustering_v1" type="adaptive_clustering_v1">
     <param name="print_fps" value="true"/>
   </node>
+
+  <node pkg="adaptive_clustering" name="pointcloud_ROI" type="pointcloud_ROI_" >
+  </node>
   
   <node pkg="rviz" type="rviz" name="rviz" args="-d $(env PWD)/adaptive_clustering_v1.rviz"/>
 </launch>
