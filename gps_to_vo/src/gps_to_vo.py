@@ -61,18 +61,24 @@ def callback1(msg):
 		rpose.pose.pose.orientation.z=before_qz	
 		rpose.pose.pose.orientation.w=before_qw
   
-	rpose.twist.twist.linear.x = msg.twist.twist.linear.x
-	rpose.twist.twist.linear.y = msg.twist.twist.linear.y
- 	rpose.twist.twist.linear.z = msg.twist.twist.linear.z
+	#rpose.twist.twist.linear.x = msg.twist.twist.linear.x
+	#rpose.twist.twist.linear.y = msg.twist.twist.linear.y
+ 	#rpose.twist.twist.linear.z = msg.twist.twist.linear.z
 	rpose.pose.covariance[21]=99999
 	rpose.pose.covariance[28]=99999
 	rpose.pose.covariance[35]=msg.twist.covariance[0]
 	#rate=rospy.Rate(1)
 	#rate.sleep()
-	vo_Pub.publish(rpose)
+	
 	
 	i=i+1
 
+def callback2(msg):
+    rpose.twist.twist.linear.x = msg.linear_acceleration.x  #linear velocity from imu
+    rpose.twist.twist.linear.y = msg.linear_acceleration.y
+    rpose.twist.twist.linear.z = msg.linear_acceleration.z
+    
+    vo_Pub.publish(rpose)
 
 if __name__=='__main__':
 	
@@ -88,6 +94,6 @@ if __name__=='__main__':
 
 	rospy.Subscriber("/gps/fix",NavSatFix,callback)
 	rospy.Subscriber("/ublox_gps/fix_velocity",TwistWithCovarianceStamped,callback1)
-
+	rospy.Subscriber("imu/data",Imu, callback2)
         
 	rospy.spin()
