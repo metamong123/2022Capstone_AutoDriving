@@ -99,15 +99,15 @@ class State:
 
 	def get_ros_msg(self, a, steer, id):
 		dt = self.dt
-		v = self.v
+		# v = self.v
 
 		c = AckermannDriveStamped()
 		c.header.frame_id = "/map"
 		c.header.stamp = rospy.Time.now()
 		c.drive.steering_angle = steer
 		c.drive.acceleration = a
-		c.drive.speed = v
-
+		# c.drive.speed = self.v
+		c.drive.speed = self.v + a * dt
 		return c
 
 
@@ -164,13 +164,13 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 obs_init1 = Object(x=1, y=11, yaw=1, L=4, W=5)
 obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)
 # hightech
-obj_msg = Object(x=962581.2429941624, y=1959229.97720466, yaw=1.2871297862692013, L=1.600, W=1.04)
+# obj_msg = Object(x=962581.2429941624, y=1959229.97720466, yaw=1.2871297862692013, L=4.475, W=1.85)
 # playground short
 # obj_msg = Object(x=962692.1184323871, y=1959011.6193129763, yaw=1.2871297862692013, L=4.475, W=1.85)
 # playground long
 # obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
-obj_msg = Object(x=962630.704431, y=1959205.67485, yaw=1.2871297862692013, L=1.600, W=1.04)
-#obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
+obj_msg = Object(x=962582.438689, y=1959244.72469, yaw=1.2871297862692013, L=1.600, W=1.04)
+# obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
 obs_info = [obs_init1, obs_init2]
 
 def callback1(msg):
@@ -282,13 +282,13 @@ if __name__ == "__main__":
 	v=0
 	prev_ind=0
 	# ind = 10
-	target_speed = 10.0 / 3.6
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
+	target_speed = 5.0 / 3.6
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=0.1, dt=0.1)
 	state.x=obj_msg.x
 	state.y=obj_msg.y
 	state.yaw=obj_msg.yaw
 	#############
-	# state.v=obj_msg.v
+	state.v=obj_msg.v
 	#############
  	#state = obj_car
 	v_list.append(state.v)
@@ -300,8 +300,9 @@ if __name__ == "__main__":
 	r = rospy.Rate(10)
 	ai = 0
 
-	# if my_wp >= (link_len[link_ind]-1):
-	# 	link_ind+=1
+	if my_wp >= (link_len[link_ind]-1):
+		print(link_len[link_ind])
+		link_ind+=1
 
 	prev_ind = link_ind-2
 	# s, d = get_frenet(state.x, state.y, mapx[:100], mapy[:100],my_wp)
@@ -337,13 +338,13 @@ if __name__ == "__main__":
 		if opt_ind == -1: ## No solution!
 			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
   
-			# if my_wp >= (link_len[link_ind]-10):
-			# 	if link_ind==42:
-			# 		link_ind=42
-			# 	else:
-			# 		link_ind+=1
-			# # prev_ind = link_ind-2
-			# print("현재 링크 번호: "+ str(link_ind))
+			if my_wp >= (link_len[link_ind]-10):
+				if link_ind==42:
+					link_ind=42
+				else:
+					link_ind+=1
+			# prev_ind = link_ind-2
+			print("현재 링크 번호: "+ str(link_ind))
   
 			s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 			x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
@@ -378,24 +379,27 @@ if __name__ == "__main__":
 		ai=a
 		# vehicle state --> topic msg
 		state.update(a, steer)
+		msg = state.get_ros_msg(a, steer, id=id)
+		control_pub.publish(msg)
 		#a_list.append(a)
 		#steer_list.append(steer)
 		#v_list.append(v)
-		print("speed = " + str(state.v) + ",steer = " + str(steer))
+		print("speed = " + str(state.v) + ",steer = " + str(steer), "+,a = "+str(a))
 		prev_v = state.v
 		state.x=obj_msg.x
 		state.y=obj_msg.y
 		state.yaw=obj_msg.yaw
-		# state.v=obj_msg.v
+		state.v=obj_msg.v
 		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 
-		# if my_wp >= (link_len[link_ind]-10):
-		# 	if link_ind==40:
-		# 		link_ind=40
-		# 	else:
-		# 		link_ind+=1
-		# # prev_ind = link_ind-2
-		# print("현재 링크 번호: "+ str(link_ind))
+		if my_wp >= (link_len[link_ind]-10):
+			if link_ind==40:
+				link_ind=40
+			else:
+				# print(link_len[link_ind])
+				link_ind+=1
+		# prev_ind = link_ind-2
+		print("현재 링크 번호: "+ str(link_ind))
 
 		# if my_wp == 270:
 		# 	with open("/home/nsclmds/a_list.text", "wb") as f:
@@ -423,7 +427,7 @@ if __name__ == "__main__":
 
 		# vehicle state --> topic msg
 		# msg = get_ros_msg(state.x, state.y, state.yaw, state.v, a, steer, id=id)
-		msg = state.get_ros_msg(a, steer, id=id)
+		# msg = state.get_ros_msg(a, steer, id=id)
 
 		# send tf
 		#tf_broadcaster.sendTransform(
@@ -437,6 +441,6 @@ if __name__ == "__main__":
 		#object_pub.publish(msg["object_msg"])
 		opt_frenet_pub.publish(opt_frenet_path.ma)
 		cand_frenet_pub.publish(cand_frenet_paths.ma)
-		control_pub.publish(msg)
+		# control_pub.publish(msg)
 
 		r.sleep()
