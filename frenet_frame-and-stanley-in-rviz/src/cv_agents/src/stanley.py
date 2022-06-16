@@ -4,7 +4,7 @@ import numpy as np
 dt = 0.1
 
 # k =0.5
-k = 4  # control gain
+k = 1  # control gain
 
 # ERP42 PARAMETERS
 LENGTH = 1.600
