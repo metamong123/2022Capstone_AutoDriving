@@ -17,6 +17,9 @@ import numpy as np
 vo_Pub=rospy.Publisher('/odom',Odometry,queue_size=1)
 
 
+heading_array = []
+filtered_heading = 0
+
 def callback(msg):
 
 	global cov1,cov2
@@ -38,26 +41,30 @@ def callback(msg):
 def callback1(msg):
 	
 	global i, before_qz, before_qw
-	heading=np.arctan( msg.twist.twist.linear.y / msg.twist.twist.linear.x )
-	if msg.twist.twist.linear.x < 0 :
-		heading=heading+np.pi
-	qx=0
+	heading=math.atan2(msg.twist.twist.linear.y , msg.twist.twist.linear.x)
+	heading_array.insert(0,heading)   # heading value save
+ 	qx=0
 	qy=0
+	if len(heading_array) == 5:   # save number
+    	heading_array.pop()
+	filtered_heading = (sum(heading_array)/len(heading_array))   # moving average
+	filtered_heading = np.median(heading_array)  #moving median
+ 
 	if i==0:
 		before_qz = 0
 		before_qw = 1
 	if (abs(msg.twist.twist.linear.x) or abs(msg.twist.twist.linear.y)) > 0.1:
-		qz=np.sin(heading / 2)
-		qw=np.cos(heading / 2)
+		qz=np.sin(filtered_heading / 2)
+		qw=np.cos(filtered_heading / 2)
 		rpose.pose.pose.orientation.x=qx	
 		rpose.pose.pose.orientation.y=qy	
 		rpose.pose.pose.orientation.z=qz	
 		rpose.pose.pose.orientation.w=qw
-		before_qz = qz
+		before_qz = qz			
 		before_qw = qw
 	else :
-		rpose.pose.pose.orientation.x=qx	
-		rpose.pose.pose.orientation.y=qy	
+		rpose.pose.pose.orientation.x=qx
+		rpose.pose.pose.orientation.y=qy
 		rpose.pose.pose.orientation.z=before_qz	
 		rpose.pose.pose.orientation.w=before_qw
   
