@@ -46,9 +46,9 @@ def callback1(msg):
  	qx=0
 	qy=0
 	if len(heading_array) == 5:   # save number
-    	heading_array.pop()
+    		heading_array.pop()
 	filtered_heading = (sum(heading_array)/len(heading_array))   # moving average
-	filtered_heading = np.median(heading_array)  #moving median
+	#filtered_heading = np.median(heading_array)  #moving median
  
 	if i==0:
 		before_qz = 0
