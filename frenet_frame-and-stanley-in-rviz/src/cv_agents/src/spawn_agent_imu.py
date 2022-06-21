@@ -152,7 +152,8 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 	c.header.stamp = rospy.Time.now()
 	c.drive.steering_angle = steer
 	c.drive.acceleration = a
-	c.drive.speed = v + a*dt
+	# c.drive.speed = v + a*dt
+	c.drive.speed = v
 
 	return {
 		"object_msg": o,
@@ -164,7 +165,7 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 obs_init1 = Object(x=1, y=11, yaw=1, L=4, W=5)
 obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)
 # hightech
-obj_msg = Object(x=962586.801608, y=1959259.28356, yaw=1.2871297862692013, L=1.600, W=1.04)
+obj_msg = Object(x=962586.801608, y=1959259.28356, yaw=1.2871297862692013, v=1, L=1.600, W=1.04)
 # obj_msg = Object(x=962581.2429941624, y=1959229.97720466, yaw=1.2871297862692013, L=4.475, W=1.85)
 # playground short
 # obj_msg = Object(x=962692.1184323871, y=1959011.6193129763, yaw=1.2871297862692013, L=4.475, W=1.85)
@@ -284,13 +285,18 @@ if __name__ == "__main__":
 	prev_ind=0
 	# ind = 10
 	target_speed = 5.0 / 3.6
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=1)
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=1)
 	state.x=obj_msg.x
 	state.y=obj_msg.y
 	state.yaw=obj_msg.yaw
+
 	#############
 	state.v=obj_msg.v
 	#############
+
+	msg = get_ros_msg(state.x, state.y, state.yaw, 1, 0, state.yaw, id=id)
+	control_pub.publish(msg)
+
 	v_list.append(state.v)
 	my_wp=0
 	my_wp = get_closest_waypoints(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
