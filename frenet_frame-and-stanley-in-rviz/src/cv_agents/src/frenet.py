@@ -17,16 +17,26 @@ from separation_axis_theorem import *
 
 
 # initialize
+# initialize
 LANE_WIDTH = 2.0  # lane width [m]
 WB = 1.04
 
-MIN_T = 2.0 # minimum terminal time [s]
-MAX_T = 10.0 # maximum terminal time [s], default = 2
+## defalt
 # MIN_T = 1.5 # minimum terminal time [s]
 # MAX_T = 2.5 # maximum terminal time [s], default = 2
 # DT_T = 0.5 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+
+## 5km/h
+MIN_T = 2.0 # minimum terminal time [s]
+MAX_T = 10.0 # maximum terminal time [s], default = 2
 DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 DT = 0.5 # timestep for update
+
+## 10km/h
+# MIN_T = 2.0 # minimum terminal time [s]
+# MAX_T = 4.0 # maximum terminal time [s], default = 2
+# DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+# DT = 0.5 # timestep for update
 
 V_MAX = 20 / 3.6	  # maximum velocity [m/s]
 # ACC_MAX=2.0
