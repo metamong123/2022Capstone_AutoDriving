@@ -23,7 +23,8 @@ def odometry_callback(data):
 
 	vx = data.twist.twist.linear.x
 	vy = data.twist.twist.linear.y
-	v = np.sqrt(vx**2+vy**2)
+	vz = data.twist.twist.linear.z
+	v = np.sqrt(vx**2+vy**2+vz**2)
 
 	orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
 	roll, pitch, yaw = euler_from_quaternion (orientation_list) 
