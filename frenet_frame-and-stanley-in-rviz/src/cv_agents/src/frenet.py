@@ -20,13 +20,22 @@ from separation_axis_theorem import *
 LANE_WIDTH = 2.0  # lane width [m]
 WB = 1.04
 
-MIN_T = 2.0 # minimum terminal time [s]
-MAX_T = 10.0 # maximum terminal time [s], default = 2
+## defalt
 # MIN_T = 1.5 # minimum terminal time [s]
 # MAX_T = 2.5 # maximum terminal time [s], default = 2
 # DT_T = 0.5 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+
+## 5km/h
+MIN_T = 2.0 # minimum terminal time [s]
+MAX_T = 10.0 # maximum terminal time [s], default = 2
 DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 DT = 0.5 # timestep for update
+
+## 10km/h
+# MIN_T = 2.0 # minimum terminal time [s]
+# MAX_T = 4.0 # maximum terminal time [s], default = 2
+# DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+# DT = 0.5 # timestep for update
 
 V_MAX = 20 / 3.6	  # maximum velocity [m/s]
 # ACC_MAX=2.0
@@ -259,7 +268,7 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 			fp = FrenetPath()
 			lat_traj = QuinticPolynomial(di, di_d, di_dd, df, df_d, df_dd, T)
 
-			fp.t = [t for t in np.arange(0.0, T, DT)]
+			fp.t = [t for t in np.arange(0.0, T, DT)] ## delta time
 			fp.d = [lat_traj.calc_pos(t) for t in fp.t]
 			fp.d_d = [lat_traj.calc_vel(t) for t in fp.t]
 			fp.d_dd = [lat_traj.calc_acc(t) for t in fp.t]
@@ -275,10 +284,10 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 			tfp.s_ddd = [lon_traj.calc_jerk(t) for t in fp.t]
 
 			# 경로 늘려주기 (In case T < MAX_T)
-			for _t in np.arange(T, MAX_T, DT):
+			for _t in np.arange(T, MAX_T, DT): ## delta time
 				tfp.t.append(_t)
 				tfp.d.append(tfp.d[-1])
-				_s = tfp.s[-1] + tfp.s_d[-1] * DT
+				_s = tfp.s[-1] + tfp.s_d[-1] * DT ## delta time
 				tfp.s.append(_s)
 
 				tfp.s_d.append(tfp.s_d[-1])
