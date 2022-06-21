@@ -29,6 +29,12 @@ make: *** [all] Error 2
 
 --> pcan driver 설치할 것
 
+fatal error: costmap_converter/ObstacleMsg.h: No such file or directory
+ #include "costmap_converter/ObstacleMsg.h"
+          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--> sudo apt-get install ros-melodic-costmap-converter
+
+
 
 
 * pickle file 생성
