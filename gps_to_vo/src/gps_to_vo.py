@@ -41,14 +41,18 @@ def callback(msg):
 def callback1(msg):
 	
 	global i, before_qz, before_qw
-	heading=math.atan2(msg.twist.twist.linear.y , msg.twist.twist.linear.x)
+	heading=np.arctan( msg.twist.twist.linear.y / msg.twist.twist.linear.x )
+	if msg.twist.twist.linear.x < 0 :
+		heading=heading+np.pi
+	#heading=math.atan2(msg.twist.twist.linear.y , msg.twist.twist.linear.x)
 	heading_array.insert(0,heading)   # heading value save
- 	qx=0
+	qx=0
 	qy=0
 	if len(heading_array) == 5:   # save number
-    		heading_array.pop()
-	filtered_heading = (sum(heading_array)/len(heading_array))   # moving average
-	#filtered_heading = np.median(heading_array)  #moving median
+		heading_array.pop()
+	filtered_heading=heading
+	#filtered_heading = (sum(heading_array)/len(heading_array))   # moving average
+	# filtered_heading = np.median(heading_array)  #moving median
  
 	if i==0:
 		before_qz = 0
@@ -70,7 +74,7 @@ def callback1(msg):
   
 	rpose.twist.twist.linear.x = msg.twist.twist.linear.x
 	rpose.twist.twist.linear.y = msg.twist.twist.linear.y
- 	rpose.twist.twist.linear.z = msg.twist.twist.linear.z
+	rpose.twist.twist.linear.z = msg.twist.twist.linear.z
 	rpose.pose.covariance[21]=99999
 	rpose.pose.covariance[28]=99999
 	rpose.pose.covariance[35]=msg.twist.covariance[0]

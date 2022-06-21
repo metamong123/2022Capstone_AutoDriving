@@ -269,7 +269,7 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 			fp = FrenetPath()
 			lat_traj = QuinticPolynomial(di, di_d, di_dd, df, df_d, df_dd, T)
 
-			fp.t = [t for t in np.arange(0.0, T, DT)]
+			fp.t = [t for t in np.arange(0.0, T, DT)] ## delta time
 			fp.d = [lat_traj.calc_pos(t) for t in fp.t]
 			fp.d_d = [lat_traj.calc_vel(t) for t in fp.t]
 			fp.d_dd = [lat_traj.calc_acc(t) for t in fp.t]
@@ -285,10 +285,10 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 			tfp.s_ddd = [lon_traj.calc_jerk(t) for t in fp.t]
 
 			# 경로 늘려주기 (In case T < MAX_T)
-			for _t in np.arange(T, MAX_T, DT):
+			for _t in np.arange(T, MAX_T, DT): ## delta time
 				tfp.t.append(_t)
 				tfp.d.append(tfp.d[-1])
-				_s = tfp.s[-1] + tfp.s_d[-1] * DT
+				_s = tfp.s[-1] + tfp.s_d[-1] * DT ## delta time
 				tfp.s.append(_s)
 
 				tfp.s_d.append(tfp.s_d[-1])
