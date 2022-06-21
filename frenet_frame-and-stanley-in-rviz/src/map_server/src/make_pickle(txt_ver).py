@@ -70,9 +70,21 @@ way_dict={}
 waypoints=interpolate_waypoints(data_x,data_y,space=0.5)
 way_dict[0]={'x':waypoints['x'],'y':waypoints['y'],'s':waypoints['s'],'yaw':waypoints['yaw']}
 # way_dict[0]['x']
+
+  
+
+
+
+ 
+way_dict[0]={'x':park1_waypoints[0]['x'],'y':park1_waypoints[0]['y'],'s':park1_waypoints[0]['s'],'yaw':park1_waypoints[0]['yaw']}
+way_dict[1]={'x':park2_waypoints[0]['x'],'y':park2_waypoints[0]['y'],'s':park2_waypoints[0]['s'],'yaw':park2_waypoints[0]['yaw']}
+way_dict[2]={'x':park3_waypoints[0]['x'],'y':park3_waypoints[0]['y'],'s':park3_waypoints[0]['s'],'yaw':park3_waypoints[0]['yaw']}
+way_dict[3]={'x':park4_waypoints[0]['x'],'y':park4_waypoints[0]['y'],'s':park4_waypoints[0]['s'],'yaw':park4_waypoints[0]['yaw']}
+
 with open('hightech_parking_map.pkl', 'wb') as handle:
   pickle.dump(way_dict,handle, protocol=0)
   
+###
 with open('/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking_map/hightech_parking1.pkl', "rb") as f:
 	park1_waypoints = pickle.load(f)
  
@@ -84,10 +96,3 @@ with open('/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and
 
 with open('/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking_map/hightech_parking4.pkl', "rb") as f:
 	park4_waypoints = pickle.load(f)
-
-
- 
-way_dict[0]={'x':park1_waypoints[0]['x'],'y':park1_waypoints[0]['y'],'s':park1_waypoints[0]['s'],'yaw':park1_waypoints[0]['yaw']}
-way_dict[1]={'x':park2_waypoints[0]['x'],'y':park2_waypoints[0]['y'],'s':park2_waypoints[0]['s'],'yaw':park2_waypoints[0]['yaw']}
-way_dict[2]={'x':park3_waypoints[0]['x'],'y':park3_waypoints[0]['y'],'s':park3_waypoints[0]['s'],'yaw':park3_waypoints[0]['yaw']}
-way_dict[3]={'x':park4_waypoints[0]['x'],'y':park4_waypoints[0]['y'],'s':park4_waypoints[0]['s'],'yaw':park4_waypoints[0]['yaw']}
