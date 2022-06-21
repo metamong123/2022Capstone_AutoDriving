@@ -1,6 +1,42 @@
 # 2022Capstone_AutoDriving
 2022 Capstone Design - Auto Driving
 
+* 의존성 패키지(error에 따라 설치)
+
+- 폴더 안 모든 패키지에 대한 의존성 패키지 설치 (하고도 안 되는 것이 있을 수 있음)
+rosdep install --from-paths . --ignore-src -r -y
+
+- Could not find a package configuration file provided by "serial" with any of the following names:
+
+    serialConfig.cmake
+    serial-config.cmake
+    
+--> sudo apt-get install ros-melodic-serial
+
+- Messages depends on unknown pkg: vision_msgs (Missing 'find_package(vision_msgs)'?)
+
+--> adaptive_clustering 패키지 밖으로 빼놓고 catkin_make 후 다시 들여놓기
+
+[ 47%] Linking CXX executable /home/mds/git_ws/devel/lib/erp42_driver/erp42_driver_node
+/usr/bin/ld: cannot find -lpcanbasic
+collect2: error: ld returned 1 exit status
+2022Capstone_AutoDriving/erp42_driver/CMakeFiles/erp42_driver_node.dir/build.make:169: recipe for target '/home/mds/git_ws/devel/lib/erp42_driver/erp42_driver_node' failed
+make[2]: *** [/home/mds/git_ws/devel/lib/erp42_driver/erp42_driver_node] Error 1
+CMakeFiles/Makefile2:12547: recipe for target '2022Capstone_AutoDriving/erp42_driver/CMakeFiles/erp42_driver_node.dir/all' failed
+make[1]: *** [2022Capstone_AutoDriving/erp42_driver/CMakeFiles/erp42_driver_node.dir/all] Error 2
+Makefile:140: recipe for target 'all' failed
+make: *** [all] Error 2
+
+--> pcan driver 설치할 것
+
+fatal error: costmap_converter/ObstacleMsg.h: No such file or directory
+ #include "costmap_converter/ObstacleMsg.h"
+          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--> sudo apt-get install ros-melodic-costmap-converter
+
+
+
+
 * pickle file 생성
 1. frenet_frame-and-stanley-in-rviz/src/map_server/src
 2. txt, csv, shp 파일에 맞춰 make_pickle python 파일 열기 
