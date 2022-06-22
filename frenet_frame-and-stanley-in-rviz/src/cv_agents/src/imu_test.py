@@ -10,7 +10,7 @@ if __name__ == "__main__":
     r = rospy.Rate(10)
     while not rospy.is_shutdown():
         
-        imu.linear_acceleration.x = 0   #gravity eliminate velocity!!!!
+        imu.linear_acceleration.x = 1   #gravity eliminate velocity!!!!
         imu.linear_acceleration.y = 0   #gravity eliminate velocity!!!!
         imu.linear_acceleration.z = 0   #gravity eliminate velocity!!!!
         
