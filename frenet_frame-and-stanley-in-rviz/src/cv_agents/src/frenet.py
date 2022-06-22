@@ -18,7 +18,7 @@ from separation_axis_theorem import *
 
 # initialize
 # initialize
-LANE_WIDTH = 2.0  # lane width [m]
+LANE_WIDTH = 7.5  # lane width [m]
 WB = 1.04
 
 ## defalt
@@ -26,17 +26,17 @@ WB = 1.04
 # MAX_T = 2.5 # maximum terminal time [s], default = 2
 # DT_T = 0.5 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 
-## 5km/h
-MIN_T = 2.0 # minimum terminal time [s]
-MAX_T = 10.0 # maximum terminal time [s], default = 2
-DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
-DT = 0.5 # timestep for update
-
-## 10km/h
+# ## 5km/h
 # MIN_T = 2.0 # minimum terminal time [s]
-# MAX_T = 4.0 # maximum terminal time [s], default = 2
+# MAX_T = 10.0 # maximum terminal time [s], default = 2
 # DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 # DT = 0.5 # timestep for update
+
+## 10km/h
+MIN_T = 2.0 # minimum terminal time [s]
+MAX_T = 6.0 # maximum terminal time [s], default = 2
+DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+DT = 0.5 # timestep for update
 
 V_MAX = 20 / 3.6	  # maximum velocity [m/s]
 # ACC_MAX=2.0
@@ -410,7 +410,7 @@ def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d,
 	for fp in fplist:
 		if min_cost >= fp.c_tot:
 			min_cost = fp.c_tot
-			opt_traj = f	p
+			opt_traj = fp
 			_opt_ind = opt_ind
 		opt_ind += 1
 

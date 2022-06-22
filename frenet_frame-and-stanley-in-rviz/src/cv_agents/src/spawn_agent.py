@@ -169,7 +169,7 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 # obj_msg = Object(x=962692.1184323871, y=1959011.6193129763, yaw=1.2871297862692013, L=4.475, W=1.85)
 # playground long
 # obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
-obj_msg = Object(x=962582.438689, y=1959244.72469, yaw=1.2871297862692013, L=1.600, W=1.04)
+obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, L=1.600, W=1.04)
 # obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
 
 obs_info = []
@@ -177,16 +177,16 @@ def callback_obstacle(msg):
 	global obs_info
 	obs_info = []
 	for o in msg.object_list:
-	    obj = [o.x, o.y, o.yaw, o.L, o.W]
+		obj = [o.x, o.y, o.yaw, o.L, o.W]
 
-	    '''
-	    #####(x, y) 좌표가 중심이 아니라 시작점인지?
-	    yaw = o.yaw           
-	    center_x = o.x + 1.3 * math.cos(yaw)
-	    center_y = o.y + 1.3 * math.sin(yaw)
-	    '''
-	    #id(=i)가 문자열이어야 하는지 확인 필요
-	    obs_info.append(obj)
+		'''
+		#####(x, y) 좌표가 중심이 아니라 시작점인지?
+		yaw = o.yaw           
+		center_x = o.x + 1.3 * math.cos(yaw)
+		center_y = o.y + 1.3 * math.sin(yaw)
+		'''
+		#id(=i)가 문자열이어야 하는지 확인 필요
+		obs_info.append(obj)
 
 '''
 def callback1(msg):
