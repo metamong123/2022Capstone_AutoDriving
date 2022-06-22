@@ -15,14 +15,13 @@ from scipy.interpolate import interp1d
 
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Quaternion
-from object_msgs.msg import Object
+from object_msgs.msg import Object, ObjectArray
 
 import pickle
 import argparse
 
 from frenet import *
 from stanley_pid import *
-# from stanley import *
 
 rospack = rospkg.RosPack()
 path_map = rospack.get_path("map_server")
@@ -32,8 +31,8 @@ from map_visualizer import Converter
 rn_id = dict()
 
 # rn_id[5] = {'right': [0, 1, 2, 3, 4, 5, 6]}  # ego route
+rn_id[5] = {'right': [0]}
 
-rn_id[5] = {'right': [0]}  # ego route
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
 
@@ -71,7 +70,7 @@ def interpolate_waypoints(wx, wy, space=0.5):
 
 class State:
 
-	def __init__(self, x=0.0, y=0.0, yaw=0.0, v=0.0, dt=1, WB=1.04):
+	def __init__(self, x=0.0, y=0.0, yaw=0.0, v=0.0, dt=0.1, WB=1.04):
 		self.x = x
 		self.y = y
 		self.yaw = yaw
@@ -98,7 +97,7 @@ class State:
 		dy = self.rear_y - point_y
 		return math.hypot(dx, dy)
 
-	def get_ros_msg(self, a, steer, id):
+	def get_ros_msg(self, a, steer, v):
 		dt = self.dt
 
 		c = AckermannDriveStamped()
@@ -107,7 +106,8 @@ class State:
 		c.drive.steering_angle = steer
 		c.drive.acceleration = a
 		# c.drive.speed = self.v
-		c.drive.speed = self.v + a * dt
+		c.drive.speed = v + a * dt
+		# print("ackermann_speed:"+str(v))
 		return c
 
 
@@ -161,19 +161,34 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 		"ackermann_msg" : c
 	}
 
-obs_init1 = Object(x=1, y=11, yaw=1, L=4, W=5)
-obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)
+#obs_init1 = Object(x=1, y=11, yaw=1, L=4, W=5)
+#obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)
 # hightech
-obj_msg = Object(x=962586.801608, y=1959259.28356, yaw=1.2871297862692013, L=1.600, W=1.04)
 # obj_msg = Object(x=962581.2429941624, y=1959229.97720466, yaw=1.2871297862692013, L=4.475, W=1.85)
 # playground short
 # obj_msg = Object(x=962692.1184323871, y=1959011.6193129763, yaw=1.2871297862692013, L=4.475, W=1.85)
 # playground long
 # obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
-# obj_msg = Object(x=962582.438689, y=1959244.72469, yaw=1.2871297862692013, L=1.600, W=1.04)
+obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, L=1.600, W=1.04)
 # obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
-obs_info = [obs_init1, obs_init2]
 
+obs_info = []
+def callback_obstacle(msg):
+	global obs_info
+	obs_info = []
+	for o in msg.object_list:
+		obj = [o.x, o.y, o.yaw, o.L, o.W]
+
+		'''
+		#####(x, y) 좌표가 중심이 아니라 시작점인지?
+		yaw = o.yaw           
+		center_x = o.x + 1.3 * math.cos(yaw)
+		center_y = o.y + 1.3 * math.sin(yaw)
+		'''
+		#id(=i)가 문자열이어야 하는지 확인 필요
+		obs_info.append(obj)
+
+'''
 def callback1(msg):
 	global obs_info
 	obs_info[0] = msg
@@ -181,7 +196,7 @@ def callback1(msg):
 def callback2(msg):
 	global obs_info
 	obs_info[1] = msg
-
+'''
 def callback3(msg):
 	global obj_msg
 	obj_msg = msg
@@ -200,13 +215,17 @@ if __name__ == "__main__":
 	args, unknown = parser.parse_known_args()
 
 	rospy.init_node("three_cv_agents_node_" + str(args.id))
+	obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
 	#sub_obs = rospy.Subscriber("/objects/marker/car_1", Marker, queue_size=1)
-	sub_obs2 = rospy.Subscriber("/objects/car_2", Object, callback1, queue_size=1)
-	sub_obs3 = rospy.Subscriber("/objects/car_3", Object, callback2, queue_size=1)
+	#sub_obs2 = rospy.Subscriber("/objects/car_2", Object, callback1, queue_size=1)
+	#sub_obs3 = rospy.Subscriber("/objects/car_3", Object, callback2, queue_size=1)
 	sub_state = rospy.Subscriber("/objects/car_1", Object, callback3, queue_size=1)
 	WB = 1.04
+
+	'''
 	while sub_obs2.get_num_connections() == 0 or sub_obs3.get_num_connections() == 0:
 		continue
+	'''
 
 	id = args.id
 	tf_broadcaster = tf.TransformBroadcaster()
@@ -243,7 +262,9 @@ if __name__ == "__main__":
 	# nodes[0]['s'] = nodes[0]['s'][:100]
 	# nodes[0]['yaw'] = nodes[0]['yaw'][:100]
  
-
+	error_icte=0
+	prev_cte =0
+	cte = 0
 	link_i=-1
 	link_len=[]
 	for i in range(len(nodes)):
@@ -283,27 +304,32 @@ if __name__ == "__main__":
 	v=0
 	prev_ind=0
 	# ind = 10
-	target_speed = 5.0 / 3.6
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=1)
+	target_speed = 10.0 / 3.6
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
 	state.x=obj_msg.x
 	state.y=obj_msg.y
 	state.yaw=obj_msg.yaw
 	#############
 	state.v=obj_msg.v
 	#############
+	msg = state.get_ros_msg(0, 0, 1.0) #a,steer,v
+	control_pub.publish(msg)
+ 	#state = obj_car
 	v_list.append(state.v)
 	my_wp=0
+	#my_wp = get_closest_waypoints(state.x, state.y, mapx[:100], mapy[:100],my_wp)
 	my_wp = get_closest_waypoints(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 	prev_v = state.v
 	error_ia = 0
-	error_icte = 0
 	r = rospy.Rate(10)
 	ai = 0
 
-	if my_wp >= (link_len[link_ind]-10):
+	if my_wp >= (link_len[link_ind]-1):
 		link_ind+=1
 
 	prev_ind = link_ind-2
+	# s, d = get_frenet(state.x, state.y, mapx[:100], mapy[:100],my_wp)
+	# x, y, road_yaw = get_cartesian(s, d, mapx[:100], mapy[:100],maps[:100])
 	s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 	x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
 	
@@ -325,7 +351,6 @@ if __name__ == "__main__":
 
 	opt_frenet_path = Converter(r=0, g=255/255.0, b=100/255.0, a=1, scale=0.5)
 	cand_frenet_paths = Converter(r=0, g=100/255.0, b=100/255.0, a=0.4, scale= 0.5)
-	cte = 0
 
 	while not rospy.is_shutdown():
 		# generate acceleration ai, and steering di
@@ -351,6 +376,7 @@ if __name__ == "__main__":
 			opt_d = prev_opt_d
 		else:
 			## PID control
+
 			error_pa = target_speed - state.v
 			error_da = state.v - prev_v
 			error_ia += target_speed - state.v
@@ -362,9 +388,6 @@ if __name__ == "__main__":
 			error_icte += cte
 			# steering angle pid control
 			steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, WB, error_icte, prev_cte)
-			
-   
-			# steering angle p control
 			# steer, _ = stanley_control(state.x, state.y, state.yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, WB)
 
 			ways = []
@@ -383,20 +406,20 @@ if __name__ == "__main__":
 		ai=a
 		# vehicle state --> topic msg
 		state.update(a, steer)
-		msg = state.get_ros_msg(a, steer, id=id)
+		if ((my_wp < (link_len[-1] -10)) & (obj_msg.v <= 1)):
+			msg = state.get_ros_msg(a, steer, 1.0)
+		else:
+			msg = state.get_ros_msg(a, steer, obj_msg.v)
 		control_pub.publish(msg)
 		#a_list.append(a)
 		#steer_list.append(steer)
 		#v_list.append(v)
 		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer) + ",a = "+str(a))
-
 		prev_v = state.v
-
 		state.x=obj_msg.x
 		state.y=obj_msg.y
 		state.yaw=obj_msg.yaw
-		state.v=obj_msg.v
-
+		# state.v=obj_msg.v
 		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 
 		if my_wp >= (link_len[link_ind]-10):
@@ -433,7 +456,7 @@ if __name__ == "__main__":
 
 		# vehicle state --> topic msg
 		# msg = get_ros_msg(state.x, state.y, state.yaw, state.v, a, steer, id=id)
-		# msg = state.get_ros_msg(a, steer, id=id)
+		msg = state.get_ros_msg(a, steer, id=id)
 
 		# send tf
 		#tf_broadcaster.sendTransform(
@@ -447,6 +470,7 @@ if __name__ == "__main__":
 		#object_pub.publish(msg["object_msg"])
 		opt_frenet_pub.publish(opt_frenet_path.ma)
 		cand_frenet_pub.publish(cand_frenet_paths.ma)
-		# control_pub.publish(msg)
+		control_pub.publish(msg)
 
 		r.sleep()
+	
