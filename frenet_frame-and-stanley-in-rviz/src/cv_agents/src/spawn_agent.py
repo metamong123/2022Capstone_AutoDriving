@@ -333,7 +333,7 @@ if __name__ == "__main__":
 	while not rospy.is_shutdown():
 		# generate acceleration ai, and steering di
 		# YOUR CODE HERE
-
+		# state.v=0.2
 		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed)
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
@@ -393,6 +393,7 @@ if __name__ == "__main__":
 		state.y=obj_msg.y
 		state.yaw=obj_msg.yaw
 		# state.v=obj_msg.v
+		# state.v=0.2
 		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 
 		if my_wp >= (link_len[link_ind]-10):

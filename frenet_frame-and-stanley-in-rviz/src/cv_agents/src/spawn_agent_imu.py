@@ -71,7 +71,7 @@ def interpolate_waypoints(wx, wy, space=0.5):
 
 class State:
 
-	def __init__(self, x=0.0, y=0.0, yaw=0.0, v=0.0, dt=1, WB=1.04):
+	def __init__(self, x=0.0, y=0.0, yaw=0.0, v=0.0, dt=0.1, WB=1.04):
 		self.x = x
 		self.y = y
 		self.yaw = yaw
@@ -98,7 +98,7 @@ class State:
 		dy = self.rear_y - point_y
 		return math.hypot(dx, dy)
 
-	def get_ros_msg(self, a, steer, id):
+	def get_ros_msg(self, a, steer, v):
 		dt = self.dt
 
 		c = AckermannDriveStamped()
@@ -107,7 +107,8 @@ class State:
 		c.drive.steering_angle = steer
 		c.drive.acceleration = a
 		# c.drive.speed = self.v
-		c.drive.speed = self.v + a * dt
+		c.drive.speed = v + a * dt
+		print("ackermann_speed:"+str(v))
 		return c
 
 
@@ -285,7 +286,7 @@ if __name__ == "__main__":
 	prev_ind=0
 	# ind = 10
 	target_speed = 5.0 / 3.6
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=1)
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
 	state.x=obj_msg.x
 	state.y=obj_msg.y
 	state.yaw=obj_msg.yaw
@@ -294,10 +295,11 @@ if __name__ == "__main__":
 	state.v=obj_msg.v
 	#############
 
-	msg = get_ros_msg(state.x, state.y, state.yaw, 1, 0, state.yaw, id=id)
+	msg = state.get_ros_msg(0, 0, 1.0) #a,steer,v
 	control_pub.publish(msg)
+	print("IN!!!!")
 
-	v_list.append(state.v)
+	# v_list.append(state.v)
 	my_wp=0
 	my_wp = get_closest_waypoints(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 	prev_v = state.v
@@ -389,7 +391,10 @@ if __name__ == "__main__":
 		ai=a
 		# vehicle state --> topic msg
 		state.update(a, steer)
-		msg = state.get_ros_msg(a, steer, id=id)
+		if ((my_wp < (link_len[-1] -10)) & (obj_msg.v <= 1)):
+			msg = state.get_ros_msg(a, steer, 1.0)
+		else:
+			msg = state.get_ros_msg(a, steer, obj_msg.v)
 		control_pub.publish(msg)
 		#a_list.append(a)
 		#steer_list.append(steer)
