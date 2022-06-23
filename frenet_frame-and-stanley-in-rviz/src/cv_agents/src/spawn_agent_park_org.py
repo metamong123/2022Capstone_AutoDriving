@@ -212,7 +212,7 @@ if __name__ == "__main__":
 	rospy.init_node("three_cv_agents_node_" + str(args.id))
 	obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
 	sub_state = rospy.Subscriber("/objects/car_1", Object, callback1, queue_size=1)
-	mode_sub = rospy.Subscribe("/mode", String, callback2)
+	mode_sub = rospy.Subscriber("/mode", String, callback2)
 	WB = 1.04
 
 	'''
@@ -331,7 +331,7 @@ if __name__ == "__main__":
 	r = rospy.Rate(10)
 	ai = 0
 
-	if my_wp[mode] >= (link_len[mode][mode][link_ind[mode]]-10):
+	if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
 		link_ind[mode]+=1
 
 	prev_ind[mode] = link_ind[mode]-2
