@@ -97,17 +97,17 @@ class State:
 		dy = self.rear_y - point_y
 		return math.hypot(dx, dy)
 
-	def get_ros_msg(self, a, steer, id):
+	def get_ros_msg(self, a, steer, v):
 		dt = self.dt
-		v = self.v
 
 		c = AckermannDriveStamped()
 		c.header.frame_id = "/map"
 		c.header.stamp = rospy.Time.now()
 		c.drive.steering_angle = steer
 		c.drive.acceleration = a
-		c.drive.speed = v
-
+		# c.drive.speed = self.v
+		c.drive.speed = v + a * dt
+		# print("ackermann_speed:"+str(v))
 		return c
 
 
@@ -305,13 +305,15 @@ if __name__ == "__main__":
 	prev_ind=0
 	# ind = 10
 	target_speed = 10.0 / 3.6
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
 	state.x=obj_msg.x
 	state.y=obj_msg.y
 	state.yaw=obj_msg.yaw
 	#############
-	# state.v=obj_msg.v
+	state.v=obj_msg.v
 	#############
+	msg = state.get_ros_msg(0, 0, 1.0) #a,steer,v
+	control_pub.publish(msg)
  	#state = obj_car
 	v_list.append(state.v)
 	my_wp=0
@@ -387,7 +389,7 @@ if __name__ == "__main__":
 			# steering angle pid control
 			steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, WB, error_icte, prev_cte)
 			# steer, _ = stanley_control(state.x, state.y, state.yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, WB)
-
+			
 			ways = []
 			for p in path:
 				way = {
@@ -404,10 +406,15 @@ if __name__ == "__main__":
 		ai=a
 		# vehicle state --> topic msg
 		state.update(a, steer)
+		if ((my_wp < (link_len[-1] -10)) & (obj_msg.v <= 1)):
+			msg = state.get_ros_msg(a, steer, 1.0)
+		else:
+			msg = state.get_ros_msg(a, steer, obj_msg.v)
+		control_pub.publish(msg)
 		#a_list.append(a)
 		#steer_list.append(steer)
 		#v_list.append(v)
-		print("speed = " + str(state.v) + ",steer = " + str(steer))
+		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer) + ",a = "+str(a))
 		prev_v = state.v
 		state.x=obj_msg.x
 		state.y=obj_msg.y
@@ -449,7 +456,7 @@ if __name__ == "__main__":
 
 		# vehicle state --> topic msg
 		# msg = get_ros_msg(state.x, state.y, state.yaw, state.v, a, steer, id=id)
-		msg = state.get_ros_msg(a, steer, id=id)
+		# msg = state.get_ros_msg(a, steer, id=id)
 
 		# send tf
 		#tf_broadcaster.sendTransform(
