@@ -169,7 +169,7 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 # obj_msg = Object(x=962692.1184323871, y=1959011.6193129763, yaw=1.2871297862692013, L=4.475, W=1.85)
 # playground long
 # obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
-obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, L=1.600, W=1.04)
+obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, v=1,L=1.600, W=1.04)
 # obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
 
 obs_info = []
@@ -324,7 +324,7 @@ if __name__ == "__main__":
 	r = rospy.Rate(10)
 	ai = 0
 
-	if my_wp >= (link_len[link_ind]-1):
+	if my_wp >= (link_len[link_ind]-10):
 		link_ind+=1
 
 	prev_ind = link_ind-2
@@ -405,9 +405,9 @@ if __name__ == "__main__":
 		
 		ai=a
 		# vehicle state --> topic msg
-		state.update(a, steer)
+		# state.update(a, steer)
 		if ((my_wp < (link_len[-1] -10)) & (obj_msg.v <= 1)):
-			msg = state.get_ros_msg(a, steer, 1.0)
+			msg = state.get_ros_msg(0, steer, 1.0)
 		else:
 			msg = state.get_ros_msg(a, steer, obj_msg.v)
 		control_pub.publish(msg)
@@ -419,7 +419,7 @@ if __name__ == "__main__":
 		state.x=obj_msg.x
 		state.y=obj_msg.y
 		state.yaw=obj_msg.yaw
-		# state.v=obj_msg.v
+		state.v=obj_msg.v
 		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 
 		if my_wp >= (link_len[link_ind]-10):
