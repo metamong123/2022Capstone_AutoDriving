@@ -241,7 +241,8 @@ if __name__ == "__main__":
 	# 	nodes['global']  = pickle.load(f)
 	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
 	# 	nodes['parking']  = pickle.load(f)
-
+	nodes['parking'][1]={}
+	nodes['parking'][1]=nodes['parking'][0]
 	# nodes['global'][6]={}
 	# nodes['global'][6]={'x':nodes['global'][0]['x'][600:], 'y':nodes['global'][0]['y'][600:], 's':nodes['global'][0]['s'][600:], 'yaw':nodes['global'][0]['yaw'][600:]}
 	# nodes['global'][5]={}
