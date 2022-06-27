@@ -1,5 +1,4 @@
 #-*- coding: utf-8 -*-
-from distutils.errors import DistutilsClassError
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
@@ -20,39 +19,24 @@ from separation_axis_theorem import *
 LANE_WIDTH = 2.0  # lane width [m]
 WB = 1.04
 
-## defalt
-# MIN_T = 1.5 # minimum terminal time [s]
-# MAX_T = 2.5 # maximum terminal time [s], default = 2
-# DT_T = 0.5 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
-
-## 5km/h
-MIN_T = 2.0 # minimum terminal time [s]
-MAX_T = 10.0 # maximum terminal time [s], default = 2
+MIN_T = 1.0 # minimum terminal time [s]
+MAX_T = 9.0 # maximum terminal time [s], default = 2
 DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 DT = 0.5 # timestep for update
 
-## 10km/h
-# MIN_T = 2.0 # minimum terminal time [s]
-# MAX_T = 4.0 # maximum terminal time [s], default = 2
-# DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
-# DT = 0.5 # timestep for update
-
 V_MAX = 20 / 3.6	  # maximum velocity [m/s]
-# ACC_MAX=2.0
-ACC_MAX=V_MAX/DT_T
-#ACC_MAX = V_MAX / MIN_T # maximum acceleration [m/ss]
-#ACC_MAX = 99999999999999999999999999999999999999999999
-STEER_MAX = math.radians(20)
+ACC_MAX = V_MAX / MIN_T # maximum acceleration [m/ss]
+STEER_MAX = math.radians(45)
 K_MAX = STEER_MAX / WB	 # maximum curvature [1/m]
-#K_MAX = 100
+
 # cost weights
-K_J = 0.1 # weight for jerk, default = 0.1 (가가속도를 위한 웨이트)
-K_T = 0.1 # weight for terminal time (터미널 타임을 위한 웨이트)
-K_D = 1.0 # weight for consistency, default = 1.0 (일관성을 위한 웨이트?)
-K_GD = 7.0 # weight for global path tracking (글로벌 패스를 따르는 것에 대한 웨이트)
-K_V = 1.0 # weight for getting to target speed (목표 속도로 도달하는 것을 위한 웨이트)
-K_LAT = 1.0 # weight for lateral direction, default = 1.0 (횡방향을 위한 웨이트)
-K_LON = 1.0 # weight for longitudinal direction (종방향을 위한 웨이트)
+K_J = 0.1 # weight for jerk, default = 0.1
+K_T = 0.1 # weight for terminal time
+K_D = 1.0 # weight for consistency, default = 1.0
+K_GD = 7.0 # weight for global path tracking
+K_V = 1.0 # weight for getting to target speed
+K_LAT = 1.0 # weight for lateral direction, default = 1.0
+K_LON = 1.0 # weight for longitudinal direction, 
 
 # lateral planning 시 terminal position condition 후보  (양 차선 중앙), default len(DF_SET) = 2
 DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
@@ -85,6 +69,7 @@ def get_closest_waypoints(x, y, mapx, mapy, prev_wp):
 		if dist < min_len:
 			min_len = dist
 			closest_wp = i
+
 	return closest_wp
 
 def get_dist(x, y, _x, _y):
@@ -199,8 +184,10 @@ class QuarticPolynomial:
 		self.a1 = vi
 		self.a2 = 0.5*ai
 
-		A = np.array([[3*T**2, 4*T**3], [6*T, 12*T**2]])
-		b = np.array([vf - self.a1 - 2*self.a2*T, af - 2*self.a2])
+		A = np.array([[3*T**2, 4*T**3],
+							 [6*T, 12*T**2]])
+		b = np.array([vf - self.a1 - 2*self.a2*T,
+							 af - 2*self.a2])
 
 		x = np.linalg.solve(A, b)
 
@@ -268,7 +255,7 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 			fp = FrenetPath()
 			lat_traj = QuinticPolynomial(di, di_d, di_dd, df, df_d, df_dd, T)
 
-			fp.t = [t for t in np.arange(0.0, T, DT)] ## delta time
+			fp.t = [t for t in np.arange(0.0, T, DT)]
 			fp.d = [lat_traj.calc_pos(t) for t in fp.t]
 			fp.d_d = [lat_traj.calc_vel(t) for t in fp.t]
 			fp.d_dd = [lat_traj.calc_acc(t) for t in fp.t]
@@ -284,10 +271,10 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 			tfp.s_ddd = [lon_traj.calc_jerk(t) for t in fp.t]
 
 			# 경로 늘려주기 (In case T < MAX_T)
-			for _t in np.arange(T, MAX_T, DT): ## delta time
+			for _t in np.arange(T, MAX_T, DT):
 				tfp.t.append(_t)
 				tfp.d.append(tfp.d[-1])
-				_s = tfp.s[-1] + tfp.s_d[-1] * DT ## delta time
+				_s = tfp.s[-1] + tfp.s_d[-1] * DT
 				tfp.s.append(_s)
 
 				tfp.s_d.append(tfp.s_d[-1])
@@ -349,10 +336,10 @@ def calc_global_paths(fplist, mapx, mapy, maps):
 
 
 def collision_check(fp, obs_info, mapx, mapy, maps):
-	
+
 	# get obstacle's position (x,y)
 	#obs_xy = get_cartesian( obs[i, 0], obs[i, 1], mapx, mapy, maps)
-	car1s = [[f[0], f[1], f[2], 1.600, 1.160] for f in zip(fp.x, fp.y, fp.yaw)]
+	car1s = [[f[0], f[1], f[2], 4.475, 1.850] for f in zip(fp.x, fp.y, fp.yaw)]
 	parked1 = obs_info[0]
 	parked2 = obs_info[1]
 	
@@ -380,17 +367,16 @@ def check_path(fplist, obs_info, mapx, mapy, maps):
 	col = 0
 	for i, _path in enumerate(fplist):
 		acc_squared = [(abs(a_s**2 + a_d**2)) for (a_s, a_d) in zip(_path.s_dd, _path.d_dd)]
-		# print("kappa:" + str(fplist[i].kappa))
 		if any([v > V_MAX for v in _path.s_d]):  # Max speed check
 			vel += 1
 			#print("a")
 			continue
 		elif any([acc > ACC_MAX**2 for acc in acc_squared]):
 			a += 1
-			#print("a:" + str(a))
+			#print("v")
 			continue
 		if any([abs(kappa) > K_MAX for kappa in fplist[i].kappa]):  # Max curvature check
-			#print("curv:"+str(abs(kappa)))
+		 	#print("curv")
 			curv += 1
 			continue
 		elif collision_check(_path, obs_info, mapx, mapy, maps):

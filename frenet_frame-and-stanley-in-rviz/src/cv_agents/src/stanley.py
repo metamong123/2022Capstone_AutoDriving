@@ -3,17 +3,11 @@ import numpy as np
 # paramters
 dt = 0.1
 
-# k =0.5
-k = 1  # control gain
+k = 0.5  # control gain
 
-# ERP42 PARAMETERS
-LENGTH = 1.600
-WIDTH = 1.160
-
-
-# # GV70 PARAMETERS
-# LENGTH = 4.715
-# WIDTH = 1.910
+# GV70 PARAMETERS
+LENGTH = 4.715
+WIDTH = 1.910
 
 def normalize_angle(angle):
 	while angle > np.pi:
@@ -56,12 +50,11 @@ def stanley_control(x, y, yaw, v, map_xs, map_ys, map_yaws, L):
 
 	# control law
 #	yaw_term = normalize_angle(map_yaw - yaw) * np.sin(np.pi/2 / (1+v/5))
-	yaw_term = normalize_angle(map_yaw - yaw) #heading error
-	cte_term = np.arctan2(k*cte, v) # cross track error
+	yaw_term = normalize_angle(map_yaw - yaw)
+	cte_term = np.arctan2(k*cte, v)
 	w_yaw = 0.9
 	w_cte = 0.65
-	# k =0.5
-	# k = 0.5
+	k = 0.5
 	# steering
 	steer = w_yaw * yaw_term + w_cte * cte_term
 	

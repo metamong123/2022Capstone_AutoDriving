@@ -15,14 +15,14 @@ from scipy.interpolate import interp1d
 
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Quaternion
-from object_msgs.msg import Object
+# from object_msgs.msg import Object, ObjectArray
+from std_msgs.msg import String
 
 import pickle
 import argparse
 
 from frenet import *
 from stanley_pid import *
-# from stanley import *
 
 rospack = rospkg.RosPack()
 path_map = rospack.get_path("map_server")
@@ -32,8 +32,8 @@ from map_visualizer import Converter
 rn_id = dict()
 
 # rn_id[5] = {'right': [0, 1, 2, 3, 4, 5, 6]}  # ego route
+rn_id[5] = {'global': [0,1,2,3,4,5,6], 'parking':[0]}
 
-rn_id[5] = {'right': [0]}  # ego route
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
 
@@ -98,21 +98,21 @@ class State:
 		dy = self.rear_y - point_y
 		return math.hypot(dx, dy)
 
-	def get_ros_msg(self, a, steer, v):
+	def get_ros_msg(self, a, steer, id):
 		dt = self.dt
+		v = self.v
 
 		c = AckermannDriveStamped()
 		c.header.frame_id = "/map"
 		c.header.stamp = rospy.Time.now()
 		c.drive.steering_angle = steer
 		c.drive.acceleration = a
-		# c.drive.speed = self.v
-		c.drive.speed = v + a * dt
-		print("ackermann_speed:"+str(v))
+		c.drive.speed = v
+
 		return c
 
 
-def get_ros_msg(x, y, yaw, v, a, steer, id):
+def get_ros_msg(x, y, yaw, v, a, steer, id, t):
 	quat = tf.transformations.quaternion_from_euler(0, 0, yaw)
 
 	m = Marker()
@@ -153,8 +153,7 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 	c.header.stamp = rospy.Time.now()
 	c.drive.steering_angle = steer
 	c.drive.acceleration = a
-	# c.drive.speed = v + a*dt
-	c.drive.speed = v
+	c.drive.speed = v + a*dt
 
 	return {
 		"object_msg": o,
@@ -163,31 +162,29 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 		"ackermann_msg" : c
 	}
 
-obs_init1 = Object(x=1, y=11, yaw=1, L=4, W=5)
-obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)
+#obs_init1 = Object(x=1, y=11, yaw=1, L=4, W=5)
+#obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)
 # hightech
-obj_msg = Object(x=962586.801608, y=1959259.28356, yaw=1.2871297862692013, v=1, L=1.600, W=1.04)
 # obj_msg = Object(x=962581.2429941624, y=1959229.97720466, yaw=1.2871297862692013, L=4.475, W=1.85)
 # playground short
 # obj_msg = Object(x=962692.1184323871, y=1959011.6193129763, yaw=1.2871297862692013, L=4.475, W=1.85)
 # playground long
 # obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
-# obj_msg = Object(x=962582.438689, y=1959244.72469, yaw=1.2871297862692013, L=1.600, W=1.04)
+# obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, v=1,L=1.600, W=1.04)
 # obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
+
+obs_init1 = Object(x=1, y=11, yaw=1, L=4, W=5)
+obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)
 obs_info = [obs_init1, obs_init2]
+# def callback1(msg):
+# 	global obj_msg
+# 	obj_msg = msg
 
-def callback1(msg):
-	global obs_info
-	obs_info[0] = msg
-
+mode='global'
 def callback2(msg):
-	global obs_info
-	obs_info[1] = msg
+	global mode
+	mode=msg.data
 
-def callback3(msg):
-	global obj_msg
-	obj_msg = msg
- 
 
 if __name__ == "__main__":
 	a_list=[]
@@ -198,74 +195,87 @@ if __name__ == "__main__":
 	parser.add_argument("--id", "-i", type=int, help="agent id", default=1)
 	parser.add_argument("--route", "-r", type=int,
 						help="start index in road network. select in [1, 3, 5, 10]", default=5)
-	parser.add_argument("--dir", "-d", type=str, default="right", help="direction to go: [left, straight, right]")
+	parser.add_argument("--dir", "-d", type=str, default="global", help="direction to go: [global, parking]")
 	args, unknown = parser.parse_known_args()
 
 	rospy.init_node("three_cv_agents_node_" + str(args.id))
-	#sub_obs = rospy.Subscriber("/objects/marker/car_1", Marker, queue_size=1)
-	sub_obs2 = rospy.Subscriber("/objects/car_2", Object, callback1, queue_size=1)
-	sub_obs3 = rospy.Subscriber("/objects/car_3", Object, callback2, queue_size=1)
-	sub_state = rospy.Subscriber("/objects/car_1", Object, callback3, queue_size=1)
+	# obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
+	# sub_state = rospy.Subscriber("/objects/car_1", Object, callback1, queue_size=1)
+	mode_sub = rospy.Subscriber("/mode", String, callback2)
 	WB = 1.04
+	# mode='global' ### global인지 parking인지 subscribe 한다고 치면..
+	'''
 	while sub_obs2.get_num_connections() == 0 or sub_obs3.get_num_connections() == 0:
 		continue
+	'''
 
 	id = args.id
 	tf_broadcaster = tf.TransformBroadcaster()
-	#marker_pub = rospy.Publisher("/objects/marker/car_" + str(id), Marker, queue_size=1)
-	#object_pub = rospy.Publisher("/objects/car_" + str(id), Object, queue_size=1)
+	object_pub = rospy.Publisher("/objects/car_" + str(id), Object, queue_size=1)
 	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
 	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
 	control_pub = rospy.Publisher("/ackermann_cmd", AckermannDriveStamped, queue_size=1)
 
 	start_node_id = args.route
-	#route_id_list = [start_node_id] + rn_id[start_node_id][args.dir]
 	route_id_list = rn_id[start_node_id][args.dir]
-	#route_id_list = rn_id[start_node_id]['right']+rn_id[5]['left']+rn_id[6]['right']
 
-	with open(path_map + "/src/route.pkl", "rb") as f:
-		nodes = pickle.load(f)
+	nodes={'global':[],'parking':[]}
 
-	with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
-		nodes = pickle.load(f)
-	# nodes[6]={}
-	# nodes[6]={'x':nodes[0]['x'][600:], 'y':nodes[0]['y'][600:], 's':nodes[0]['s'][600:], 'yaw':nodes[0]['yaw'][600:]}
-	# nodes[5]={}
-	# nodes[5]={'x':nodes[0]['x'][500:600], 'y':nodes[0]['y'][500:600], 's':nodes[0]['s'][500:600], 'yaw':nodes[0]['yaw'][500:600]}
-	# nodes[4]={}
-	# nodes[4]={'x':nodes[0]['x'][400:500], 'y':nodes[0]['y'][400:500], 's':nodes[0]['s'][400:500], 'yaw':nodes[0]['yaw'][400:500]}
-	# nodes[3]={}
-	# nodes[3]={'x':nodes[0]['x'][300:400], 'y':nodes[0]['y'][300:400], 's':nodes[0]['s'][300:400], 'yaw':nodes[0]['yaw'][300:400]}
-	# nodes[2]={}
-	# nodes[2]={'x':nodes[0]['x'][200:300], 'y':nodes[0]['y'][200:300], 's':nodes[0]['s'][200:300], 'yaw':nodes[0]['yaw'][200:300]}
-	# nodes[1]={}
-	# nodes[1]={'x':nodes[0]['x'][100:200], 'y':nodes[0]['y'][100:200], 's':nodes[0]['s'][100:200], 'yaw':nodes[0]['yaw'][100:200]}
-	# nodes[0]['x'] = nodes[0]['x'][:100]
-	# nodes[0]['y'] = nodes[0]['y'][:100]
-	# nodes[0]['s'] = nodes[0]['s'][:100]
-	# nodes[0]['yaw'] = nodes[0]['yaw'][:100]
- 
+	with open(path_map + "/src/route.pkl", "rb") as f: #global
+		nodes['global'] = pickle.load(f)
+	
+	with open(path_map + "/src/route_parking.pkl", "rb") as f: #parking
+		nodes['parking'] = pickle.load(f)
+    
+	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
+	# 	nodes['global']  = pickle.load(f)
+	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
+	# 	nodes['parking']  = pickle.load(f)
+	nodes['parking'][1]={}
+	nodes['parking'][1]=nodes['parking'][0]
+	# nodes['parking'][1]={'x':nodes['parking'][0]['x'][::-1],'y':nodes['parking'][0]['y'][::-1],'yaw':nodes['parking'][0]['yaw'][::-1],'s':nodes['parking'][0]['s'][::-1]}
+	nodes['global'][6]={}
+	nodes['global'][6]={'x':nodes['global'][0]['x'][600:], 'y':nodes['global'][0]['y'][600:], 's':nodes['global'][0]['s'][600:], 'yaw':nodes['global'][0]['yaw'][600:]}
+	nodes['global'][5]={}
+	nodes['global'][5]={'x':nodes['global'][0]['x'][500:600], 'y':nodes['global'][0]['y'][500:600], 's':nodes['global'][0]['s'][500:600], 'yaw':nodes['global'][0]['yaw'][500:600]}
+	nodes['global'][4]={}
+	nodes['global'][4]={'x':nodes['global'][0]['x'][400:500], 'y':nodes['global'][0]['y'][400:500], 's':nodes['global'][0]['s'][400:500], 'yaw':nodes['global'][0]['yaw'][400:500]}
+	nodes['global'][3]={}
+	nodes['global'][3]={'x':nodes['global'][0]['x'][300:400], 'y':nodes['global'][0]['y'][300:400], 's':nodes['global'][0]['s'][300:400], 'yaw':nodes['global'][0]['yaw'][300:400]}
+	nodes['global'][2]={}
+	nodes['global'][2]={'x':nodes['global'][0]['x'][200:300], 'y':nodes['global'][0]['y'][200:300], 's':nodes['global'][0]['s'][200:300], 'yaw':nodes['global'][0]['yaw'][200:300]}
+	nodes['global'][1]={}
+	nodes['global'][1]={'x':nodes['global'][0]['x'][100:200], 'y':nodes['global'][0]['y'][100:200], 's':nodes['global'][0]['s'][100:200], 'yaw':nodes['global'][0]['yaw'][100:200]}
+	nodes['global'][0]['x'] = nodes['global'][0]['x'][:100]
+	nodes['global'][0]['y'] = nodes['global'][0]['y'][:100]
+	nodes['global'][0]['s'] = nodes['global'][0]['s'][:100]
+	nodes['global'][0]['yaw'] = nodes['global'][0]['yaw'][:100]
 
-	link_i=-1
-	link_len=[]
-	for i in range(len(nodes)):
-		link_i+=len(nodes[i]["x"])
-		link_len.append(link_i)
+	error_icte=0
+	prev_cte =0
+	cte = 0
 
+	link_len={'global':[],'parking':[]}
+	for i in nodes:
+		link_i=-1
+		for j in range(len(nodes[i])):
+			link_i+=len(nodes[i][j]["x"])
+			link_len[i].append(link_i)
 
-	link_ind=0
+	
+	link_ind={'global':0, 'parking':0}
+	wx = {'global':[],'parking':[]}
+	wy = {'global':[],'parking':[]}
+	wyaw = {'global':[],'parking':[]}
 
-	wx = []
-	wy = []
-	wyaw = []
-
-	for _id in route_id_list:
-		wx.append(nodes[_id]["x"][1:])
-		wy.append(nodes[_id]["y"][1:])
-		wyaw.append(nodes[_id]["yaw"][1:])
-	wx = np.concatenate(wx)
-	wy = np.concatenate(wy)
-	wyaw = np.concatenate(wyaw)
+	for i in nodes:
+		for _id in rn_id[5][i]:
+			wx[i].append(nodes[i][_id]["x"][1:])
+			wy[i].append(nodes[i][_id]["y"][1:])
+			wyaw[i].append(nodes[i][_id]["yaw"][1:])
+		wx[i] = np.concatenate(wx[i])
+		wy[i] = np.concatenate(wy[i])
+		wyaw[i] = np.concatenate(wyaw[i])
 
 	# ws = np.zeros(wx.shape)
 	# for i in range(len(ws)):
@@ -273,47 +283,55 @@ if __name__ == "__main__":
 	# 	y = wy[i]
 	# 	sd = get_frenet(x, y, wx, wy)
 	# 	ws[i] = sd[0]
+ 
+	waypoints={'global':[],'parking':[]}
+	for i in nodes:
+		waypoints[i] = interpolate_waypoints(wx[i], wy[i], space=0.5)
 
-	waypoints = interpolate_waypoints(wx, wy, space=0.5)
-	#waypoints = {"x": wx, "y": wy, "yaw": wyaw, "s" : ws}
+	mapx={'global':[],'parking':[]}
+	mapy={'global':[],'parking':[]}
+	mapyaw={'global':[],'parking':[]}
+	maps={'global':[],'parking':[]}
 
-	mapx = waypoints["x"]
-	mapy = waypoints["y"]
-	mapyaw = waypoints["yaw"]
-	maps = waypoints["s"]
+	for i in waypoints:
+		mapx[i] = waypoints[i]["x"]
+		mapy[i] = waypoints[i]["y"]
+		mapyaw[i] = waypoints[i]["yaw"]
+		maps[i] = waypoints[i]["s"]
 
 	v=0
-	prev_ind=0
-	# ind = 10
-	target_speed = 5.0 / 3.6
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
-	state.x=obj_msg.x
-	state.y=obj_msg.y
-	state.yaw=obj_msg.yaw
-
+	prev_ind={'global':0,'parking':0}
+	ind = 0
+	target_speed = 1.0
+	state=State(x=mapx[mode][ind], y=mapy[mode][ind], yaw=mapyaw[mode][ind], v=1, dt=0.1)
+	# state.x=obj_msg.x
+	# state.y=obj_msg.y
+	# state.yaw=obj_msg.yaw
 	#############
-	state.v=obj_msg.v
+	# state.v=obj_msg.v
 	#############
-
-	msg = state.get_ros_msg(0, 0, 1.0) #a,steer,v
-	control_pub.publish(msg)
-	print("IN!!!!")
-
-	# v_list.append(state.v)
-	my_wp=0
-	my_wp = get_closest_waypoints(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
+	# msg = state.get_ros_msg(0, 0, 1.0) #a,steer,v
+	# control_pub.publish(msg)
+ 	#state = obj_car
+	v_list.append(state.v)
+	my_wp={'global':0,'parking':0}
+	my_wp[mode]=ind
+	#my_wp = get_closest_waypoints(state.x, state.y, mapx[:100], mapy[:100],my_wp)
+	
+	my_wp[mode] = get_closest_waypoints(state.x, state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
 	prev_v = state.v
 	error_ia = 0
-	error_icte = 0
 	r = rospy.Rate(10)
 	ai = 0
 
-	if my_wp >= (link_len[link_ind]-10):
-		link_ind+=1
+	if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
+		link_ind[mode]+=1
 
-	prev_ind = link_ind-2
-	s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-	x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
+	prev_ind[mode] = link_ind[mode]-2
+	# s, d = get_frenet(state.x, state.y, mapx[:100], mapy[:100],my_wp)
+	# x, y, road_yaw = get_cartesian(s, d, mapx[:100], mapy[:100],maps[:100])
+	s, d = get_frenet(state.x, state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
+	x, y, road_yaw = get_cartesian(s, d, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],maps[mode][:link_len[mode][link_ind[mode]]])
 	
 	yawi = state.yaw - road_yaw
 	si = s
@@ -333,32 +351,34 @@ if __name__ == "__main__":
 
 	opt_frenet_path = Converter(r=0, g=255/255.0, b=100/255.0, a=1, scale=0.5)
 	cand_frenet_paths = Converter(r=0, g=100/255.0, b=100/255.0, a=0.4, scale= 0.5)
-	cte = 0
 
 	while not rospy.is_shutdown():
 		# generate acceleration ai, and steering di
 		# YOUR CODE HERE
+  
+		
 
-		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed)
+		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode], mapy[mode], maps[mode], opt_d, target_speed)
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
-			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
+			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
   
-			if my_wp >= (link_len[link_ind]-10):
-				if link_ind==42:
-					link_ind=42
+			if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
+				if link_ind[mode]==len(link_len[mode]):
+					link_ind[mode]=len(link_len[mode])
 				else:
-					link_ind+=1
-			# prev_ind = link_ind-2
-			print("현재 링크 번호: "+ str(link_ind))
+					link_ind[mode]+=1
+			# prev_ind = link_ind[mode]-2
+			print("현재 링크 번호: "+ str(link_ind[mode])+", mode: " + str(mode))
   
-			s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-			x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
+			s, d = get_frenet(state.x, state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
+			x, y, road_yaw = get_cartesian(s, d, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],maps[mode][:link_len[mode][link_ind[mode]]])
 			steer = road_yaw - state.yaw
 			a = 0
 			opt_d = prev_opt_d
 		else:
 			## PID control
+
 			error_pa = target_speed - state.v
 			error_da = state.v - prev_v
 			error_ia += target_speed - state.v
@@ -370,11 +390,8 @@ if __name__ == "__main__":
 			error_icte += cte
 			# steering angle pid control
 			steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, WB, error_icte, prev_cte)
-			
-   
-			# steering angle p control
 			# steer, _ = stanley_control(state.x, state.y, state.yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, WB)
-
+			
 			ways = []
 			for p in path:
 				way = {
@@ -391,34 +408,31 @@ if __name__ == "__main__":
 		ai=a
 		# vehicle state --> topic msg
 		state.update(a, steer)
-		if ((my_wp < (link_len[-1] -10)) & (obj_msg.v <= 1)):
-			msg = state.get_ros_msg(a, steer, 1.0)
-		else:
-			msg = state.get_ros_msg(a, steer, obj_msg.v)
-		control_pub.publish(msg)
+		# if ((my_wp[mode] < (link_len[mode][-1] -10)) & (obj_msg.v <= 1)):
+		# 	msg = state.get_ros_msg(0, steer, 1.0)
+		# else:
+		# 	msg = state.get_ros_msg(a, steer, obj_msg.v)
+		# control_pub.publish(msg)
 		#a_list.append(a)
 		#steer_list.append(steer)
 		#v_list.append(v)
-		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer) + ",a = "+str(a))
+		print("현재 speed = " + str(state.v) + ",steer = " + str(steer) + ",a = "+str(a))
+		# prev_v = state.v
+		# state.x=obj_msg.x
+		# state.y=obj_msg.y
+		# state.yaw=obj_msg.yaw
+		# state.v=obj_msg.v
+		my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
 
-		prev_v = state.v
-
-		state.x=obj_msg.x
-		state.y=obj_msg.y
-		state.yaw=obj_msg.yaw
-		state.v=obj_msg.v
-
-		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-
-		if my_wp >= (link_len[link_ind]-10):
-			if link_ind==40:
-				link_ind=40
+		if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
+			if link_ind[mode]==len(link_len[mode]):
+				link_ind[mode]=len(link_len[mode])
 			else:
-				link_ind+=1
-		# prev_ind = link_ind-2
-		print("현재 링크 번호: "+ str(link_ind))
+				link_ind[mode]+=1
+		# prev_ind = link_ind[mode]-2
+		print("현재 링크 번호: "+ str(link_ind[mode])+", mode: " + str(mode))
 
-		# if my_wp == 270:
+		# if my_wp[mode] == 270:
 		# 	with open("/home/nsclmds/a_list.text", "wb") as f:
 		# 		pickle.dump(a_list, f)
 		# 	with open("/home/nsclmds/v_list.text", "wb") as f:
@@ -426,8 +440,8 @@ if __name__ == "__main__":
 		# 	with open("/home/nsclmds/steer_list.text", "wb") as f:
 		# 		pickle.dump(steer_list, f)
     
-		s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-		x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
+		s, d = get_frenet(state.x, state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
+		x, y, road_yaw = get_cartesian(s, d, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],maps[mode][:link_len[mode][link_ind[mode]]])
 		yaw_diff = state.yaw - road_yaw
 
 		si = s
@@ -441,9 +455,12 @@ if __name__ == "__main__":
 		di_dd = ai * math.sin(yaw_diff)
 		df_d = 0
 		df_dd = 0
-
+		# if mode=='parking' & link_ind==1:
+		# 	t=
+		# else:
+		# 	t=0
 		# vehicle state --> topic msg
-		# msg = get_ros_msg(state.x, state.y, state.yaw, state.v, a, steer, id=id)
+		msg = get_ros_msg(state.x, state.y, state.yaw, state.v, a, steer, id=id, t=0)
 		# msg = state.get_ros_msg(a, steer, id=id)
 
 		# send tf
@@ -455,9 +472,10 @@ if __name__ == "__main__":
 		#)
 
 		# publish vehicle state in ros msg
-		#object_pub.publish(msg["object_msg"])
+		object_pub.publish(msg["object_msg"])
 		opt_frenet_pub.publish(opt_frenet_path.ma)
 		cand_frenet_pub.publish(cand_frenet_paths.ma)
+		control_pub.publish(msg["ackermann_msg"])
 		# control_pub.publish(msg)
 
 		r.sleep()
