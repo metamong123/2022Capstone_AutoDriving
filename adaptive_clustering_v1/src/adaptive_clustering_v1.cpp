@@ -55,9 +55,20 @@ void pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& ros_pc2_in) {
   /*** Remove ground and ceiling ***/
   pcl::IndicesPtr pc_indices(new std::vector<int>);
   pcl::PassThrough<pcl::PointXYZI> pt;
+
   pt.setInputCloud(pcl_pc_in);
   pt.setFilterFieldName("z");
   pt.setFilterLimits(z_axis_min_, z_axis_max_);
+  pt.filter(*pcl_pc_in);
+
+  pt.setInputCloud(pcl_pc_in);
+  pt.setFilterFieldName("y");
+  pt.setFilterLimits(-7.0, 7.0);
+  pt.filter(*pcl_pc_in);
+
+  pt.setInputCloud(pcl_pc_in);
+  pt.setFilterFieldName("x");
+  pt.setFilterLimits(0, 20);
   pt.filter(*pc_indices);
   
   /*** Divide the point cloud into nested circular regions ***/
@@ -241,7 +252,7 @@ int main(int argc, char **argv) {
   
   private_nh.param<std::string>("sensor_model", sensor_model, "VLP-16"); // VLP-16, HDL-32E, HDL-64E
   private_nh.param<bool>("print_fps", print_fps_, false);
-  private_nh.param<float>("z_axis_min", z_axis_min_, -0.8);
+  private_nh.param<float>("z_axis_min", z_axis_min_, -0.6);
   private_nh.param<float>("z_axis_max", z_axis_max_, 2.0);
   private_nh.param<int>("cluster_size_min", cluster_size_min_, 3);
   private_nh.param<int>("cluster_size_max", cluster_size_max_, 2200000);

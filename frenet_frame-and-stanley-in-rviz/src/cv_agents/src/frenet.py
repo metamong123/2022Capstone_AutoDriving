@@ -17,15 +17,25 @@ from separation_axis_theorem import *
 
 
 # initialize
-LANE_WIDTH = 2.0  # lane width [m]
+# initialize
+LANE_WIDTH = 7.5  # lane width [m]
 WB = 1.04
 
-MIN_T = 2.0 # minimum terminal time [s]
-MAX_T = 10.0 # maximum terminal time [s], default = 2
+## defalt
 # MIN_T = 1.5 # minimum terminal time [s]
 # MAX_T = 2.5 # maximum terminal time [s], default = 2
 # DT_T = 0.5 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
-DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+
+# ## 5km/h
+# MIN_T = 2.0 # minimum terminal time [s]
+# MAX_T = 10.0 # maximum terminal time [s], default = 2
+# DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+# DT = 0.5 # timestep for update
+
+## 10km/h
+MIN_T = 2.0 # minimum terminal time [s]
+MAX_T = 6.0 # maximum terminal time [s], default = 2
+DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 DT = 0.5 # timestep for update
 
 V_MAX = 20 / 3.6	  # maximum velocity [m/s]
@@ -97,18 +107,18 @@ def get_frenet(x, y, mapx, mapy, prev_wp):
 	#-------- get frenet d
 	frenet_d = get_dist(x_x,x_y,proj_x,proj_y)
 
-	ego_vec = [x-mapx[prev_wp], y-mapy[prev_wp], 0];
-	map_vec = [n_x, n_y, 0];
+	ego_vec = [x-mapx[prev_wp], y-mapy[prev_wp], 0]
+	map_vec = [n_x, n_y, 0]
 	d_cross = np.cross(ego_vec,map_vec)
 	if d_cross[-1] > 0:
-		frenet_d = -frenet_d;
+		frenet_d = -frenet_d
 
 	#-------- get frenet s
-	frenet_s = 0;
+	frenet_s = 0
 	for i in range(prev_wp):
-		frenet_s = frenet_s + get_dist(mapx[i],mapy[i],mapx[i+1],mapy[i+1]);
+		frenet_s = frenet_s + get_dist(mapx[i],mapy[i],mapx[i+1],mapy[i+1])
 
-	frenet_s = frenet_s + get_dist(0,0,proj_x,proj_y);
+	frenet_s = frenet_s + get_dist(0,0,proj_x,proj_y)
 
 	return frenet_s, frenet_d
 
@@ -129,14 +139,14 @@ def get_cartesian(s, d, mapx, mapy, maps):
 	heading = np.arctan2(dy, dx) # [rad]
 
 	# the x,y,s along the segment
-	seg_s = s - maps[prev_wp];
+	seg_s = s - maps[prev_wp]
 
-	seg_x = mapx[prev_wp] + seg_s*np.cos(heading);
-	seg_y = mapy[prev_wp] + seg_s*np.sin(heading);
+	seg_x = mapx[prev_wp] + seg_s*np.cos(heading)
+	seg_y = mapy[prev_wp] + seg_s*np.sin(heading)
 
-	perp_heading = heading + 90 * np.pi/180;
-	x = seg_x + d*np.cos(perp_heading);
-	y = seg_y + d*np.sin(perp_heading);
+	perp_heading = heading + 90 * np.pi/180
+	x = seg_x + d*np.cos(perp_heading)
+	y = seg_y + d*np.sin(perp_heading)
 
 	return x, y, heading
 
@@ -259,7 +269,7 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 			fp = FrenetPath()
 			lat_traj = QuinticPolynomial(di, di_d, di_dd, df, df_d, df_dd, T)
 
-			fp.t = [t for t in np.arange(0.0, T, DT)]
+			fp.t = [t for t in np.arange(0.0, T, DT)] ## delta time
 			fp.d = [lat_traj.calc_pos(t) for t in fp.t]
 			fp.d_d = [lat_traj.calc_vel(t) for t in fp.t]
 			fp.d_dd = [lat_traj.calc_acc(t) for t in fp.t]
@@ -275,10 +285,10 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 			tfp.s_ddd = [lon_traj.calc_jerk(t) for t in fp.t]
 
 			# 경로 늘려주기 (In case T < MAX_T)
-			for _t in np.arange(T, MAX_T, DT):
+			for _t in np.arange(T, MAX_T, DT): ## delta time
 				tfp.t.append(_t)
 				tfp.d.append(tfp.d[-1])
-				_s = tfp.s[-1] + tfp.s_d[-1] * DT
+				_s = tfp.s[-1] + tfp.s_d[-1] * DT ## delta time
 				tfp.s.append(_s)
 
 				tfp.s_d.append(tfp.s_d[-1])
@@ -344,21 +354,15 @@ def collision_check(fp, obs_info, mapx, mapy, maps):
 	# get obstacle's position (x,y)
 	#obs_xy = get_cartesian( obs[i, 0], obs[i, 1], mapx, mapy, maps)
 	car1s = [[f[0], f[1], f[2], 1.600, 1.160] for f in zip(fp.x, fp.y, fp.yaw)]
-	parked1 = obs_info[0]
-	parked2 = obs_info[1]
 	
-	for car1 in car1s:
-		first_object_msg = car1
-		second_object_msg = [parked1.x, parked1.y, parked1.yaw, parked1.L, parked1.W]
-		third_object_msg = [parked2.x, parked2.y, parked2.yaw, parked2.L, parked2.W]
-		first_object_vertices = get_vertice_rect(first_object_msg)
-		second_object_vertices = get_vertice_rect(second_object_msg)
-		third_object_vertices = get_vertice_rect(third_object_msg)
+	for obs in obs_info:
+		for car1 in car1s:
+			car_vertices = get_vertice_rect(car1)
+			obs_vertices = get_vertice_rect(obs)
 
-		is_collide1 = separating_axis_theorem(first_object_vertices, second_object_vertices)
-		is_collide2 = separating_axis_theorem(first_object_vertices, third_object_vertices)
-		if is_collide1 or is_collide2:
-			return True
+			is_collide = separating_axis_theorem(car_vertices, obs_vertices)
+			if is_collide:
+				return True
 
 	return False
 

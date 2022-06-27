@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /MarkerArray4/Status1
       Splitter Ratio: 0.5
     Tree Height: 549
   - Class: rviz/Selection
@@ -122,6 +121,14 @@ Visualization Manager:
         adaptive_clustering_v1: true
       Queue Size: 100
       Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /objects/marker/obstacles
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -150,16 +157,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 33.149269104003906
+      Distance: 45.77752685546875
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 962613.1875
-        Y: 1959214
-        Z: 0
+        X: 962593.5
+        Y: 1959242.375
+        Z: 0.03769458085298538
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
@@ -187,4 +194,4 @@ Window Geometry:
     collapsed: true
   Width: 1267
   X: 67
-  Y: 42
+  Y: 27

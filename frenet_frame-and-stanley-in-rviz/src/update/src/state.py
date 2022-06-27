@@ -21,10 +21,10 @@ def odometry_callback(data):
 	x = data.pose.pose.position.x 
 	y = data.pose.pose.position.y 
 
-	vx = data.twist.twist.linear.x
-	vy = data.twist.twist.linear.y
-	vz = data.twist.twist.linear.z
-	v = np.sqrt(vx**2+vy**2+vz**2)
+	v = data.twist.twist.linear.x
+	# vy = data.twist.twist.linear.y
+	# vz = data.twist.twist.linear.z
+	# v = np.sqrt(vx**2+vy**2+vz**2)
 
 	orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
 	roll, pitch, yaw = euler_from_quaternion (orientation_list) 
@@ -40,6 +40,7 @@ if __name__ == "__main__":
 	rospy.init_node("state")
 	#state_pub=rospy.Publisher("/state",Object,queue_size=1)
 	object_pub=rospy.Publisher("/objects/car_1", Object,queue_size=1)
+	marker_pub=rospy.Publisher("/objects/marker/car_1", Marker,queue_size=1)
 	r = rospy.Rate(10)
 
 	rospy.Subscriber("/odom", Odometry,odometry_callback)
@@ -76,19 +77,24 @@ if __name__ == "__main__":
 		m.id = id
 		m.type = m.CUBE
 
-		m.pose.position.x = x + 1.3 * math.cos(yaw)
-		m.pose.position.y = y + 1.3 * math.sin(yaw)
-		m.pose.position.z = 0.75
+		#m.pose.position.x = x + 1.3 * math.cos(yaw)
+		#m.pose.position.y = y + 1.3 * math.sin(yaw)
+
+		m.pose.position.x = x
+		m.pose.position.y = y
+		m.pose.position.z = 0.3
 		m.pose.orientation = Quaternion(*quat)
 
-		m.scale.x = 4.475
-		m.scale.y = 1.850
+		m.scale.x = 1.600
+		m.scale.y = 1.160
 		m.scale.z = 1.645
 
 		m.color.r = 93 / 255.0
 		m.color.g = 122 / 255.0
 		m.color.b = 177 / 255.0
 		m.color.a = 0.97
+
+		marker_pub.publish(m)
 
 		o = Object()
 		o.header.frame_id = "/map"
