@@ -46,6 +46,28 @@ rn_id[6] = {
 	'right': [i for i in range(28,40)]
 }'''
 
+def backward_yaw(yaw):
+    if yaw <= 0:
+        yaw = yaw + 3.14
+    else:
+        yaw = yaw - 3.14
+    return yaw
+
+def list_backyaw(x):
+	for yaw in x:
+		if yaw <= 0:
+			yaw = yaw + 3.14
+		else:
+			yaw = yaw - 3.14
+	return x
+
+def list_minus(x):
+    a=[]
+    for i in x:
+        i = -i
+        a.append(i)
+    return a
+
 
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
@@ -333,6 +355,7 @@ if __name__ == "__main__":
 			kd_a = 0.7
 			ki_a = 0.01
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
+			# state_yaw = backward_yaw(state.yaw)
 			steer, _ = stanley_control(state.x, state.y, state.yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, state.WB)
 			# steer = - steer
 			ways = []
