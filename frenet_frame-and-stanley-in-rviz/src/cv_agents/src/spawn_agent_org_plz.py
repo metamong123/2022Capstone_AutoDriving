@@ -261,8 +261,8 @@ if __name__ == "__main__":
 	prev_ind=0
 	ind = 100
 	target_speed = - 5.0 / 3.6
-	state = State(x=mapx[ind], y=mapy[ind], yaw=mapyaw[ind], v=-1, dt=0.1)
-	# state = State(x=mapx[ind], y=mapy[ind], yaw=3.14, v=-1, dt=0.1)
+	# state = State(x=mapx[ind], y=mapy[ind], yaw=mapyaw[ind], v=-1, dt=0.1)
+	state = State(x=mapx[ind], y=mapy[ind], yaw=3.14, v=-1, dt=0.1)
 	v_list.append(state.v)
 	my_wp=ind
 	my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
@@ -282,13 +282,13 @@ if __name__ == "__main__":
 	# road_yaw = - road_yaw
 	yawi = state.yaw - road_yaw
 	si = s
-	si_d = state.v * math.cos(yawi)
+	si_d = - state.v * math.cos(yawi)
 	si_dd = ai * math.cos(yawi)
 	sf_d = target_speed
 	sf_dd = 0
 
 	di = d
-	di_d = state.v * math.sin(yawi)
+	di_d = - state.v * math.sin(yawi)
 	di_dd = ai * math.sin(yawi)
 	df_d = 0
 	df_dd = 0
@@ -386,13 +386,13 @@ if __name__ == "__main__":
 		yaw_diff = state.yaw - road_yaw
 
 		si = s
-		si_d = state.v * math.cos(yaw_diff)
+		si_d = - state.v * math.cos(yaw_diff)
 		si_dd = ai * math.cos(yaw_diff)
 		sf_d = target_speed
 		sf_dd = 0
 		
 		di = d
-		di_d = state.v * math.sin(yaw_diff)
+		di_d = - state.v * math.sin(yaw_diff)
 		di_dd = ai * math.sin(yaw_diff)
 		df_d = 0
 		df_dd = 0
