@@ -8,7 +8,7 @@
 	<?ignore node name="spawn_agents" pkg="cv_agents" type="spawn_agent.py" output="screen"/?>
 	<?ignore node name="spawn_agents" pkg="cv_agents" type="spawn_agent_org_backward.py" output="screen"/?>
 	<?ignore node name="spawn_agents" pkg="cv_agents" type="spawn_agent_org_back_better_editing.py" output="screen"/?>
-	<node name="spawn_agents" pkg="cv_agents" type="spawn_agent_parking_back.py" output="screen"/>
+	<node name="spawn_agents" pkg="cv_agents" type="spawn_agent (copy).py" output="screen"/>
 	<node type="rviz" name="rviz" pkg="rviz" args="-d /home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/cv_agents/rviz/frontier.rviz" />
 	
 </launch>
