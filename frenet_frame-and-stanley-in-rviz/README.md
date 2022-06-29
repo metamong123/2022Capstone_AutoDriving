@@ -1,6 +1,6 @@
-spawn_agent_org_back_better.py -> 그나마 나은 놈..
-spawn_agent_parking_back.py -> 윗놈한테 parking mode 넣어서 실행해본놈(실패....)
-나머지: 손보다가 실패한 각각 다른놈들..
+1. spawn_agent_org_back_better.py -> 그나마 나은 놈..
+2. spawn_agent_parking_back.py -> 윗놈한테 parking mode 넣어서 실행해본놈(실패....)
+3. 나머지: 손보다가 실패한 각각 다른놈들..
 
 
 
