@@ -65,11 +65,10 @@ def list_backyaw(x):
 	return a
 
 def list_minus(x):
-    a=[]
     for i in x:
-        i = -i
-        a.append(i)
-    return a
+        for j in i:
+            j=-j
+    return -x
 
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
@@ -203,7 +202,6 @@ if __name__ == "__main__":
 	a_list=[]
 	v_list=[]
 	steer_list=[]
-	road_list=[]
 	parser = argparse.ArgumentParser(description='Spawn a CV agent')
 
 	parser.add_argument("--id", "-i", type=int, help="agent id", default=1)
@@ -286,21 +284,14 @@ if __name__ == "__main__":
 	mapx = waypoints["x"]
 	mapy = waypoints["y"]
 	mapyaw = waypoints["yaw"]
-	# mapyaw=list_backyaw(mapyaw)
-	aaa=[]
-	for yaw in mapyaw:
-		if yaw <= 0:
-			yaw = yaw + 3.14
-			print(yaw)
-	mapyaw = list_backyaw(mapyaw)
-
+	mapyaw = np.array(list_backyaw(mapyaw))
 	maps = waypoints["s"]
 	
 	prev_ind=0
 	ind = 100
 	target_speed = - 5.0 / 3.6
-	# state = State(x=mapx[ind], y=mapy[ind], yaw=mapyaw[ind], v=-1, dt=0.1)
-	state = State(x=mapx[ind], y=mapy[ind], yaw=3.14, v=-1, dt=0.1)
+	state = State(x=mapx[ind], y=mapy[ind], yaw=mapyaw[ind], v=-1, dt=0.1)
+	# state = State(x=mapx[ind], y=mapy[ind], yaw=3.14, v=-1, dt=0.1)
 	v_list.append(state.v)
 	my_wp=ind
 	my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
@@ -317,12 +308,10 @@ if __name__ == "__main__":
 	prev_ind = link_ind-2
 	s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 	x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
-	road_list.append(road_yaw)
-	# road_yaw = backward_yaw(road_yaw)
-	road_yaw = -road_yaw
-	print("road_yaw: "+str(road_yaw))
-	state_yaw = backward_yaw(state.yaw)
-	yawi = state_yaw - road_yaw
+	# road_yaw = -road_yaw
+	# print("road_yaw: "+str(road_yaw))
+	# state_yaw = state.yaw -3.14
+	yawi = state.yaw - road_yaw
 
 	# s=-s
 	# d=-d
@@ -378,15 +367,11 @@ if __name__ == "__main__":
 			s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 			x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
 			# s=-s
-			# d=-d
-			road_yaw = -road_yaw
-			road_list.append(road_yaw)
-			# road_yaw = backward_yaw(road_yaw)
-			print("road_yaw: " + str(road_yaw))
-			state_yaw = backward_yaw(state.yaw)
+			d=-d
 			# road_yaw = -road_yaw
-			steer = road_yaw - state_yaw
-			
+			# print("road_yaw: " + str(road_yaw))
+			# state_yaw = state.yaw -3.14
+			steer = road_yaw - state.yaw
 			a = 0
 			opt_d = prev_opt_d
 			opt_d=-opt_d
@@ -398,15 +383,9 @@ if __name__ == "__main__":
 			kd_a = 0.7
 			ki_a = 0.01
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
-			# state_yaw = backward_yaw(state.yaw)
-			# pyaw=-path[opt_ind].yaw
-			pyaw=list_minus(path[opt_ind].yaw)
-			# state_yaw = backward_yaw(state.yaw)
-			# steer, _ = stanley_control(state.x, state.y, state.yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, state.WB)
-			steer, _ = stanley_control(state.x, state.y, state_yaw, state.v, path[opt_ind].x, path[opt_ind].y, pyaw, state.WB)
-			# pyaw=list_minus(path[opt_ind].yaw)
-			# print(pyaw[0])
-			# print(path[opt_ind].yaw[0])
+			# state_yaw = state.yaw -3.14
+			steer, _ = stanley_control(state.x, state.y, state_yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, state.WB)
+			# steer = - steer
 			ways = []
 			for p in path:
 				way = {
@@ -420,9 +399,9 @@ if __name__ == "__main__":
 			opt_d = path[opt_ind].d[-1]
 			prev_opt_d = path[opt_ind].d[-1]
 			# print("%f %f"%(opt_d, prev_opt_d))
-		# steer = -backward_yaw(steer)
-		# steer = - steer
+		
 		state.update(a, steer)
+		ai=a
 		a_list.append(a)
 		steer_list.append(steer)
 		v_list.append(state.v)
@@ -439,20 +418,17 @@ if __name__ == "__main__":
 		# prev_ind = link_ind-2
 		print("현재 링크 번호: "+ str(link_ind))
   
-		if my_wp == 80:
-			with open("/home/nsclmds/road_list.txt", "wb") as f:
-				pickle.dump(road_list, f)
-			# with open("/home/nsclmds/v_list.txt", "wb") as f:
-			# 	pickle.dump(v_list, f)
-			# with open("/home/nsclmds/steer_list.txt", "wb") as f:
-			# 	pickle.dump(steer_list, f)
+		# if my_wp == 700:
+		# 	with open("/home/nsclmds/a_list.txt", "wb") as f:
+		# 		pickle.dump(a_list, f)
+		# 	with open("/home/nsclmds/v_list.txt", "wb") as f:
+		# 		pickle.dump(v_list, f)
+		# 	with open("/home/nsclmds/steer_list.txt", "wb") as f:
+		# 		pickle.dump(steer_list, f)
 
 		s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 		x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
-		road_list.append(road_yaw)
-		# road_yaw = backward_yaw(road_yaw)
-		
-		road_yaw = -road_yaw
+		# road_yaw = -road_yaw
 		# s=-s
 		# d=-d
 		# road_yaw = -road_yaw
@@ -463,8 +439,8 @@ if __name__ == "__main__":
 		# print("S:"+str(s)+", D:"+str(d))
 		# x, y, road_yaw = get_cartesian(s, d, mapx, mapy, maps)
 		# print("x:"+str(x)+", y:"+str(y)+", yaw:"+str(road_yaw))
-		state_yaw = backward_yaw(state.yaw)
-		yaw_diff = state_yaw - road_yaw
+		# state_yaw = state.yaw -3.14
+		yaw_diff = state.yaw - road_yaw
 
 		si = s
 		si_d = state.v * math.cos(yaw_diff)
@@ -505,8 +481,3 @@ if __name__ == "__main__":
 		control_pub.publish(msg["ackermann_msg"])
 
 		r.sleep()
-		with open("/home/nsclmds/map.txt", "wb") as f:
-			pickle.dump(nodes, f)
-with open('hightech_parking_map.pkl', 'wb') as handle:
-	pickle.dump(nodes,handle, protocol=0)
-  
