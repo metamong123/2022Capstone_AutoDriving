@@ -105,7 +105,7 @@ class State:
 		c.header.frame_id = "/map"
 		c.header.stamp = rospy.Time.now()
 		c.drive.steering_angle = steer
-		c.drive.acceleration = a
+		# c.drive.acceleration = a
 		# c.drive.speed = self.v
 		c.drive.speed = v + a * dt
 		# print("ackermann_speed:"+str(v))
@@ -170,7 +170,9 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 # obj_msg = Object(x=962692.1184323871, y=1959011.6193129763, yaw=1.2871297862692013, L=4.475, W=1.85)
 # playground long
 # obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
-obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, v=1,L=1.600, W=1.04)
+
+### obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, v=1,L=1.600, W=1.04)
+
 # obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
 
 obs_info = []
@@ -189,9 +191,11 @@ def callback_obstacle(msg):
 		#id(=i)가 문자열이어야 하는지 확인 필요
 		obs_info.append(obj)
 
-def callback1(msg):
+obj_msg=Object()
+def callback3(msg):
 	global obj_msg
-	obj_msg = msg
+	obj_msg=msg
+	print(obj_msg)
  
 def callback2(msg):
 	global mode
@@ -211,8 +215,8 @@ if __name__ == "__main__":
 
 	rospy.init_node("three_cv_agents_node_" + str(args.id))
 	obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
-	sub_state = rospy.Subscriber("/objects/car_1", Object, callback1, queue_size=1)
-	mode_sub = rospy.Subscriber("/mode", String, callback2)
+	sub_state = rospy.Subscriber("/objects/car_1", Object, callback3, queue_size=1)
+	# mode_sub = rospy.Subscriber("/mode", String, callback2)
 	WB = 1.04
 
 	'''
@@ -224,8 +228,9 @@ if __name__ == "__main__":
 	tf_broadcaster = tf.TransformBroadcaster()
 	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
 	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
-	control_pub = rospy.Publisher("/ackermann_cmd", AckermannDriveStamped, queue_size=1)
-
+	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
+	rospy.set_param('car_mode', 'global')
+	
 	start_node_id = args.route
 	route_id_list = rn_id[start_node_id][args.dir]
 
@@ -326,6 +331,7 @@ if __name__ == "__main__":
 	my_wp={'global':0,'parking':0}
 	#my_wp = get_closest_waypoints(state.x, state.y, mapx[:100], mapy[:100],my_wp)
 	mode='global' ### global인지 parking인지 subscribe 한다고 치면..
+	rospy.set_param('car_mode', mode)
 	my_wp[mode] = get_closest_waypoints(state.x, state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
 	prev_v = state.v
 	error_ia = 0
@@ -333,6 +339,7 @@ if __name__ == "__main__":
 	ai = 0
 
 	if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
+		rospy.set_param('move_mode', 'finish')
 		link_ind[mode]+=1
 
 	prev_ind[mode] = link_ind[mode]-2
@@ -363,6 +370,13 @@ if __name__ == "__main__":
 	while not rospy.is_shutdown():
 		# generate acceleration ai, and steering di
 		# YOUR CODE HERE
+		if (mode == 'global') & (my_wp == 100): ################parking mode 시작 웨이포인트 넣기
+			mode='parking'
+			rospy.set_param('car_mode', mode)
+		elif (mode=='parking') & (link_ind[mode]==0) & (my_wp==10): ################parking curve 시작 웨이포인트 넣기
+			rospy.set_param('move_mode', 'forward')
+		elif (mode=='parking') & (link_ind[mode]==1):
+			rospy.set_param('move_mode', 'backward')
 
 		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode], mapy[mode], maps[mode], opt_d, target_speed)
 		# update state with acc, delta
@@ -371,8 +385,11 @@ if __name__ == "__main__":
   
 			if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
 				if link_ind[mode]==len(link_len[mode]):
-					link_ind[mode]=len(link_len[mode])
+					if mode=='parking':
+						mode = 'global'
+						rospy.set_param('car_mode', mode)
 				else:
+					rospy.set_param('move_mode', 'finish')
 					link_ind[mode]+=1
 			# prev_ind = link_ind[mode]-2
 			print("현재 링크 번호: "+ str(link_ind[mode]))
@@ -432,8 +449,14 @@ if __name__ == "__main__":
 
 		if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
 			if link_ind[mode]==len(link_len[mode]):
-				link_ind[mode]=len(link_len[mode])
+				if mode=='parking':
+					mode = 'global'
+					rospy.set_param('car_mode', mode)
+				else:
+					rospy.set_param('move_mode', 'finish')
+					link_ind[mode]=len(link_len[mode])
 			else:
+				rospy.set_param('move_mode', 'finish')
 				link_ind[mode]+=1
 		# prev_ind = link_ind[mode]-2
 		print("현재 링크 번호: "+ str(link_ind[mode]))

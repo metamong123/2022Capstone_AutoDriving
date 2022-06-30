@@ -169,8 +169,7 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 # obj_msg = Object(x=962692.1184323871, y=1959011.6193129763, yaw=1.2871297862692013, L=4.475, W=1.85)
 # playground long
 # obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
-
-obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, v=1,L=1.600, W=1.04)
+# obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, v=1,L=1.600, W=1.04)
 # obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
 
 obs_info = []
@@ -189,10 +188,11 @@ def callback_obstacle(msg):
 		#id(=i)가 문자열이어야 하는지 확인 필요
 		obs_info.append(obj)
 
+obj_msg=Object()
 def callback3(msg):
 	global obj_msg
-	obj_msg = msg
- 
+	obj_msg=msg
+
 
 if __name__ == "__main__":
 	a_list=[]
@@ -220,7 +220,7 @@ if __name__ == "__main__":
 	tf_broadcaster = tf.TransformBroadcaster()
 	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
 	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
-	control_pub = rospy.Publisher("/ackermann_cmd", AckermannDriveStamped, queue_size=1)
+	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
 
 	start_node_id = args.route
 	route_id_list = rn_id[start_node_id][args.dir]
@@ -294,6 +294,7 @@ if __name__ == "__main__":
 	prev_ind=0
 	# ind = 10
 	target_speed = 10.0 / 3.6
+
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
 	state.x=obj_msg.x
 	state.y=obj_msg.y
@@ -405,7 +406,7 @@ if __name__ == "__main__":
 		#a_list.append(a)
 		#steer_list.append(steer)
 		#v_list.append(v)
-		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer) + ",a = "+str(a))
+		print("현재 speed = " + str(state.x) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer) + ",a = "+str(a))
 		prev_v = state.v
 		state.x=obj_msg.x
 		state.y=obj_msg.y

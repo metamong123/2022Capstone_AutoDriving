@@ -1,4 +1,4 @@
 <launch>
-	<param name="parking_flag" type="string" value="default" />
+	<param name="move_mode" type="string" value="default" />
 	<param name="car_mode" type="string" value="global" />
 </launch>
