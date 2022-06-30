@@ -350,7 +350,7 @@ if __name__ == "__main__":
 		# YOUR CODE HERE
 
 
-		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy,maps, opt_d, target_speed)
+		path, opt_ind = frenet_optimal_planning(si, -si_d, -si_dd, -sf_d, -sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy,maps, opt_d, target_speed)
 		# update state with acc, delta
 		# print(path)
 		# path=list(map(list_minus, path))
@@ -374,7 +374,7 @@ if __name__ == "__main__":
 			# print("road_yaw: " + str(road_yaw))
 			# state_yaw = state.yaw -3.14
 			state_yaw = backward_yaw(state.yaw)
-			steer = -road_yaw + state_yaw
+			steer = road_yaw - state_yaw
 			a = 0
 			opt_d = prev_opt_d
 			opt_d=-opt_d
@@ -389,7 +389,7 @@ if __name__ == "__main__":
 			state_yaw = backward_yaw(state.yaw)
 			# state_yaw = state.yaw -3.14
 			steer, _ = stanley_control(state.x, state.y, state_yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, state.WB)
-			steer = - steer
+			# steer = - steer
 			ways = []
 			for p in path:
 				way = {
@@ -403,13 +403,13 @@ if __name__ == "__main__":
 			opt_d = path[opt_ind].d[-1]
 			prev_opt_d = path[opt_ind].d[-1]
 			# print("%f %f"%(opt_d, prev_opt_d))
-		
+		# steer=backward_yaw(-steer)
 		state.update(a, steer)
 		ai=a
 		a_list.append(a)
 		steer_list.append(steer)
 		v_list.append(state.v)
-		print("speed = " + str(state.v) + ",steer = " + str(steer))
+		print("speed = " + str(state.v) + ",steer = " + str(steer) + ", my yaw = " + str(state.yaw))
 		prev_v = state.v
 
 		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)

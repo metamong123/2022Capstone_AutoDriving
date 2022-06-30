@@ -21,7 +21,7 @@ import pickle
 import argparse
 
 from frenet import *
-from stanley import *
+from stanley_back import *
 
 rospack = rospkg.RosPack()
 path_map = rospack.get_path("map_server")
@@ -311,7 +311,9 @@ if __name__ == "__main__":
 	# road_yaw = -road_yaw
 	# print("road_yaw: "+str(road_yaw))
 	# state_yaw = state.yaw -3.14
-	yawi = state.yaw - road_yaw
+	state_yaw = backward_yaw(state.yaw)
+	# state_yaw = - state.yaw
+	yawi = state_yaw - road_yaw
 
 	# s=-s
 	# d=-d
@@ -348,7 +350,7 @@ if __name__ == "__main__":
 		# YOUR CODE HERE
 
 
-		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy,maps, opt_d, target_speed)
+		path, opt_ind = frenet_optimal_planning(si, -si_d, -si_dd, -sf_d, -sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy,maps, opt_d, target_speed)
 		# update state with acc, delta
 		# print(path)
 		# path=list(map(list_minus, path))
@@ -371,7 +373,8 @@ if __name__ == "__main__":
 			# road_yaw = -road_yaw
 			# print("road_yaw: " + str(road_yaw))
 			# state_yaw = state.yaw -3.14
-			steer = road_yaw - state.yaw
+			state_yaw = backward_yaw(state.yaw)
+			steer = road_yaw - state_yaw
 			a = 0
 			opt_d = prev_opt_d
 			opt_d=-opt_d
@@ -383,9 +386,11 @@ if __name__ == "__main__":
 			kd_a = 0.7
 			ki_a = 0.01
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
+			state_yaw = backward_yaw(state.yaw)
 			# state_yaw = state.yaw -3.14
-			steer, _ = stanley_control(state.x, state.y, state.yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, state.WB)
+			steer, _ = stanley_control(state.x, state.y, state_yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, state.WB)
 			# steer = - steer
+			
 			ways = []
 			for p in path:
 				way = {
@@ -399,13 +404,15 @@ if __name__ == "__main__":
 			opt_d = path[opt_ind].d[-1]
 			prev_opt_d = path[opt_ind].d[-1]
 			# print("%f %f"%(opt_d, prev_opt_d))
-		
+		# steer=backward_yaw(-steer)
+		# steer=abs(steer)
+		steer=backward_yaw(steer)
 		state.update(a, steer)
 		ai=a
 		a_list.append(a)
 		steer_list.append(steer)
 		v_list.append(state.v)
-		print("speed = " + str(state.v) + ",steer = " + str(steer))
+		print("speed = " + str(state.v) + ",steer = " + str(steer) + ", my yaw = " + str(state.yaw))
 		prev_v = state.v
 
 		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
@@ -440,7 +447,8 @@ if __name__ == "__main__":
 		# x, y, road_yaw = get_cartesian(s, d, mapx, mapy, maps)
 		# print("x:"+str(x)+", y:"+str(y)+", yaw:"+str(road_yaw))
 		# state_yaw = state.yaw -3.14
-		yaw_diff = state.yaw - road_yaw
+		state_yaw = backward_yaw(state.yaw)
+		yaw_diff = state_yaw - road_yaw
 
 		si = s
 		si_d = state.v * math.cos(yaw_diff)

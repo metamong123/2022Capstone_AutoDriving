@@ -36,7 +36,7 @@ rn_id = dict()
 
 # rn_id[5] = {'left': [i for i in range(40)]}  # ego route
 
-rn_id[5] = {'left': [0]}  # ego route
+rn_id[5] = {'left': [0, 1]}  # ego route
 
 '''rn_id[5] = {
 	'right': [i for i in range(10, 17)],  # ego route
@@ -46,29 +46,6 @@ rn_id[6] = {
 	'right': [i for i in range(28,40)]
 }'''
 
-def backward_yaw(yaw):
-    if yaw <= 0:
-        yaw = yaw + 3.14
-    else:
-        yaw = yaw - 3.14
-    return yaw
-
-def list_backyaw(x):
-	a=[]
-	for yaw in x:
-		if yaw <= 0:
-			yaw = yaw + 3.14
-			a.append(yaw)
-		else:
-			yaw = yaw - 3.14
-			a.append(yaw)
-	return a
-
-def list_minus(x):
-    for i in x:
-        for j in i:
-            j=-j
-    return -x
 
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
@@ -234,11 +211,6 @@ if __name__ == "__main__":
 	with open(path_map + "/src/route.pkl", "rb") as f:
 		nodes = pickle.load(f)
 
-	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
-	# 	nodes  = pickle.load(f)
-	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
-	# 	nodes['parking']  = pickle.load(f)
-
 	#link_len=[len(nodes[i]["x"]) for i in range(len(nodes))]
 	#link_len[0]-=1
 
@@ -284,14 +256,12 @@ if __name__ == "__main__":
 	mapx = waypoints["x"]
 	mapy = waypoints["y"]
 	mapyaw = waypoints["yaw"]
-	mapyaw = np.array(list_backyaw(mapyaw))
 	maps = waypoints["s"]
 	
 	prev_ind=0
 	ind = 100
-	target_speed = - 5.0 / 3.6
-	state = State(x=mapx[ind], y=mapy[ind], yaw=mapyaw[ind], v=-1, dt=0.1)
-	# state = State(x=mapx[ind], y=mapy[ind], yaw=3.14, v=-1, dt=0.1)
+	target_speed = 5.0 / 3.6
+	state = State(x=mapx[ind], y=mapy[ind], yaw=mapyaw[ind], v=1, dt=0.1)
 	v_list.append(state.v)
 	my_wp=ind
 	my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
@@ -308,13 +278,7 @@ if __name__ == "__main__":
 	prev_ind = link_ind-2
 	s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 	x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
-	# road_yaw = -road_yaw
-	# print("road_yaw: "+str(road_yaw))
-	# state_yaw = state.yaw -3.14
 	yawi = state.yaw - road_yaw
-
-	# s=-s
-	# d=-d
 	si = s
 	si_d = state.v * math.cos(yawi)
 	si_dd = ai * math.cos(yawi)
@@ -326,19 +290,9 @@ if __name__ == "__main__":
 	di_dd = ai * math.sin(yawi)
 	df_d = 0
 	df_dd = 0
-
-	# di=-di
-	# si=-si
-	# si_d=-si_d
-	# si_dd=-si_dd
-	# di_d=-di_d
-	# di_dd=-di_dd
 	
 	opt_d = d
 	prev_opt_d = d
-
-	# opt_d=-opt_d
-	# prev_opt_d=-prev_opt_d
 
 	opt_frenet_path = Converter(r=0, g=255/255.0, b=100/255.0, a=1, scale=0.5)
 	cand_frenet_paths = Converter(r=0, g=100/255.0, b=100/255.0, a=0.4, scale= 0.5)
@@ -350,8 +304,7 @@ if __name__ == "__main__":
 
 		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy,maps, opt_d, target_speed)
 		# update state with acc, delta
-		# print(path)
-		# path=list(map(list_minus, path))
+
 		if opt_ind == -1:
 			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
   
@@ -366,15 +319,9 @@ if __name__ == "__main__":
   
 			s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 			x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
-			# s=-s
-			# d=-d
-			# road_yaw = -road_yaw
-			# print("road_yaw: " + str(road_yaw))
-			# state_yaw = state.yaw -3.14
 			steer = road_yaw - state.yaw
 			a = 0
 			opt_d = prev_opt_d
-			opt_d=-opt_d
 		else:
 			error_pa = target_speed - state.v
 			error_da = state.v - prev_v
@@ -383,9 +330,8 @@ if __name__ == "__main__":
 			kd_a = 0.7
 			ki_a = 0.01
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
-			# state_yaw = state.yaw -3.14
 			steer, _ = stanley_control(state.x, state.y, state.yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, state.WB)
-			# steer = - steer
+
 			ways = []
 			for p in path:
 				way = {
@@ -401,11 +347,10 @@ if __name__ == "__main__":
 			# print("%f %f"%(opt_d, prev_opt_d))
 		
 		state.update(a, steer)
-		ai=a
 		a_list.append(a)
 		steer_list.append(steer)
 		v_list.append(state.v)
-		print("speed = " + str(state.v) + ",steer = " + str(steer))
+		print("speed = " + str(state.v) + ",steer = " + str(steer) + ", my yaw: "+str(state.yaw))
 		prev_v = state.v
 
 		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
@@ -428,18 +373,12 @@ if __name__ == "__main__":
 
 		s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 		x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
-		# road_yaw = -road_yaw
-		# s=-s
-		# d=-d
-		# road_yaw = -road_yaw
-		# print("road_yaw: " + str(road_yaw))
 		# s, d = get_frenet(state.x, state.y, mapx[link_len[prev_ind]:link_len[link_ind]], mapy[link_len[prev_ind]:link_len[link_ind]])
 		# x, y, road_yaw = get_cartesian(s, d, mapx[link_len[prev_ind]:link_len[link_ind]], mapy[link_len[prev_ind]:link_len[link_ind]],maps[link_len[prev_ind]:link_len[link_ind]])
 		# s, d = get_frenet(state.x, state.y, mapx, mapy)
 		# print("S:"+str(s)+", D:"+str(d))
 		# x, y, road_yaw = get_cartesian(s, d, mapx, mapy, maps)
 		# print("x:"+str(x)+", y:"+str(y)+", yaw:"+str(road_yaw))
-		# state_yaw = state.yaw -3.14
 		yaw_diff = state.yaw - road_yaw
 
 		si = s
@@ -454,14 +393,6 @@ if __name__ == "__main__":
 		df_d = 0
 		df_dd = 0
 		
-		# di=-di
-		# si=-si
-		# si_d=-si_d
-		# si_dd=-si_dd
-		# di_d=-di_d
-		# di_dd=-di_dd
-	
-	
 		# vehicle state --> topic msg
 		msg = get_ros_msg(state.x, state.y, state.yaw, state.v, a, steer, id=id)
 		# print("state: "+str(state.x) +" "+str(state.y)+" "+str(state.yaw))
