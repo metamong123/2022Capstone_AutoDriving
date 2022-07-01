@@ -239,15 +239,35 @@ if __name__ == "__main__":
 	with open(path_map + "/src/route.pkl", "rb") as f: #global
 		nodes['global'] = pickle.load(f)
 	
-	with open(path_map + "/src/route_parking.pkl", "rb") as f: #parking
-		nodes['parking'] = pickle.load(f)
+	# with open(path_map + "/src/route_parking.pkl", "rb") as f: #parking
+	# 	nodes['parking'] = pickle.load(f)
+    
+	with open(path_map + "/src/route_parking1.pkl", "rb") as f: #parking
+		nodes['parking'][0]= pickle.load(f)
+	with open(path_map + "/src/route_parking2.pkl", "rb") as f: #parking
+		nodes['parking'][2]= pickle.load(f)
+	with open(path_map + "/src/route_parking3.pkl", "rb") as f: #parking
+		nodes['parking'][4]= pickle.load(f)
+	with open(path_map + "/src/route_parking4.pkl", "rb") as f: #parking
+		nodes['parking'][6]= pickle.load(f)
+    
+	nodes['parking'][1]={}
+	nodes['parking'][1]=nodes['parking'][0]
+	nodes['parking'][3]={}
+	nodes['parking'][3]=nodes['parking'][2]
+	nodes['parking'][5]={}
+	nodes['parking'][5]=nodes['parking'][4]
+	nodes['parking'][7]={}
+	nodes['parking'][7]=nodes['parking'][6]
+    
+    
     
 	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
 	# 	nodes['global']  = pickle.load(f)
 	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
 	# 	nodes['parking']  = pickle.load(f)
-	nodes['parking'][1]={}
-	nodes['parking'][1]=nodes['parking'][0]
+	# nodes['parking'][1]={}
+	# nodes['parking'][1]=nodes['parking'][0]
 	# nodes['global'][6]={}
 	# nodes['global'][6]={'x':nodes['global'][0]['x'][600:], 'y':nodes['global'][0]['y'][600:], 's':nodes['global'][0]['s'][600:], 'yaw':nodes['global'][0]['yaw'][600:]}
 	# nodes['global'][5]={}
@@ -316,7 +336,7 @@ if __name__ == "__main__":
 	v=0
 	prev_ind={'global':0,'parking':0}
 	# ind = 10
-	target_speed = 10.0 / 3.6
+	target_speed = {'global':10.0 / 3.6, 'parking': 5.0/3.6}
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
 	state.x=obj_msg.x
 	state.y=obj_msg.y
@@ -352,7 +372,7 @@ if __name__ == "__main__":
 	si = s
 	si_d = state.v * math.cos(yawi)
 	si_dd = ai * math.cos(yawi)
-	sf_d = target_speed
+	sf_d = target_speed[mode]
 	sf_dd = 0
 
 	di = d
@@ -370,24 +390,27 @@ if __name__ == "__main__":
 	while not rospy.is_shutdown():
 		# generate acceleration ai, and steering di
 		# YOUR CODE HERE
-		if (mode == 'global') & (my_wp == 100): ################parking mode 시작 웨이포인트 넣기
+		if (mode == 'global') & (my_wp == 50): ################parking mode 시작 웨이포인트 넣기
 			mode='parking'
 			rospy.set_param('car_mode', mode)
-		elif (mode=='parking') & (link_ind[mode]==0) & (my_wp==10): ################parking curve 시작 웨이포인트 넣기
+		elif (mode=='parking') & ((link_ind[mode]==0)or(link_ind[mode]==2)or(link_ind[mode]==4)or(link_ind[mode]==6)) & (my_wp==10): ################parking curve 시작 웨이포인트 넣기
 			rospy.set_param('move_mode', 'forward')
-		elif (mode=='parking') & (link_ind[mode]==1):
+		elif (mode=='parking') & ((link_ind[mode]==1)or(link_ind[mode]==3)or(link_ind[mode]==5)or(link_ind[mode]==7)):
 			rospy.set_param('move_mode', 'backward')
 
-		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode], mapy[mode], maps[mode], opt_d, target_speed)
+		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode], mapy[mode], maps[mode], opt_d, target_speed[mode])
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
 			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
   
 			if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
 				if link_ind[mode]==len(link_len[mode]):
-					if mode=='parking':
-						mode = 'global'
-						rospy.set_param('car_mode', mode)
+					rospy.set_param('move_mode', 'finish')
+					link_ind[mode]=len(link_len[mode])
+				elif mode=='parking' & ((link_ind['parking']==1)or(link_ind['parking']==3)or(link_ind['parking']==5)or(link_ind['parking']==7)):
+					rospy.set_param('move_mode', 'finish')
+					mode = 'global'
+					rospy.set_param('car_mode', mode)
 				else:
 					rospy.set_param('move_mode', 'finish')
 					link_ind[mode]+=1
@@ -402,9 +425,9 @@ if __name__ == "__main__":
 		else:
 			## PID control
 
-			error_pa = target_speed - state.v
+			error_pa = target_speed[mode] - state.v
 			error_da = state.v - prev_v
-			error_ia += target_speed - state.v
+			error_ia += target_speed[mode] - state.v
 			kp_a = 0.5
 			kd_a = 0.7
 			ki_a = 0.01
@@ -449,12 +472,12 @@ if __name__ == "__main__":
 
 		if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
 			if link_ind[mode]==len(link_len[mode]):
-				if mode=='parking':
-					mode = 'global'
-					rospy.set_param('car_mode', mode)
-				else:
-					rospy.set_param('move_mode', 'finish')
-					link_ind[mode]=len(link_len[mode])
+				rospy.set_param('move_mode', 'finish')
+				link_ind[mode]=len(link_len[mode])
+			elif mode=='parking' & ((link_ind['parking']==1)or(link_ind['parking']==3)or(link_ind['parking']==5)or(link_ind['parking']==7)):
+				rospy.set_param('move_mode', 'finish')
+				mode = 'global'
+				rospy.set_param('car_mode', mode)
 			else:
 				rospy.set_param('move_mode', 'finish')
 				link_ind[mode]+=1
@@ -476,7 +499,7 @@ if __name__ == "__main__":
 		si = s
 		si_d = state.v * math.cos(yaw_diff)
 		si_dd = ai * math.cos(yaw_diff)
-		sf_d = target_speed
+		sf_d = target_speed[mode]
 		sf_dd = 0
 		
 		di = d

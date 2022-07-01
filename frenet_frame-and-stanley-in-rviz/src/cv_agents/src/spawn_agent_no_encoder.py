@@ -244,8 +244,17 @@ if __name__ == "__main__":
 	with open(path_map + "/src/route.pkl", "rb") as f:
 		nodes = pickle.load(f)
 
-	with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
-		nodes = pickle.load(f)
+	# with open(path_map + "/src/route_parking1.pkl", "rb") as f: #global
+	# 	nodes= pickle.load(f)
+	# with open(path_map + "/src/route_parking2.pkl", "rb") as f: #global
+	# 	nodes= pickle.load(f)
+	# with open(path_map + "/src/route_parking3.pkl", "rb") as f: #global
+	# 	nodes= pickle.load(f)
+	# with open(path_map + "/src/route_parking4.pkl", "rb") as f: #global
+	# 	nodes= pickle.load(f)
+
+	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
+	# 	nodes = pickle.load(f)
 	# nodes[6]={}
 	# nodes[6]={'x':nodes[0]['x'][600:], 'y':nodes[0]['y'][600:], 's':nodes[0]['s'][600:], 'yaw':nodes[0]['yaw'][600:]}
 	# nodes[5]={}
