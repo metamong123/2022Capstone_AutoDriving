@@ -75,16 +75,16 @@ if __name__ == "__main__":
 
 	# TODO: AS CONFIGURATION FILE
 	link_file = path + "/src/route.pkl"
-	linemark_file = path + "/src/route_parking.pkl"
+	# linemark_file = path + "/src/route_parking.pkl"
 
 	link_cv = Converter(link_file, 2000, r=255/255.0, g=236/255.0, b=139/255.0, a=0.8, scale=0.5)
-	lanemark_cv = Converter(linemark_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
+	# lanemark_cv = Converter(linemark_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
 
 	link_pub = rospy.Publisher("/rviz/lane_links", MarkerArray, queue_size=1.2, latch=True)
-	parking_link_pub = rospy.Publisher("/rviz/parking_links", MarkerArray, queue_size=1, latch=True)
+	# parking_link_pub = rospy.Publisher("/rviz/parking_links", MarkerArray, queue_size=1, latch=True)
 
 	rospy.sleep(1)
 	while not rospy.is_shutdown():
 		link_pub.publish(link_cv.ma)
-		parking_link_pub.publish(lanemark_cv.ma)
+		# parking_link_pub.publish(lanemark_cv.ma)
 		rospy.sleep(1)
