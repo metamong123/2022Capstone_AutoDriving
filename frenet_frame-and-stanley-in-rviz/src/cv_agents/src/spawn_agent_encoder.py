@@ -67,10 +67,10 @@ def interpolate_waypoints(wx, wy, space=0.5):
 		"s": ss
 	}
 
-
+order=[]
 class State:
 
-	def __init__(self, x=0.0, y=0.0, yaw=0.0, v=0.0, dt=0.1, WB=1.04):
+	def __init__(self, x=0.0, y=0.0, yaw=0.0, v=0.0, dt=0.05, WB=1.04):
 		self.x = x
 		self.y = y
 		self.yaw = yaw
@@ -80,7 +80,7 @@ class State:
 		self.dt = dt
 		self.WB = WB
 
-	def update(self, a, delta):
+	def update(self, vu, delta):
 		dt = self.dt
 		WB = self.WB
 
@@ -88,7 +88,8 @@ class State:
 		self.y += self.v * math.sin(self.yaw) * dt
 		self.yaw += self.v / WB * math.tan(delta) * dt
 		self.yaw = pi_2_pi(self.yaw)
-		self.v += a * dt
+		# self.v += a * dt
+		self.v = vu
 		self.rear_x = self.x - ((WB / 2) * math.cos(self.yaw))
 		self.rear_y = self.y - ((WB / 2) * math.sin(self.yaw))
 
@@ -97,21 +98,29 @@ class State:
 		dy = self.rear_y - point_y
 		return math.hypot(dx, dy)
 
-	def get_ros_msg(self, a, steer, ov):
+	def get_ros_msg(self, a, steer):
 		dt = self.dt
-		v=0
+		# v=0
 		c = AckermannDriveStamped()
 		c.header.frame_id = "/map"
 		c.header.stamp = rospy.Time.now()
 		c.drive.steering_angle = steer
-		# c.drive.acceleration = a
+		c.drive.acceleration = a
+		order.append(a)
+		order.append(dt)
+		order.append(self.v)
+		order.append(self.v+(a*dt))
+		order.append("/n")
 		# c.drive.speed = self.v
-		if (ov + a*dt)>1.39:
-			v=1.39
-		else:
-			v=ov+a*dt
-		c.drive.speed = v
-		# print("ackermann_speed:"+str(v))
+		# if (ov + a*dt)>1.39:
+		# 	v=1.39
+		# else:
+		# 	v=ov+a*dt
+		speed=self.v+ (a * dt)
+		if self.v < 1.0:
+			speed=1.0
+		c.drive.speed = speed
+		print("ackermann_speed:"+str(speed))
 		return c
 
 
@@ -150,7 +159,7 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 	o.L = m.scale.x
 	o.W = m.scale.y
  
-	dt=0.01
+	dt=0.1
 	c = AckermannDriveStamped()
 	c.header.frame_id = "/map"
 	c.header.stamp = rospy.Time.now()
@@ -174,28 +183,57 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 # playground long
 # obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
 # obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, v=1,L=1.600, W=1.04)
-obj_msg = Object(x=962649.259757, y=1959322.81895, yaw=1.2871297862692013, L=4.475, W=1.85)
+# obj_msg = Object(x=962649.259757, y=1959322.81895, yaw=1.2871297862692013, L=4.475, W=1.85)
+
+# obs_info = []
+# def callback_obstacle(msg):
+# 	global obs_info
+# 	obs_info = []
+# 	for o in msg.object_list:
+# 		obj = [o.x, o.y, o.yaw, o.L, o.W]
+
+# 		'''
+# 		#####(x, y) 좌표가 중심이 아니라 시작점인지?
+# 		yaw = o.yaw           
+# 		center_x = o.x + 1.3 * math.cos(yaw)
+# 		center_y = o.y + 1.3 * math.sin(yaw)
+# 		'''
+# 		#id(=i)가 문자열이어야 하는지 확인 필요
+# 		obs_info.append(obj)
+
+# # obj_msg=Object()
+# def callback3(msg):
+# 	global obj_msg
+# 	obj_msg=msg
 
 obs_info = []
-def callback_obstacle(msg):
-	global obs_info
-	obs_info = []
-	for o in msg.object_list:
-		obj = [o.x, o.y, o.yaw, o.L, o.W]
+obj_msg=Object()
 
-		'''
-		#####(x, y) 좌표가 중심이 아니라 시작점인지?
-		yaw = o.yaw           
-		center_x = o.x + 1.3 * math.cos(yaw)
-		center_y = o.y + 1.3 * math.sin(yaw)
-		'''
-		#id(=i)가 문자열이어야 하는지 확인 필요
-		obs_info.append(obj)
+class TopicReciver:
+	def __init__(self):
+		self.obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, self.callback_obstacle, queue_size=1)
+		self.state_sub = rospy.Subscriber("/objects/car_1", Object, self.callback2, queue_size=1)
+	def check_all_connections(self):
+		return (self.obstacle_sub.get_num_connections()+self.state_sub.get_num_connections())==2
+	def callback_obstacle(self, msg):
+		if self.check_all_connections():
+			global obs_info
+			obs_info = []
+			for o in msg.object_list:
+				obj = [o.x, o.y, o.yaw, o.L, o.W]
 
-# obj_msg=Object()
-def callback3(msg):
-	global obj_msg
-	obj_msg=msg
+				'''
+				#####(x, y) 좌표가 중심이 아니라 시작점인지?
+				yaw = o.yaw           
+				center_x = o.x + 1.3 * math.cos(yaw)
+				center_y = o.y + 1.3 * math.sin(yaw)
+				'''
+				#id(=i)가 문자열이어야 하는지 확인 필요
+				obs_info.append(obj)
+	def callback2(self, msg):
+		if self.check_all_connections():
+			global obj_msg
+			obj_msg=msg
 
 
 if __name__ == "__main__":
@@ -211,8 +249,9 @@ if __name__ == "__main__":
 	args, unknown = parser.parse_known_args()
 
 	rospy.init_node("three_cv_agents_node_" + str(args.id))
-	obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
-	sub_state = rospy.Subscriber("/objects/car_1", Object, callback3, queue_size=1)
+	topic_receiver=TopicReciver()
+	# obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
+	# sub_state = rospy.Subscriber("/objects/car_1", Object, callback3, queue_size=1)
 	WB = 1.04
 
 	'''
@@ -240,8 +279,8 @@ if __name__ == "__main__":
 	# with open(path_map + "/src/route_parking4.pkl", "rb") as f: #global
 	# 	nodes= pickle.load(f)
 
-	with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
-		nodes = pickle.load(f)
+	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
+	# 	nodes = pickle.load(f)
 
 	# nodes[6]={}
 	# nodes[6]={'x':nodes[0]['x'][600:], 'y':nodes[0]['y'][600:], 's':nodes[0]['s'][600:], 'yaw':nodes[0]['yaw'][600:]}
@@ -312,12 +351,12 @@ if __name__ == "__main__":
 	# ind = 10
 	target_speed = 5.0/3.6
 
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
-	state.x=obj_msg.x
-	state.y=obj_msg.y
-	state.yaw=obj_msg.yaw
-	#############
-	state.v=obj_msg.v
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.05)
+	# state.x=obj_msg.x
+	# state.y=obj_msg.y
+	# state.yaw=obj_msg.yaw
+	# #############
+	# state.v=obj_msg.v
 	#############
 	# msg = state.get_ros_msg(0, 0, 1.0) #a,steer,v
 	# control_pub.publish(msg)
@@ -364,8 +403,12 @@ if __name__ == "__main__":
 	while not rospy.is_shutdown():
 		# generate acceleration ai, and steering di
 		# YOUR CODE HERE
-
-		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed)
+		state.x=obj_msg.x
+		state.y=obj_msg.y
+		state.yaw=obj_msg.yaw
+		state.v=obj_msg.v
+		# path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed)
+		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, [], mapx, mapy, maps, opt_d, target_speed)
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
 			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
@@ -385,16 +428,23 @@ if __name__ == "__main__":
 			opt_d = prev_opt_d
 		else:
 			## PID control
-			if state.v <= 1.0:
-				state_v=1.0
-			elif state.v > 1.0:
-				state_v=state.v
+			# if state.v <= 1.0:
+			# 	state_v=1.0
+			# elif state.v > 1.0:
+			# 	state_v=state.v
+			state_v=state.v
 			error_pa = target_speed - state_v
 			error_da = state_v - prev_v
 			error_ia += target_speed - state_v
+			# if state_v < 1.0:
+			# 	error_ia += 0
+			# else:
+			# 	error_ia += target_speed - state_v
 			kp_a = 0.5
-			kd_a = 0.7
-			ki_a = 0.01
+			# kd_a = 0.7
+			# ki_a = 0.01
+			kd_a = 0.0
+			ki_a = 0.0
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
 			prev_cte = cte
 			error_icte += cte
@@ -416,28 +466,32 @@ if __name__ == "__main__":
 			prev_opt_d = path[opt_ind].d[-1]
 		
 		ai=a
+		prev_v = state.v
 		# vehicle state --> topic msg
-		# state.update(a, steer)
-		if ((my_wp < (link_len[-1] -10)) & (obj_msg.v <= 1.0)):
-			msg = state.get_ros_msg(0, steer, 1.0)
-		else:
-			msg = state.get_ros_msg(a, steer, obj_msg.v)
+		state.update(obj_msg.v, steer)
+		# if ((my_wp < (link_len[-1] -10)) and (obj_msg.v <= 1.0)):
+		# 	msg = state.get_ros_msg(0, steer, 1.0)
+		# if (obj_msg.v <= 1.0):
+		# 	msg = state.get_ros_msg(0, steer, 1.0)
+		# else:
+		# 	msg = state.get_ros_msg(a, steer, state.v)
+		msg = state.get_ros_msg(a, steer)
 		control_pub.publish(msg)
-		#a_list.append(a)
+		a_list.append(a)
 		#steer_list.append(steer)
-		#v_list.append(v)
-		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer) + ",a = "+str(a) + str(target_speed))
+		v_list.append(msg.drive.speed)
+		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer) + ",a = "+str(a) +", dt: "+str(dt))
 		# prev_v = state.v
-		if state.v <= 1.0:
-			prev_v=1.0
-		elif state.v > 1.0:
-			prev_v=state.v
+		# if state.v <= 1.0:
+		# 	prev_v=1.0
+		# elif state.v > 1.0:
+		# 	prev_v=state.v
 		state.x=obj_msg.x
 		state.y=obj_msg.y
 		state.yaw=obj_msg.yaw
 		state.v=obj_msg.v
 		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-
+		
 		# if my_wp >= (link_len[link_ind]-10):
 		# 	if link_ind==40:
 		# 		link_ind=40
@@ -446,13 +500,18 @@ if __name__ == "__main__":
 		# # prev_ind = link_ind-2
 		# print("현재 링크 번호: "+ str(link_ind))
 
-		# if my_wp == 270:
-		# 	with open("/home/nsclmds/a_list.text", "wb") as f:
-		# 		pickle.dump(a_list, f)
-		# 	with open("/home/nsclmds/v_list.text", "wb") as f:
-		# 		pickle.dump(v_list, f)
-		# 	with open("/home/nsclmds/steer_list.text", "wb") as f:
-		# 		pickle.dump(steer_list, f)
+		if my_wp == 35:
+			with open("/home/nsclmds/a_list.text", "w") as f:
+				pickle.dump(a_list, f)
+			# with open("/home/nsclmds/v_list.text", "w") as f:
+			# 	pickle.dump(v_list, f)
+			with open("/home/nsclmds/v_list.text", "w") as f:
+				pickle.dump(order, f)
+			textfile = open("/home/nsclmds/a_file.txt", "w")
+			for element in order:
+				textfile.write(str(element) + "\n")
+			# with open("/home/nsclmds/steer_list.text", "wb") as f:
+			# 	pickle.dump(steer_list, f)
     
 		s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 		x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
@@ -486,7 +545,7 @@ if __name__ == "__main__":
 		#object_pub.publish(msg["object_msg"])
 		opt_frenet_pub.publish(opt_frenet_path.ma)
 		cand_frenet_pub.publish(cand_frenet_paths.ma)
-		control_pub.publish(msg)
+		# control_pub.publish(msg)
 
 		r.sleep()
 	

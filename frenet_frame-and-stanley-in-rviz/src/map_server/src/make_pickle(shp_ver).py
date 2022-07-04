@@ -40,7 +40,7 @@ def interpolate_waypoints(wx, wy, space=0.5):
     "s": ss
   }
 
-df=gpd.read_file('/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/hightech_map/parking4/parking4.shp' )
+df=gpd.read_file('/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking3/parking3.shp' )
 
 # 좌표 변환이 필요한 경우 주석 삭제
 df.to_crs(epsg=5179)
@@ -66,10 +66,10 @@ for i in range(len(df.geometry.x)):
 # data_x=np.concatenate(data_x)
 # data_y=np.concatenate(data_y)
 waypoints=interpolate_waypoints(data_x,data_y,space=0.5)
-wayp_dict[i]={'x':waypoints['x'],'y':waypoints['y'],'s':waypoints['s'],'yaw':waypoints['yaw']}
+wayp_dict[0]={'x':waypoints['x'],'y':waypoints['y'],'s':waypoints['s'],'yaw':waypoints['yaw']}
 
 
-with open('parking4.pkl', 'wb') as handle:
+with open('parking3.pkl', 'wb') as handle:
   pickle.dump(wayp_dict,handle, protocol=0)
   
 # with open('route.pkl', "rb") as f:

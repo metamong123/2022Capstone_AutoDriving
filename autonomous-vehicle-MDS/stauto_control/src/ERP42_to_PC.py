@@ -133,7 +133,7 @@ if __name__ == '__main__':
     pub_gear_erp42 = rospy.Publisher('ERP42_gear', Float32, queue_size=10)
     pub_brake_erp42 = rospy.Publisher('ERP42_brake', Float32, queue_size=10)
 
-    rate = rospy.Rate(20)
+    # rate = rospy.Rate(20)
 
     port = str(rospy.get_param("~robot_port","/dev/ttyUSB0"))
 
@@ -144,7 +144,7 @@ if __name__ == '__main__':
                         stopbits=serial.STOPBITS_ONE
                         )
 
-    r=rospy.Rate(20)
+    r=rospy.Rate(10)
 
     while (ser.isOpen() and (not rospy.is_shutdown())):
         

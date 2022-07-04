@@ -175,32 +175,61 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 
 # obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
 
+# obs_info = []
+# def callback_obstacle(msg):
+# 	global obs_info
+# 	obs_info = []
+# 	for o in msg.object_list:
+# 		obj = [o.x, o.y, o.yaw, o.L, o.W]
+
+# 		'''
+# 		#####(x, y) 좌표가 중심이 아니라 시작점인지?
+# 		yaw = o.yaw           
+# 		center_x = o.x + 1.3 * math.cos(yaw)
+# 		center_y = o.y + 1.3 * math.sin(yaw)
+# 		'''
+# 		#id(=i)가 문자열이어야 하는지 확인 필요
+# 		obs_info.append(obj)
+
+# obj_msg=Object()
+# def callback3(msg):
+# 	global obj_msg
+# 	obj_msg=msg
+# 	# print(obj_msg)
+
+
+# def callback2(msg):
+# 	global mode
+# 	mode=msg.data
+
 obs_info = []
-def callback_obstacle(msg):
-	global obs_info
-	obs_info = []
-	for o in msg.object_list:
-		obj = [o.x, o.y, o.yaw, o.L, o.W]
-
-		'''
-		#####(x, y) 좌표가 중심이 아니라 시작점인지?
-		yaw = o.yaw           
-		center_x = o.x + 1.3 * math.cos(yaw)
-		center_y = o.y + 1.3 * math.sin(yaw)
-		'''
-		#id(=i)가 문자열이어야 하는지 확인 필요
-		obs_info.append(obj)
-
 obj_msg=Object()
-def callback3(msg):
-	global obj_msg
-	obj_msg=msg
-	# print(obj_msg)
+class TopicReciver:
+	def __init__(self):
+		self.obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, self.callback_obstacle, queue_size=1)
+		self.state_sub = rospy.Subscriber("/objects/car_1", Object, self.callback2, queue_size=1)
+	def check_all_connections(self):
+		return (self.obstacle_sub.get_num_connections()+self.state_sub.get_num_connections())==2
+	def callback_obstacle(self, msg):
+		if self.check_all_connections():
+			global obs_info
+			obs_info = []
+			for o in msg.object_list:
+				obj = [o.x, o.y, o.yaw, o.L, o.W]
 
+				'''
+				#####(x, y) 좌표가 중심이 아니라 시작점인지?
+				yaw = o.yaw           
+				center_x = o.x + 1.3 * math.cos(yaw)
+				center_y = o.y + 1.3 * math.sin(yaw)
+				'''
+				#id(=i)가 문자열이어야 하는지 확인 필요
+				obs_info.append(obj)
+	def callback2(self, msg):
+		if self.check_all_connections():
+			global obj_msg
+			obj_msg=msg
 
-def callback2(msg):
-	global mode
-	mode=msg.data
 
 if __name__ == "__main__":
 	a_list=[]
@@ -215,8 +244,9 @@ if __name__ == "__main__":
 	args, unknown = parser.parse_known_args()
 
 	rospy.init_node("three_cv_agents_node_" + str(args.id))
-	obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
-	sub_state = rospy.Subscriber("/objects/car_1", Object, callback3, queue_size=1)
+	topic_receiver=TopicReciver()
+	# obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
+	# sub_state = rospy.Subscriber("/objects/car_1", Object, callback3, queue_size=1)
 	# mode_sub = rospy.Subscriber("/mode", String, callback2)
 	WB = 1.04
 
@@ -253,7 +283,7 @@ if __name__ == "__main__":
 	# 	nodes['parking'][6]= pickle.load(f)
 	with open(path_map + "/src/route_parking3.pkl", "rb") as f: #parking
 		aaaaaa=pickle.load(f)
-		nodes['parking'][0]= aaaaaa[21]
+		nodes['parking'][0]= aaaaaa[0]
 	nodes['parking'][1]={}
 	nodes['parking'][1]=nodes['parking'][0]
 	# nodes['parking'][3]={}

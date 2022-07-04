@@ -15,43 +15,54 @@ from object_msgs.msg import Object
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float32, UInt32, Bool
 
-def odometry_callback(data): 
-	global x, y, v, yaw
-	# sensor_msgs/Imu.msg 
-	x = data.pose.pose.position.x 
-	y = data.pose.pose.position.y 
+x=0.0
+y=0.0
+yaw=0.0
+v=0.0
+id=1
 
-	v = data.twist.twist.linear.x
-	# vy = data.twist.twist.linear.y
-	# vz = data.twist.twist.linear.z
-	# v = np.sqrt(vx**2+vy**2+vz**2)
+class TopicReciver:
+	def __init__(self):
+		self.odom_sub=rospy.Subscriber("/odom", Odometry,self.odometry_callback)
+	def check_all_connections(self):
+		return (self.odom_sub.get_num_connections())==1
+	def odometry_callback(self, data): 
+		if self.check_all_connections():
+			global x, y, v, yaw
+			# sensor_msgs/Imu.msg 
+			x = data.pose.pose.position.x 
+			y = data.pose.pose.position.y 
 
-	orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
-	roll, pitch, yaw = euler_from_quaternion (orientation_list) 
-	# imu_theta=yaw*(180/np.pi) 
-    	# print("lap: %f" %cur_gps_position[0])
+			v = data.twist.twist.linear.x
+			# vy = data.twist.twist.linear.y
+			# vz = data.twist.twist.linear.z
+			# v = np.sqrt(vx**2+vy**2+vz**2)
 
-def speed_callback(data): 
-	global speed 
-	speed = data.data/36 
+			orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
+			roll, pitch, yaw = euler_from_quaternion (orientation_list) 
+			# imu_theta=yaw*(180/np.pi) 
+			# print("lap: %f" %cur_gps_position[0])
+
+
+# def speed_callback(data): 
+# 	global speed 
+# 	speed = data.data/36 
 
 if __name__ == "__main__":
     
 	rospy.init_node("state")
 	#state_pub=rospy.Publisher("/state",Object,queue_size=1)
+	topic_receiver=TopicReciver()
 	object_pub=rospy.Publisher("/objects/car_1", Object,queue_size=1)
 	marker_pub=rospy.Publisher("/objects/marker/car_1", Marker,queue_size=1)
+	
 	r = rospy.Rate(10)
 
-	rospy.Subscriber("/odom", Odometry,odometry_callback)
+	# rospy.Subscriber("/odom", Odometry,odometry_callback)
 	# rospy.Subscriber("/ERP42_speed",Float32,speed_callback)
 	# imu_theta=0.0
 	#cur_gps_position=[126.76780661311217,37.22919729043270]
-	x=0.0
-	y=0.0
-	yaw=0.0
-	v=0.0
-	id=1
+	
 	# speed=0
 	while not rospy.is_shutdown():
 
