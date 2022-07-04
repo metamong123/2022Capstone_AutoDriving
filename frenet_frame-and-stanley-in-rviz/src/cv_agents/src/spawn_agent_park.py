@@ -236,7 +236,7 @@ if __name__ == "__main__":
 
 	nodes={'global':[],'parking':[]}
 
-	with open(path_map + "/src/route.pkl", "rb") as f: #global
+	with open(path_map + "/src/global_route.pkl", "rb") as f: #global
 		nodes['global'] = pickle.load(f)
 	
 	# with open(path_map + "/src/route_parking.pkl", "rb") as f: #parking
@@ -292,7 +292,7 @@ if __name__ == "__main__":
 	link_len={'global':[],'parking':[]}
 	for i in nodes:
 		link_i=-1
-		for j in range(len(nodes[i])):
+		for j in nodes[i].keys():
 			link_i+=len(nodes[i][j]["x"])
 			link_len[i].append(link_i)
 
@@ -302,8 +302,8 @@ if __name__ == "__main__":
 	wy = {'global':[],'parking':[]}
 	wyaw = {'global':[],'parking':[]}
 
-	for i in nodes:
-		for _id in rn_id[5][i]:
+	for i in nodes.keys():
+		for _id in nodes[i].keys():
 			wx[i].append(nodes[i][_id]["x"][1:])
 			wy[i].append(nodes[i][_id]["y"][1:])
 			wyaw[i].append(nodes[i][_id]["yaw"][1:])

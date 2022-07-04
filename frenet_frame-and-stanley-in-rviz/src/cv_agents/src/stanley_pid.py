@@ -4,11 +4,11 @@ import numpy as np
 dt = 0.1
 
 # k =0.5
-kp = 0.3 # control gain
+kp = 0.5 # control gain
 # ki=0.01
 # kd=0.5
-ki = 0.01
-kd = 0.7
+ki = 0
+kd = 0
 
 # ERP42 PARAMETERS
 LENGTH = 1.600
@@ -66,8 +66,8 @@ def stanley_control(x, y, yaw, v, map_xs, map_ys, map_yaws, L, error_icte, prev_
 	error_icte += cte
 	# cte_term = np.arctan2(kp*cte + ki*error_icte+ kd*error_dcte , (1.39+v)) # cross track error
 	# cte_term = np.arctan2(kp*cte + ki*error_icte+ kd*error_dcte , (2.78+v)) # cross track error
-	# cte_term = np.arctan2(kp*cte + ki*error_icte+ kd*error_dcte , (4.17+v)) # cross track error
-	cte_term = np.arctan2((kp*cte + ki*error_icte+ kd*error_dcte) , (5.56+v)) # cross track error
+	cte_term = np.arctan2(kp*cte + ki*error_icte+ kd*error_dcte , (4.17+v)) # cross track error
+	# cte_term = np.arctan2((kp*cte + ki*error_icte+ kd*error_dcte) , (10+v)) # cross track error
 	w_yaw = 0.9
 	# w_cte = 0.65
 	w_cte = 1
