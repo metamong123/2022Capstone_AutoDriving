@@ -17,9 +17,6 @@ class ObstaclePub():
 		self.sub_cluster = rospy.Subscriber('/adaptive_clustering_v1/markers', MarkerArray, self.cluster_callback)
 		self.listener = tf.TransformListener()
 
-		#self.tf_broadcaster = tf.TransformBroadcaster()
-		#loop_rate = rospy.Rate(10) #10Hz
-
 	#callback function def
 	def msg_pub(self):
 		markers = self.msg
@@ -30,6 +27,7 @@ class ObstaclePub():
 
 				o = Object()
 
+				# object length, width
 				o.L = abs(markers.markers[id].points[0].x - markers.markers[id].points[1].x)
 				o.W = abs(markers.markers[id].points[4].y - markers.markers[id].points[3].y)
 
@@ -37,10 +35,12 @@ class ObstaclePub():
 				o.id = id
 				o.classification = o.CLASSIFICATION_CAR
 
+				# object x, y, yaw (frame = car_1)
 				x = (markers.markers[id].points[0].x + markers.markers[id].points[1].x)/2
 				y = (markers.markers[id].points[4].y + markers.markers[id].points[3].y)/2
 				yaw = 0
 
+				# transformation (car_1 -> map)
 				pose = tf.transformations.euler_matrix(0, 0, yaw)
 				pose[0, 3] = x
 				pose[1, 3] = y
@@ -56,6 +56,7 @@ class ObstaclePub():
         
 				result = np.array(np.dot(tf_matrix, pose))
 
+				# object x, y, yaw (frame = map)
 				o.x = result[0, 3]
 				o.y = result[1, 3]
 
