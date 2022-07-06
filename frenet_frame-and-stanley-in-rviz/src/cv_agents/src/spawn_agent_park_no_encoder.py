@@ -444,7 +444,7 @@ if __name__ == "__main__":
 		# 	rospy.set_param('move_mode', 'forward')
 		# elif (mode=='parking') & ((link_ind[mode]==1)or(link_ind[mode]==3)or(link_ind[mode]==5)or(link_ind[mode]==7)):
 		# 	rospy.set_param('move_mode', 'backward')
-		if (mode == 'global') and ((my_wp[mode] >= 230) and (my_wp[mode] < 245)): ################parking mode 시작 웨이포인트 넣기
+		if (mode == 'global') and ((my_wp[mode] >= 245) and (my_wp[mode] < 250)): ################parking mode 시작 웨이포인트 넣기
 			print("11111!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			prev_park_ind=0
 			for park_i in range(0,5,2):
@@ -493,13 +493,17 @@ if __name__ == "__main__":
 		# 		if collision_check([mapx[mode][:link_len[mode][park_i]], mapy[mode][:link_len[mode][park_i]],mapyaw[mode][:link_len[mode][park_i]]],obs_info,0,0,0)==False:
 		# 			link_ind[mode]==park_i
 		# 			break
-		if mode =='global':
-			path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode], mapy[mode], maps[mode], opt_d, target_speed[mode])
 		if mode =='parking':
-			path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode][link_ind['parking']], mapy[mode][link_ind['parking']], maps[mode][link_ind['parking']], opt_d, target_speed[mode])
+			path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]], maps[mode][park_i][:link_len[mode][park_i]], opt_d, target_speed[mode])
+		else:
+			path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode], mapy[mode], maps[mode], opt_d, target_speed[mode])
+		
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
-			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
+			if mode =='parking':
+				my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]], my_wp[mode])
+			else:
+				my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
   
 			# if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
 			# 	if link_ind[mode]==len(link_len[mode]):
@@ -516,7 +520,7 @@ if __name__ == "__main__":
 				if link_ind[mode]==len(link_len[mode]):
 					rospy.set_param('move_mode', 'finish')
 					link_ind[mode]=len(link_len[mode])
-				elif ((mode=='parking') and (link_ind['parking']==1)):
+				elif ((mode=='parking') and (link_ind['parking']==1)or(link_ind['parking']==3)or(link_ind['parking']==5)):
 					rospy.set_param('move_mode', 'finish')
 					fin_wp = my_wp[mode]
 					mode = 'global'
@@ -530,9 +534,13 @@ if __name__ == "__main__":
 			if (fin_wp!=0) and (fin_wp != my_wp[mode]) and (mode!='parking'):
 				rospy.set_param('move_mode', 'forward')
 				fin_wp=0
-    
-			s, d = get_frenet(state.x, state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
-			x, y, road_yaw = get_cartesian(s, d, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],maps[mode][:link_len[mode][link_ind[mode]]])
+			if mode == 'parking':
+				s, d = get_frenet(state.x, state.y, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]],my_wp[mode])
+				x, y, road_yaw = get_cartesian(s, d, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]],maps[mode][park_i][:link_len[mode][park_i]])
+			else:
+				s, d = get_frenet(state.x, state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
+				x, y, road_yaw = get_cartesian(s, d, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],maps[mode][:link_len[mode][link_ind[mode]]])
+			
 			steer = road_yaw - state.yaw
 			a = 0
 			opt_d = prev_opt_d
@@ -579,18 +587,24 @@ if __name__ == "__main__":
 		msg = state.get_ros_msg(a, steer, id=id)
 		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer) + ",a = "+str(a))
 		prev_v = state.v
-		my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
-
+		if mode =='parking':
+			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]], my_wp[mode])
+		else:
+			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
+  
 		if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
 			if link_ind[mode]==len(link_len[mode]):
 				rospy.set_param('move_mode', 'finish')
+				fin_wp = my_wp[mode]
 				link_ind[mode]=len(link_len[mode])
-			elif mode=='parking' and ((link_ind['parking']==1)or(link_ind['parking']==3)or(link_ind['parking']==5)or(link_ind['parking']==7)):
+			elif mode=='parking' and ((link_ind['parking']==1)or(link_ind['parking']==3)or(link_ind['parking']==5)):
 				rospy.set_param('move_mode', 'finish')
+				fin_wp = my_wp[mode]
 				mode = 'global'
 				rospy.set_param('car_mode', mode)
 			else:
 				rospy.set_param('move_mode', 'finish')
+				fin_wp = my_wp[mode]
 				link_ind[mode]+=1
 
 		if (fin_wp!=0) and (fin_wp != my_wp[mode]) and (mode!='parking'):
@@ -607,9 +621,13 @@ if __name__ == "__main__":
 		# 	with open("/home/nsclmds/steer_list.text", "wb") as f:
 		# 		pickle.dump(steer_list, f)
     
-		s, d = get_frenet(state.x, state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
-		x, y, road_yaw = get_cartesian(s, d, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],maps[mode][:link_len[mode][link_ind[mode]]])
-		yaw_diff = state.yaw - road_yaw
+		if mode == 'parking':
+			s, d = get_frenet(state.x, state.y, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]],my_wp[mode])
+			x, y, road_yaw = get_cartesian(s, d, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]],maps[mode][park_i][:link_len[mode][park_i]])
+		else:
+			s, d = get_frenet(state.x, state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
+			x, y, road_yaw = get_cartesian(s, d, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],maps[mode][:link_len[mode][link_ind[mode]]])
+			yaw_diff = state.yaw - road_yaw
 
 		si = s
 		si_d = state.v * math.cos(yaw_diff)

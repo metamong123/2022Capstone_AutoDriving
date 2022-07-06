@@ -5,7 +5,7 @@
 	<node name="parking_car" pkg="obstacles" type="parking_car.py" />
 	<node name="collision_check" pkg="obstacles" type="collision_check_with_visualizing_car.py" />
 	
-	<node name="spawn_agents" pkg="cv_agents" type="spawn_agent_park_no_encoder.py" output="screen"/>
+	<node name="spawn_agents" pkg="cv_agents" type="spawn_agent_park_no_encoder_2.py" output="screen"/>
 	<?ignore node name="spawn_agents" pkg="cv_agents" type="spawn_agent_org_backward.py" output="screen"/?>
 	<?ignore node name="spawn_agents" pkg="cv_agents" type="spawn_agent_org_back_better_editing2.py" output="screen"/?>
 	<?ignore node name="spawn_agents" pkg="cv_agents" type="spawn_agent (copy).py" output="screen"/?>
