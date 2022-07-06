@@ -2,6 +2,7 @@
 	<param name="move_mode" type="string" value="default" />
 	<param name="car_mode" type="string" value="global" />
 	<param name="delivery_mode" type="string" value="default" />
+	<node name="parking_backward" pkg="parking_mission" type="parking_backward.py"/>
 	<?ignore <node name="core_control" pkg="core" type="core_based_waypoint.py" output="screen"/> ?>
 	<?ignore <node name="core_control" pkg="core" type="core_based_stopline.py" output="screen"/> ?>
 	<node name="core_control" pkg="core" type="core_based_waypoint_stech.py" output="screen"/>
