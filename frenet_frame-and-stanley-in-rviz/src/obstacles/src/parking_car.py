@@ -50,7 +50,7 @@ class CarParked(object):
 		o.a = self.accel
 		o.delta = self.delta
 		o.L = 4.475
-		o.W = 1.850
+		o.W = 1.150
 
 		self.object_pub.publish(o)
 
@@ -58,8 +58,8 @@ class CarParked(object):
 if __name__ == "__main__":
 	rospy.init_node("parking_car")
 	r = rospy.Rate(1)
-	cp1 = CarParked(x=45.4, y=31.7, yaw=-0.51, id=2)
-	cp2 = CarParked(x=25.578, y=-9.773, yaw=2.65, id=3)
+	cp1 = CarParked(x=962575.68525061, y=1959246.37897911, yaw=2.84853436, id=2)
+	cp2 = CarParked(x=962577.02808145, y=1959251.08300435, yaw=2.84853436, id=3)
 
 	while not rospy.is_shutdown():
 		cp1.to_ros()

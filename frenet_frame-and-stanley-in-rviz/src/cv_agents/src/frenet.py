@@ -344,7 +344,7 @@ def collision_check(fp, obs_info, mapx, mapy, maps):
 
 	# get obstacle's position (x,y)
 	#obs_xy = get_cartesian( obs[i, 0], obs[i, 1], mapx, mapy, maps)
-	car1s = [[f[0], f[1], f[2], 4.475, 1.850] for f in zip(fp.x, fp.y, fp.yaw)]
+	car1s = [[f[0], f[1], f[2], 1.600, 1.150] for f in zip(fp.x, fp.y, fp.yaw)]
 	parked1 = obs_info[0]
 	parked2 = obs_info[1]
 	
@@ -363,6 +363,22 @@ def collision_check(fp, obs_info, mapx, mapy, maps):
 
 	return False
 
+# def collision_check(fp, obs_info, mapx, mapy, maps):
+	
+# 	# get obstacle's position (x,y)
+# 	#obs_xy = get_cartesian( obs[i, 0], obs[i, 1], mapx, mapy, maps)
+# 	car1s = [[f[0], f[1], f[2], 1.600, 1.160] for f in zip(fp.x, fp.y, fp.yaw)]
+	
+# 	for obs in obs_info:
+# 		for car1 in car1s:
+# 			car_vertices = get_vertice_rect(car1)
+# 			obs_vertices = get_vertice_rect(obs)
+
+# 			is_collide = separating_axis_theorem(car_vertices, obs_vertices)
+# 			if is_collide:
+# 				return True
+
+# 	return False
 
 def check_path(fplist, obs_info, mapx, mapy, maps):
 	ok_ind = []
