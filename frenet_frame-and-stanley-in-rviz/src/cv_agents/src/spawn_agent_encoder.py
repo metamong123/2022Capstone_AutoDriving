@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import rospkg
 import sys
 from ackermann_msgs.msg import AckermannDriveStamped
+from std_msgs.msg import Float64
 
 from scipy.interpolate import interp1d
 
@@ -70,7 +71,7 @@ def interpolate_waypoints(wx, wy, space=0.5):
 order=[]
 class State:
 
-	def __init__(self, x=0.0, y=0.0, yaw=0.0, v=0.0, dt=0.05, WB=1.04):
+	def __init__(self, x=0.0, y=0.0, yaw=0.0, v=0.0, dt=0.1, WB=1.04):
 		self.x = x
 		self.y = y
 		self.yaw = yaw
@@ -166,7 +167,6 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 	c.drive.steering_angle = steer
 	c.drive.acceleration = a
 	c.drive.speed = v + a*dt
-
 	return {
 		"object_msg": o,
 		"marker_msg": m,
@@ -183,7 +183,13 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 # playground long
 # obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
 # obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, v=1,L=1.600, W=1.04)
-# obj_msg = Object(x=962649.259757, y=1959322.81895, yaw=1.2871297862692013, L=4.475, W=1.85)
+obj_msg = Object(x=962643.046622, y=1959322.52524, yaw=1.2871297862692013,v=1, L=1.600, W=1.04)
+
+# x: 962627.0
+# y: 1959329.0
+
+# 962623.466172
+#       y: 1959332.09968
 
 # obs_info = []
 # def callback_obstacle(msg):
@@ -207,7 +213,7 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 # 	obj_msg=msg
 
 obs_info = []
-obj_msg=Object()
+
 
 class TopicReciver:
 	def __init__(self):
@@ -233,7 +239,9 @@ class TopicReciver:
 	def callback2(self, msg):
 		if self.check_all_connections():
 			global obj_msg
+			obj_msg=Object()
 			obj_msg=msg
+
 
 
 if __name__ == "__main__":
@@ -249,6 +257,7 @@ if __name__ == "__main__":
 	args, unknown = parser.parse_known_args()
 
 	rospy.init_node("three_cv_agents_node_" + str(args.id))
+	# obj_msg=Object()
 	topic_receiver=TopicReciver()
 	# obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
 	# sub_state = rospy.Subscriber("/objects/car_1", Object, callback3, queue_size=1)
@@ -264,6 +273,7 @@ if __name__ == "__main__":
 	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
 	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
 	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
+	velocity_pub = rospy.Publisher("/vel_frenet", Float64, queue_size=1)
 
 	start_node_id = args.route
 	route_id_list = rn_id[start_node_id][args.dir]
@@ -351,7 +361,7 @@ if __name__ == "__main__":
 	# ind = 10
 	target_speed = 5.0/3.6
 
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.05)
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
 	# state.x=obj_msg.x
 	# state.y=obj_msg.y
 	# state.yaw=obj_msg.yaw
@@ -403,11 +413,8 @@ if __name__ == "__main__":
 	while not rospy.is_shutdown():
 		# generate acceleration ai, and steering di
 		# YOUR CODE HERE
-		state.x=obj_msg.x
-		state.y=obj_msg.y
-		state.yaw=obj_msg.yaw
-		state.v=obj_msg.v
 		# path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed)
+		# prev_path=path[opt_ind]
 		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, [], mapx, mapy, maps, opt_d, target_speed)
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
@@ -434,13 +441,14 @@ if __name__ == "__main__":
 			# 	state_v=state.v
 			state_v=state.v
 			error_pa = target_speed - state_v
+			print(error_pa)
 			error_da = state_v - prev_v
 			error_ia += target_speed - state_v
 			# if state_v < 1.0:
 			# 	error_ia += 0
 			# else:
 			# 	error_ia += target_speed - state_v
-			kp_a = 0.5
+			kp_a = 10
 			# kd_a = 0.7
 			# ki_a = 0.01
 			kd_a = 0.0
@@ -468,7 +476,7 @@ if __name__ == "__main__":
 		ai=a
 		prev_v = state.v
 		# vehicle state --> topic msg
-		state.update(obj_msg.v, steer)
+		state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
 		# if ((my_wp < (link_len[-1] -10)) and (obj_msg.v <= 1.0)):
 		# 	msg = state.get_ros_msg(0, steer, 1.0)
 		# if (obj_msg.v <= 1.0):
@@ -477,6 +485,7 @@ if __name__ == "__main__":
 		# 	msg = state.get_ros_msg(a, steer, state.v)
 		msg = state.get_ros_msg(a, steer)
 		control_pub.publish(msg)
+		velocity_pub.publish(msg.drive.speed)
 		a_list.append(a)
 		#steer_list.append(steer)
 		v_list.append(msg.drive.speed)

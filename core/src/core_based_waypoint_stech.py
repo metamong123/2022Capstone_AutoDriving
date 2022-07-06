@@ -77,30 +77,32 @@ def yolo_callback(msg):
     stopline = msg.data[8]  # x
 
 def traffic_decision():
-    if traffic_light == 0: # green or None
-        traffic_speed = frenet_speed
-        traffic_angle = frenet_angle
-        traffic_gear = frenet_gear
-        traffic_brake = 0
-    elif traffic_light == 1: # left
-        traffic_speed = frenet_speed
-        traffic_angle = frenet_angle
-        traffic_gear = frenet_gear
-        traffic_brake = 0
-    elif traffic_light == 2 or traffic_light == 4: # red and yellow
-        traffic_speed = 0
-        traffic_angle = 0
-        traffic_gear = 0
-        traffic_brake = 50  # ê¸‰ë¸Œë ˆì´í¬í• ì§€ ë§ì§€ ê³ ë¯¼..
+#   if traffic_light == 0: # green or None
+#      traffic_speed = frenet_speed
+#      traffic_angle = frenet_angle
+#      traffic_gear = frenet_gear
+#      traffic_brake = 0
+#   elif traffic_light == 1: # left
+#      traffic_speed = frenet_speed
+#      traffic_angle = frenet_angle
+#      traffic_gear = frenet_gear
+#      traffic_brake = 0
+#   elif traffic_light == 2 or traffic_light == 4: # red and yellow
+#      traffic_speed = 0
+#      traffic_angle = 0
+#      traffic_gear = 0
+#      traffic_brake = 50  # ê¸‰ë¸Œë ˆì´í¬í• ì§€ ë§ì§€ ê³ ë¯¼..
+#   elif traffic_light == 3: # straightleft
+#      traffic_speed = frenet_speed
+#      traffic_angle = frenet_angle
+#      traffic_gear = frenet_gear
+#      traffic_brake = 0
+   traffic_speed = 0
+   traffic_angle = 0
+   traffic_gear = 0
+   traffic_brake = 50 
 
-    elif traffic_light == 3: # straightleft
-        traffic_speed = frenet_speed
-        traffic_angle = frenet_angle
-        traffic_gear = frenet_gear
-        traffic_brake = 0
-
-    return traffic_speed, traffic_angle, traffic_gear, traffic_brake
-
+   return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
 if __name__=='__main__':
 
@@ -127,7 +129,12 @@ if __name__=='__main__':
             cmd.drive.jerk = 200
          else:
             if move_mode == 'finish':
-               cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = traffic_decision()
+               cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = traffic_decision()   
+               final_cmd_Pub.publish(cmd)
+               print('stop!!!')
+               t = rospy.Time(5)
+               rospy.sleep(t)
+               rospy.set_param('move_mode', 'forward')
             else:
                cmd.drive.speed = frenet_speed
                cmd.drive.steering_angle = frenet_angle + lanenet_steer  # extra lanenet

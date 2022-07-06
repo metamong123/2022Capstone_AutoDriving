@@ -127,15 +127,15 @@ def Parsing():
 
 if __name__ == '__main__':
     rospy.init_node('ERP42_status')
-    pub_encoder_erp42 = rospy.Publisher('ERP42_encoder', Float64, queue_size=10)
-    pub_steer_erp42 = rospy.Publisher('ERP42_steer', Float32, queue_size=10)
-    pub_speed_erp42 = rospy.Publisher('ERP42_speed', Float32, queue_size=10)
-    pub_gear_erp42 = rospy.Publisher('ERP42_gear', Float32, queue_size=10)
-    pub_brake_erp42 = rospy.Publisher('ERP42_brake', Float32, queue_size=10)
+    pub_encoder_erp42 = rospy.Publisher('ERP42_encoder', Float64, queue_size=1)
+    pub_steer_erp42 = rospy.Publisher('ERP42_steer', Float32, queue_size=1)
+    pub_speed_erp42 = rospy.Publisher('ERP42_speed', Float32, queue_size=1)
+    pub_gear_erp42 = rospy.Publisher('ERP42_gear', Float32, queue_size=1)
+    pub_brake_erp42 = rospy.Publisher('ERP42_brake', Float32, queue_size=1)
 
     # rate = rospy.Rate(20)
 
-    port = str(rospy.get_param("~robot_port","/dev/ttyUSB0"))
+    port = str(rospy.get_param("~robot_port","/dev/ttyUSB3"))
 
     ser = serial.Serial(port, 
                         baudrate=115200, 
@@ -144,7 +144,7 @@ if __name__ == '__main__':
                         stopbits=serial.STOPBITS_ONE
                         )
 
-    r=rospy.Rate(10)
+    #r=rospy.Rate(20)
 
     while (ser.isOpen() and (not rospy.is_shutdown())):
         
@@ -157,4 +157,4 @@ if __name__ == '__main__':
         pub_gear_erp42.publish(gear)
         pub_brake_erp42.publish(brake)
 
-        r.sleep()
+    #    r.sleep()

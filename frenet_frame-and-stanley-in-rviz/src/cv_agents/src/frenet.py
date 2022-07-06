@@ -27,10 +27,16 @@ WB = 1.04
 # DT_T = 0.5 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 
 # 5km/h
-MIN_T = 2.0 # minimum terminal time [s]
-MAX_T = 10.0 # maximum terminal time [s], default = 2
-DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
-DT = 0.5 # timestep for update
+# MIN_T = 2.0 # minimum terminal time [s]
+# MAX_T = 10.0 # maximum terminal time [s], default = 2
+# DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+# DT = 0.5 # timestep for update
+
+MIN_T = 0.1 # minimum terminal time [s]
+MAX_T = 8.1 # maximum terminal time [s], default = 2
+DT_T = 2 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+DT = 0.1 # timestep for update
+
 
 # ## 10km/h
 # MIN_T = 2.0 # minimum terminal time [s]
@@ -43,15 +49,27 @@ DT = 0.5 # timestep for update
 # DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 # DT = 0.5 # timestep for update
 
+## 경로는 잘 생기나 DT가 너무 안 맞음
+# MIN_T = 2.0 # minimum terminal time [s]
+# MAX_T = 14.0 # maximum terminal time [s], default = 2
+# DT_T = 6.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+# DT = 2.0 # timestep for update
 
+# MIN_T = 0.1 # minimum terminal time [s]
+# MAX_T = 0.7 # maximum terminal time [s], default = 2
+# DT_T = 0.3 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+# DT = 0.1 # timestep for update
 
 
 V_MAX = 20/3.6	  # maximum velocity [m/s]
 # ACC_MAX=2.0
-ACC_MAX=V_MAX/DT_T
+# ACC_MAX=V_MAX/DT_T
+ACC_MAX=V_MAX/0.1
 #ACC_MAX = V_MAX / MIN_T # maximum acceleration [m/ss]
 #ACC_MAX = 99999999999999999999999999999999999999999999
+
 STEER_MAX = math.radians(20)
+
 K_MAX = STEER_MAX / WB	 # maximum curvature [1/m]
 #K_MAX = 100
 # cost weights

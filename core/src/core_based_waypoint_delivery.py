@@ -38,10 +38,10 @@ def parking_callback(msg):
    backward_angle = msg.drive.steering_angle
    backward_gear = msg.drive.acceleration
    backward_brake = msg.drive.jerk
-   
+
 def lanenet_callback(msg):
    global lanenet_steer
-   lanenet_steer = msg.data
+   lanenet_steer = msg.data   
 
 def parking_decision():
    if move_mode == 'forward':    # parking forward -> frenet
@@ -65,44 +65,41 @@ def parking_decision():
    return parking_speed, parking_angle, parking_gear, parking_brake
 
 def yolo_callback(msg):
-   global deliveryA, deliveryB, traffic_light, person, car, uturnsign, kidzonesign, parkingsign, stopline
-   deliveryA = msg.data[0] # x
-   deliveryB = msg.data[1] # x
-   traffic_light = msg.data[2]
-   person = msg.data[3]
-   car = msg.data[4] # x
-   uturnsign = msg.data[5] # x
-   kidzonesign = msg.data[6] # x
-   parkingsign = msg.data[7] # x 고민된다
-   stopline = msg.data[8]  
+    global deliveryA, deliveryB, traffic_light, person, car, uturnsign, kidzonesign, parkingsign, stopline
+    deliveryA = msg.data[0] # x
+    deliveryB = msg.data[1] # x
+    traffic_light = msg.data[2]
+    person = msg.data[3]
+    car = msg.data[4] # x
+    uturnsign = msg.data[5] # x
+    kidzonesign = msg.data[6] # x
+    parkingsign = msg.data[7] # x
+    stopline = msg.data[8]  # x
 
 def traffic_decision():
-#   if traffic_light == 0: # green or None
-#       traffic_speed = frenet_speed
-#       traffic_angle = frenet_angle
-#       traffic_gear = frenet_gear
-#       traffic_brake = 0
-#   elif traffic_light == 1: # left
-#       traffic_speed = frenet_speed
-#       traffic_angle = frenet_angle
-#       traffic_gear = frenet_gear
-#       traffic_brake = 0
-#   elif traffic_light == 2 or traffic_light == 4: # red and yellow
-#       traffic_speed = 0
-#       traffic_angle = 0
-#       traffic_gear = 0
-#       traffic_brake = 50  # ê¸‰ë¸Œë ˆì´í¬í• ì§€ ë§ì§€ ê³ ë¯¼..
-#   elif traffic_light == 3: # straightleft
-#       traffic_speed = frenet_speed
-#       traffic_angle = frenet_angle
-#       traffic_gear = frenet_gear
-#       traffic_brake = 0
-   traffic_speed = 0
-   traffic_angle = 0
-   traffic_gear = 0
-   traffic_brake = 50 
-   
-   return traffic_speed, traffic_angle, traffic_gear, traffic_brake
+    if traffic_light == 0: # green or None
+        traffic_speed = frenet_speed
+        traffic_angle = frenet_angle
+        traffic_gear = frenet_gear
+        traffic_brake = 0
+    elif traffic_light == 1: # left
+        traffic_speed = frenet_speed
+        traffic_angle = frenet_angle
+        traffic_gear = frenet_gear
+        traffic_brake = 0
+    elif traffic_light == 2 or traffic_light == 4: # red and yellow
+        traffic_speed = 0
+        traffic_angle = 0
+        traffic_gear = 0
+        traffic_brake = 50  # ê¸‰ë¸Œë ˆì´í¬í• ì§€ ë§ì§€ ê³ ë¯¼..
+
+    elif traffic_light == 3: # straightleft
+        traffic_speed = frenet_speed
+        traffic_angle = frenet_angle
+        traffic_gear = frenet_gear
+        traffic_brake = 0
+
+    return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
 
 if __name__=='__main__':
@@ -129,20 +126,19 @@ if __name__=='__main__':
             cmd.drive.acceleration = 0
             cmd.drive.jerk = 200
          else:
-            if stopline == 1:
+            if move_mode == 'finish':
                cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = traffic_decision()
-               final_cmd_Pub.publish(cmd)
-               print('stop!!!!')
-               t = rospy.Time(5)
-               rospy.sleep(t)
             else:
                cmd.drive.speed = frenet_speed
-               cmd.drive.steering_angle = frenet_angle + lanenet_steer  # extra lanenet
+               cmd.drive.steering_angle = frenet_angle
                cmd.drive.acceleration = frenet_gear
                cmd.drive.jerk = 0
                print('global mode!!!')
          
       elif car_mode == 'parking':
          cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = parking_decision()
+
+      elif car_mode == 'delivery':
+         pass
 
       final_cmd_Pub.publish(cmd)
