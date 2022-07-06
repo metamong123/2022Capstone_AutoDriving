@@ -2,7 +2,7 @@ import os
 
 import cv2
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
 
@@ -18,8 +18,11 @@ class LanenetLaneDetector(LaneDetector):
     _MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pretrained-models", "lanenet-model")
 
     def __init__(self, y_range, dbscan_min_samples=DBSCAN_MIN_SAMPLES, dbscan_eps=DBSCAN_EPS,
-                 morphology_kernel=MORPHOLOGY_KERNEL, min_area_thr=MIN_AREA_THR):
-        self.sess = tf.Session(graph=tf.Graph(), config=tf.ConfigProto(log_device_placement=False))
+                 morphology_kernel=MORPHOLOGY_KERNEL, min_area_thr=MIN_AREA_THR):  
+ 
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.2)       
+        self.sess = tf.Session(graph=tf.Graph(), config=tf.ConfigProto(log_device_placement=False,gpu_options=gpu_options))
+        #self.tf.ConfigProto().gpu_options.per_process_gpu_memory_fraction = 0.1
         tf.saved_model.loader.load(self.sess, ["serve"], self._MODEL_PATH)
         self.y_range = y_range
         self.dbscan_min_samples = dbscan_min_samples
@@ -92,8 +95,8 @@ class LanenetLaneDetector(LaneDetector):
         return lanes, cls._SHAPE
 
     def get_lanes(self, img):
-	with tf.device('/device:GPU:0'):
-        	binary_seg_image, instance_seg_image = self.sess.run(["lanenet_model/ArgMax:0",
+        with tf.device('/device:GPU:0'):
+                binary_seg_image, instance_seg_image = self.sess.run(["lanenet_model/ArgMax:0",
                                                               "lanenet_model/pix_embedding_relu:0"],
                                                              feed_dict={"input:0": [img]})
 
