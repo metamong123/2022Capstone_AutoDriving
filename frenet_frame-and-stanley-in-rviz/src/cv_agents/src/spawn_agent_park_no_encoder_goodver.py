@@ -34,6 +34,12 @@ rn_id = dict()
 # rn_id[5] = {'right': [0, 1, 2, 3, 4, 5, 6]}  # ego route
 rn_id[5] = {'global': [0,1,2,3,4], 'parking':[0,1,2,3,4,5]}
 
+class ParkingPath:
+	def __init__(self):
+		self.x = []
+		self.y = []
+		self.yaw = []
+
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
 
