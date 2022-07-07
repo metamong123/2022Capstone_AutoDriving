@@ -46,6 +46,12 @@ rn_id[6] = {
 	'right': [i for i in range(28,40)]
 }'''
 
+def find_dir(link_dict, link_ind):
+	for i in link_dict.keys():
+		for j in link_dir[i]:
+			if link_ind == j:
+				return i
+
 
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
@@ -257,8 +263,8 @@ if __name__ == "__main__":
 		link_len.append(link_i)
 	link_len
  
-	link_dir={'straight':[0,1,2,3,4,5,6,7,9,10,11,12,14,16,18,19,20,21,22,23,24,25,29,31,32,37,38,40,41,42,43,44,45],'left':[8,26,27,28,30,33,34],'right':[13,15,17,19,35,36,39]}
-
+	link_dir={'straight':[0,1,2,3,4,5,6,10,11,12,14,16,18,21,22,23,24,25,29,31,32,37,38,40,41,42,43,44,45],'left':[7,8,26,27,28,30,33,34],'right':[9,13,15,17,19,20,35,36,39]}
+	dir=[]
 	link_ind=0
 
 	wx = []
@@ -290,7 +296,7 @@ if __name__ == "__main__":
 	
 	prev_ind=0
 	ind = 100
-	target_speed = 5.0 / 3.6
+	target_speed = 15.0 / 3.6
 	state = State(x=mapx[ind], y=mapy[ind], yaw=mapyaw[ind], v=1, dt=0.1)
 	v_list.append(state.v)
 	my_wp=ind
@@ -337,14 +343,14 @@ if __name__ == "__main__":
 
 		if opt_ind == -1:
 			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-  
+			dir=find_dir(link_dir, link_ind)
 			if my_wp >= (link_len[link_ind]-10):
 				if link_ind==len(link_len):
 					link_ind=len(link_len)
 				else:
 					link_ind+=1
 			# prev_ind = link_ind-2
-			print("현재 링크 번호: "+ str(link_ind))
+			print("현재 링크 번호: "+ str(link_ind)+", 링크 방향: "+str(dir))
 
   
 			s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
@@ -384,14 +390,14 @@ if __name__ == "__main__":
 		prev_v = state.v
 
 		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-  
+		dir=find_dir(link_dir, link_ind)
 		if my_wp >= (link_len[link_ind]-10):
 			if link_ind==40:
 				link_ind=40
 			else:
 				link_ind+=1
 		# prev_ind = link_ind-2
-		print("현재 링크 번호: "+ str(link_ind))
+		print("현재 링크 번호: "+ str(link_ind)+", 링크 방향: "+str(dir))
   
 		# if my_wp == 700:
 		# 	with open("/home/nsclmds/a_list.txt", "wb") as f:

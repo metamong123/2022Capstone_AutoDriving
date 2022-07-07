@@ -74,7 +74,7 @@ if __name__ == "__main__":
 	path = rospack.get_path("map_server")
 
 	# TODO: AS CONFIGURATION FILE
-	link_file = path + "/src/route.pkl"
+	link_file = path + "/src/__route.pkl"
 	parking1_file = path + "/src/route_parking1.pkl"
 	parking2_file = path + "/src/route_parking2.pkl"
 	parking3_file = path + "/src/route_parking3.pkl"
