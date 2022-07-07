@@ -43,10 +43,11 @@ def cmd_callback(msg):
 if __name__=='__main__':
 
    
-   rospy.init_node('parking_backward')
+    rospy.init_node('parking_backward')
    
-   cmd=AckermannDriveStamped()
+    cmd=AckermannDriveStamped()
    
-   rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,cmd_callback)
+    rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,cmd_callback)
 
-   rospy.spin()
+    while not rospy.is_shutdown():
+        

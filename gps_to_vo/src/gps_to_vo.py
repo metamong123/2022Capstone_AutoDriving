@@ -44,6 +44,8 @@ def callback1(msg):
 	heading=np.arctan( msg.twist.twist.linear.y / msg.twist.twist.linear.x )
 	if msg.twist.twist.linear.x < 0 :
 		heading=heading+np.pi
+	a = heading * 180/np.pi
+ 	print(a)
 	#heading=math.atan2(msg.twist.twist.linear.y , msg.twist.twist.linear.x)
 	heading_array.insert(0,heading)   # heading value save
 	qx=0
