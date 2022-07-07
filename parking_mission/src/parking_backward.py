@@ -5,7 +5,6 @@ import numpy as np
 from ackermann_msgs.msg import AckermannDriveStamped
 
 
-global save_speed,save_angle,save_accel
 save_speed=[]
 save_angle=[]
 save_accel=[]
@@ -14,6 +13,7 @@ cmd_Pub=rospy.Publisher('/ackermann_cmd_parking_backward',AckermannDriveStamped,
 
 def cmd_callback(msg):
     global speed, angle, accel
+    global save_speed,save_angle,save_accel
     speed, angle, accel = msg.drive.speed, msg.drive.steering_angle, msg.drive.acceleration
     move_mode = rospy.get_param('move_mode')
     car_mode = rospy.get_param('car_mode')

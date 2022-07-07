@@ -44,6 +44,11 @@ def lanenet_callback(msg):
    lanenet_steer = msg.data
   
 def parking_decision():
+   global move_mode
+   parking_speed = 0 
+   parking_angle = 0
+   parking_gear = 0
+   parking_brake = 0
    if move_mode == 'forward':    # parking forward -> frenet
       parking_speed = frenet_speed
       parking_angle = frenet_angle
@@ -105,7 +110,9 @@ def traffic_decision():
    return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
 if __name__=='__main__':
-
+   
+  
+  
    rospy.init_node('core_control')
 
    rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
@@ -120,7 +127,7 @@ if __name__=='__main__':
    while not rospy.is_shutdown():
       car_mode = rospy.get_param('car_mode')
       move_mode = rospy.get_param('move_mode')
-
+      
       if car_mode == 'global':
          if person == 1: # dynamic obstacles
             cmd.drive.speed = 0
@@ -137,13 +144,14 @@ if __name__=='__main__':
                rospy.set_param('move_mode', 'forward')
             else:
                cmd.drive.speed = frenet_speed
-               cmd.drive.steering_angle = frenet_angle + lanenet_steer  # extra lanenet
+               cmd.drive.steering_angle = frenet_angle #+ lanenet_steer  # extra lanenet
                cmd.drive.acceleration = frenet_gear
                cmd.drive.jerk = 0
                print('global mode!!!')
          
       elif car_mode == 'parking':
          cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = parking_decision()
+         print("1")
 
 
       final_cmd_Pub.publish(cmd)

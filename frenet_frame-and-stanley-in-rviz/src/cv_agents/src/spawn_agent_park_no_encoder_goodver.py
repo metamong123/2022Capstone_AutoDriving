@@ -426,7 +426,7 @@ if __name__ == "__main__":
 	v=0
 	prev_ind={'global':0,'parking':0}
 	# ind = 10
-	target_speed = {'global':5.0 / 3.6, 'parking': 3.0/3.6}
+	target_speed = {'global':10.0 / 3.6, 'parking': 10.0/3.6}
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 	state.x=obj_msg.x
 	state.y=obj_msg.y
@@ -450,10 +450,11 @@ if __name__ == "__main__":
 
 	if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
 		rospy.set_param('move_mode', 'finish')
+		print("finish!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 		link_ind[mode]+=1
-	if (fin_wp!=0) and (fin_wp != my_wp[mode])and (mode!='parking'):
-		rospy.set_param('move_mode', 'forward')
-		fin_wp=0
+	# if (fin_wp!=0) and (fin_wp != my_wp[mode])and (mode!='parking'):
+	# 	rospy.set_param('move_mode', 'forward')
+	# 	fin_wp=0
 
 	prev_ind[mode] = link_ind[mode]-2
 	# s, d = get_frenet(state.x, state.y, mapx[:100], mapy[:100],my_wp)
@@ -518,7 +519,7 @@ if __name__ == "__main__":
 					"y" : fp.y
 				}	
 				ways.append(way)
-				parking_path.make_marker_array(ways)
+				# parking_path.make_marker_array(ways)
 				prev_park_ind=park_i
 				print("부딪힘: "+str(collision_check(fp,obs_info,0,0,0)))
 				if collision_check(fp,obs_info,0,0,0)==False:
@@ -528,10 +529,10 @@ if __name__ == "__main__":
 					mode='parking'
 					rospy.set_param('car_mode', mode)
 					break
-		elif (mode=='parking') and (link_ind[mode]==0) and (my_wp[mode]==10): ################parking curve 시작 웨이포인트 넣기
-			rospy.set_param('move_mode', 'forward')
-		elif (mode=='parking') and (link_ind[mode]==1):
-			rospy.set_param('move_mode', 'backward')
+		# elif (mode=='parking') and (link_ind[mode]==0) and (my_wp[mode]==10): ################parking curve 시작 웨이포인트 넣기
+		# 	rospy.set_param('move_mode', 'forward')
+		# elif (mode=='parking') and (link_ind[mode]==1) and (my_wp[mode]==30):
+		# 	rospy.set_param('move_mode', 'backward')
 
 		# ## Parking Link choose!!
 		# if mode == 'parking':
@@ -572,15 +573,22 @@ if __name__ == "__main__":
 					fin_wp = my_wp[mode]
 					mode = 'global'
 					rospy.set_param('car_mode', mode)
+				elif (mode == 'parking') and (link_ind['parking']==0):
+					if (my_wp[mode]==15):
+						rospy.set_param('move_mode', 'finish')
+						print("finish!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+						fin_wp = my_wp[mode]
+						link_ind[mode]+=1
 				else:
 					rospy.set_param('move_mode', 'finish')
+					print("finish!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 					fin_wp = my_wp[mode]
 					link_ind[mode]+=1
 			# prev_ind = link_ind[mode]-2
 			print("현재 링크 번호: "+ str(link_ind[mode])+", mode: "+str(mode))
-			if (fin_wp!=0) and (fin_wp != my_wp[mode]) and (mode!='parking'):
-				rospy.set_param('move_mode', 'forward')
-				fin_wp=0
+			# if (fin_wp!=0) and (fin_wp != my_wp[mode]) and (mode!='parking'):
+			# 	rospy.set_param('move_mode', 'forward')
+			# 	fin_wp=0
     
 			if mode == 'parking':
 				s, d = get_frenet(state.x, state.y, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]],my_wp[mode])
@@ -653,14 +661,20 @@ if __name__ == "__main__":
 				fin_wp = my_wp[mode]
 				mode = 'global'
 				rospy.set_param('car_mode', mode)
+			elif (mode == 'parking') and (link_ind['parking']==0):
+				if (my_wp[mode]==15):
+					rospy.set_param('move_mode', 'finish')
+					print("finish!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+					fin_wp = my_wp[mode]
+					link_ind[mode]+=1
 			else:
 				rospy.set_param('move_mode', 'finish')
 				fin_wp = my_wp[mode]
 				link_ind[mode]+=1
 
-		if (fin_wp!=0) and (fin_wp != my_wp[mode]) and (mode!='parking'):
-			rospy.set_param('move_mode', 'forward')
-			fin_wp=0
+		# if (fin_wp!=0) and (fin_wp != my_wp[mode]) and (mode!='parking'):
+		# 	rospy.set_param('move_mode', 'forward')
+		# 	fin_wp=0
 		# prev_ind = link_ind[mode]-2
 		print("현재 링크 번호: "+ str(link_ind[mode])+", mode: "+str(mode))
 
@@ -702,10 +716,10 @@ if __name__ == "__main__":
 			# 		link_ind[mode]==park_i
 			# 		break
 			print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
-		elif (mode=='parking') and (link_ind[mode]==0) and (my_wp==10): ################parking curve 시작 웨이포인트 넣기
-			rospy.set_param('move_mode', 'forward')
-		elif (mode=='parking') and (link_ind[mode]==1):
-			rospy.set_param('move_mode', 'backward')
+		# elif (mode=='parking') and (link_ind[mode]==0) and (my_wp==10): ################parking curve 시작 웨이포인트 넣기
+		# 	rospy.set_param('move_mode', 'forward')
+		# elif (mode=='parking') and (link_ind[mode]==1):
+		# 	rospy.set_param('move_mode', 'backward')
 		# vehicle state --> topic msg
 		# msg = get_ros_msg(state.x, state.y, state.yaw, state.v, a, steer, id=id)
 		# msg = state.get_ros_msg(a, steer, id=id)
