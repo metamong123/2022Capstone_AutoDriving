@@ -34,9 +34,9 @@ rn_id = dict()
 	'left': [18, 2, 11, 6, 13, 8, 15, 10, 26, 0]  # ego route
 }'''
 
-# rn_id[5] = {'left': [i for i in range(40)]}  # ego route
+rn_id[5] = {'left': [i for i in range(40)]}  # ego route
 
-rn_id[5] = {'left': [0, 1]}  # ego route
+# rn_id[5] = {'left': [0, 1]}  # ego route
 
 '''rn_id[5] = {
 	'right': [i for i in range(10, 17)],  # ego route
@@ -208,26 +208,56 @@ if __name__ == "__main__":
 	route_id_list = rn_id[start_node_id][args.dir]
 	#route_id_list = rn_id[start_node_id]['right']+rn_id[5]['left']+rn_id[6]['right']
 
-	with open(path_map + "/src/route.pkl", "rb") as f:
+	with open(path_map + "/src/__route.pkl", "rb") as f:
+		nodes = pickle.load(f)
+	with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/__route.pkl", "rb") as f:
 		nodes = pickle.load(f)
 
 	#link_len=[len(nodes[i]["x"]) for i in range(len(nodes))]
 	#link_len[0]-=1
 
-	nodes[1]={}
-	nodes[1]={'x':nodes[0]['x'][300:], 'y':nodes[0]['y'][300:], 's':nodes[0]['s'][300:], 'yaw':nodes[0]['yaw'][300:]}
-	nodes[0]['x'] = nodes[0]['x'][:300]
-	nodes[0]['y'] = nodes[0]['y'][:300]
-	nodes[0]['s'] = nodes[0]['s'][:300]
-	nodes[0]['yaw'] = nodes[0]['yaw'][:300]
+	# nodes[1]={}
+	# nodes[1]={'x':nodes[0]['x'][300:], 'y':nodes[0]['y'][300:], 's':nodes[0]['s'][300:], 'yaw':nodes[0]['yaw'][300:]}
+	# nodes[0]['x'] = nodes[0]['x'][:300]
+	# nodes[0]['y'] = nodes[0]['y'][:300]
+	# nodes[0]['s'] = nodes[0]['s'][:300]
+	# nodes[0]['yaw'] = nodes[0]['yaw'][:300]
+	nodes[41]={}
+	nodes[40]={}
+	for i in range(39,16,-1):
+		nodes[i+2]=nodes[i]
+	# nodes[18]={}
+	# nodes[17]={}
+	nodes[18]={'x':nodes[16]['x'][215:], 'y':nodes[16]['y'][215:], 's':nodes[16]['s'][215:], 'yaw':nodes[16]['yaw'][215:]}
+	nodes[17]={'x':nodes[16]['x'][165:215], 'y':nodes[16]['y'][165:215], 's':nodes[16]['s'][165:215], 'yaw':nodes[16]['yaw'][165:215]}
+	nodes[16]={'x':nodes[16]['x'][:165], 'y':nodes[16]['y'][:165], 's':nodes[16]['s'][:165], 'yaw':nodes[16]['yaw'][:165]}
 
+	for i in range(41,25,-1):
+		nodes[i+1]=nodes[i]
+	nodes[26]={'x':nodes[25]['x'][45:117], 'y':nodes[25]['y'][45:117], 's':nodes[25]['s'][45:117], 'yaw':nodes[25]['yaw'][45:117]}
+	nodes[25]={'x':nodes[25]['x'][:45], 'y':nodes[25]['y'][:45], 's':nodes[25]['s'][:45], 'yaw':nodes[25]['yaw'][:45]}
  
+	for i in range(42,29,-1):
+		nodes[i+2]=nodes[i]
+
+	nodes[31]={'x':nodes[29]['x'][117:], 'y':nodes[29]['y'][117:], 's':nodes[29]['s'][117:], 'yaw':nodes[29]['yaw'][117:]}
+	nodes[30]={'x':nodes[29]['x'][47:117], 'y':nodes[29]['y'][47:117], 's':nodes[29]['s'][47:117], 'yaw':nodes[29]['yaw'][47:117]}
+	nodes[29]={'x':nodes[29]['x'][:47], 'y':nodes[29]['y'][:47], 's':nodes[29]['s'][:47], 'yaw':nodes[29]['yaw'][:47]} ##node 44개
+
+	for i in range(44,32,-1):
+		nodes[i+1]=nodes[i]
+
+	nodes[33]={'x':nodes[32]['x'][118:], 'y':nodes[32]['y'][118:], 's':nodes[32]['s'][118:], 'yaw':nodes[32]['yaw'][118:]}
+	nodes[32]={'x':nodes[32]['x'][:118], 'y':nodes[32]['y'][:118], 's':nodes[32]['s'][:118], 'yaw':nodes[32]['yaw'][:118]} ##node 45
+
 	link_i=-1
 	link_len=[]
 	for i in range(len(nodes)):
 		link_i+=len(nodes[i]["x"])
 		link_len.append(link_i)
-
+	link_len
+ 
+	link_dir={'straight':[0,1,2,3,4,5,6,7,9,10,11,12,14,16,18,19,20,21,22,23,24,25,29,31,32,37,38,40,41,42,43,44,45],'left':[8,26,27,28,30,33,34],'right':[13,15,17,19,35,36,39]}
 
 	link_ind=0
 
