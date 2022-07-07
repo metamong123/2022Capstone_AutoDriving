@@ -31,7 +31,15 @@ from map_visualizer import Converter
 rn_id = dict()
 
 # rn_id[5] = {'right': [0, 1, 2, 3, 4, 5, 6]}  # ego route
-rn_id[5] = {'right': [0]}
+rn_id[5] = {'right': [i for i in range(46)]}
+
+
+def find_dir(link_dict, link_ind):
+	for i in link_dict.keys():
+		for j in link_dict[i]:
+			if link_ind == j:
+				return i
+
 
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
@@ -242,34 +250,45 @@ if __name__ == "__main__":
 
 	with open(path_map + "/src/global_route.pkl", "rb") as f:
 		nodes = pickle.load(f)
-
-	# with open(path_map + "/src/route_parking1.pkl", "rb") as f: #global
-	# 	nodes= pickle.load(f)
-	# with open(path_map + "/src/route_parking2.pkl", "rb") as f: #global
-	# 	nodes= pickle.load(f)
-	# with open(path_map + "/src/route_parking3.pkl", "rb") as f: #global
-	# 	nodes= pickle.load(f)
-	# with open(path_map + "/src/route_parking4.pkl", "rb") as f: #global
-	# 	nodes= pickle.load(f)
-
-	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
+  
+	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
 	# 	nodes = pickle.load(f)
-	# nodes[6]={}
-	# nodes[6]={'x':nodes[0]['x'][600:], 'y':nodes[0]['y'][600:], 's':nodes[0]['s'][600:], 'yaw':nodes[0]['yaw'][600:]}
-	# nodes[5]={}
-	# nodes[5]={'x':nodes[0]['x'][500:600], 'y':nodes[0]['y'][500:600], 's':nodes[0]['s'][500:600], 'yaw':nodes[0]['yaw'][500:600]}
-	# nodes[4]={}
-	# nodes[4]={'x':nodes[0]['x'][400:500], 'y':nodes[0]['y'][400:500], 's':nodes[0]['s'][400:500], 'yaw':nodes[0]['yaw'][400:500]}
-	# nodes[3]={}
-	# nodes[3]={'x':nodes[0]['x'][300:400], 'y':nodes[0]['y'][300:400], 's':nodes[0]['s'][300:400], 'yaw':nodes[0]['yaw'][300:400]}
-	# nodes[2]={}
-	# nodes[2]={'x':nodes[0]['x'][200:300], 'y':nodes[0]['y'][200:300], 's':nodes[0]['s'][200:300], 'yaw':nodes[0]['yaw'][200:300]}
-	# nodes[1]={}
-	# nodes[1]={'x':nodes[0]['x'][100:200], 'y':nodes[0]['y'][100:200], 's':nodes[0]['s'][100:200], 'yaw':nodes[0]['yaw'][100:200]}
-	# nodes[0]['x'] = nodes[0]['x'][:100]
-	# nodes[0]['y'] = nodes[0]['y'][:100]
-	# nodes[0]['s'] = nodes[0]['s'][:100]
-	# nodes[0]['yaw'] = nodes[0]['yaw'][:100]
+
+	nodes[41]={}
+	nodes[40]={}
+	for i in range(39,16,-1):
+		nodes[i+2]=nodes[i]
+	
+	nodes[18]={'x':nodes[16]['x'][215:], 'y':nodes[16]['y'][215:], 's':nodes[16]['s'][215:], 'yaw':nodes[16]['yaw'][215:]}
+	nodes[17]={'x':nodes[16]['x'][165:215], 'y':nodes[16]['y'][165:215], 's':nodes[16]['s'][165:215], 'yaw':nodes[16]['yaw'][165:215]}
+	nodes[16]={'x':nodes[16]['x'][:165], 'y':nodes[16]['y'][:165], 's':nodes[16]['s'][:165], 'yaw':nodes[16]['yaw'][:165]}
+
+	for i in range(41,25,-1):
+		nodes[i+1]=nodes[i]
+	nodes[26]={'x':nodes[25]['x'][45:117], 'y':nodes[25]['y'][45:117], 's':nodes[25]['s'][45:117], 'yaw':nodes[25]['yaw'][45:117]}
+	nodes[25]={'x':nodes[25]['x'][:45], 'y':nodes[25]['y'][:45], 's':nodes[25]['s'][:45], 'yaw':nodes[25]['yaw'][:45]}
+ 
+	for i in range(42,29,-1):
+		nodes[i+2]=nodes[i]
+
+	nodes[31]={'x':nodes[29]['x'][117:], 'y':nodes[29]['y'][117:], 's':nodes[29]['s'][117:], 'yaw':nodes[29]['yaw'][117:]}
+	nodes[30]={'x':nodes[29]['x'][47:117], 'y':nodes[29]['y'][47:117], 's':nodes[29]['s'][47:117], 'yaw':nodes[29]['yaw'][47:117]}
+	nodes[29]={'x':nodes[29]['x'][:47], 'y':nodes[29]['y'][:47], 's':nodes[29]['s'][:47], 'yaw':nodes[29]['yaw'][:47]} ##node 44개
+
+	for i in range(44,32,-1):
+		nodes[i+1]=nodes[i]
+
+	nodes[33]={'x':nodes[32]['x'][118:], 'y':nodes[32]['y'][118:], 's':nodes[32]['s'][118:], 'yaw':nodes[32]['yaw'][118:]}
+	nodes[32]={'x':nodes[32]['x'][:118], 'y':nodes[32]['y'][:118], 's':nodes[32]['s'][:118], 'yaw':nodes[32]['yaw'][:118]} ##node 45
+
+	link_i=-1
+	link_len=[]
+	for i in range(len(nodes)):
+		link_i+=len(nodes[i]["x"])
+		link_len.append(link_i)
+ 
+	link_dir={'straight':[0,1,2,3,4,5,6,10,11,12,14,16,18,21,22,23,24,25,29,31,32,37,38,40,41,42,43,44,45],'left':[7,8,26,27,28,30,33,34],'right':[9,13,15,17,19,20,35,36,39]}
+	dir=[]
  
 	error_icte=0
 	prev_cte =0
@@ -371,15 +390,15 @@ if __name__ == "__main__":
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
 			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-  
+			dir=find_dir(link_dir, link_ind)
 			if my_wp >= (link_len[link_ind]-10):
 				if link_ind==42:
 					link_ind=42
 				else:
 					link_ind+=1
 			# prev_ind = link_ind-2
-			print("현재 링크 번호: "+ str(link_ind))
-  
+			print("현재 링크 번호: "+ str(link_ind)+", 링크 방향: "+str(dir))
+
 			s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 			x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
 			steer = road_yaw - state.yaw
@@ -427,14 +446,14 @@ if __name__ == "__main__":
 		state.yaw=obj_msg.yaw
 		# state.v=obj_msg.v
 		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-
+		dir=find_dir(link_dir, link_ind)
 		if my_wp >= (link_len[link_ind]-10):
 			if link_ind==40:
 				link_ind=40
 			else:
 				link_ind+=1
 		# prev_ind = link_ind-2
-		print("현재 링크 번호: "+ str(link_ind))
+		print("현재 링크 번호: "+ str(link_ind)+", 링크 방향: "+str(dir))
 
 		# if my_wp == 270:
 		# 	with open("/home/nsclmds/a_list.text", "wb") as f:
