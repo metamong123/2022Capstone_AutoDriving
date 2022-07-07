@@ -22,46 +22,42 @@ from std_msgs.msg import Int32MultiArray
 
 def pub_detected(count):
     
-    thresh = 20
+    thresh = 50
     
     delivery_A = [count[0], count[1], count[2]]
     delivery_B = [count[3], count[4], count[5]]
     traffic_sign = [count[6], count[7], count[8], count[9], count[10]]
     detect_else = [count[11], count[12], count[13], count[14], count[15], count[16]]
     B_flag = count[17]
-    B_ypos = [count[18], count[19], count[20]]
+    B_xpos = [count[18], count[19], count[20]]
     
     class_list=["A1", "A2", "A3", "B1", "B2", "B3", "green", "left", "red", "straightleft", "yellow", "person", "car", "uturn", "kidzone", "parking", "stopline"]
-    
-    final_check=Int32MultiArray()
+
     final_check.data = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-    global A_num
-
     # 배달 미션 - A표지판 판별
-    max_A = delivery_A[0]
-    for a in range(len(delivery_A)):
-        if (delivery_A[a] >= max_A):
-            max_A = delivery_A[a]
-            A_num = a
-    if (max_A >= thresh):
-        final_check.data[0] = A_num + 1
-        print(class_list[A_num])
-    else:
-        final_check.data[0] = 0
-    detected_A = A_num
+    if any(d_A != 0 for d_A in delivery_A):
+        max_A = delivery_A[0]
+        for a in range(len(delivery_A)):
+            if (delivery_A[a] >= max_A):
+                max_A = delivery_A[a]
+                A_num = a
+        if (max_A >= thresh):
+            final_check.data[0] = A_num + 1
+        else:
+            final_check.data[0] = 0
+
     #배달 미션 - B표지판 위치를 통해 경로 설정
     if (B_flag == 1):
-        if all(b >= thresh for b in delivery_B):
-            min_B = min(B_ypos)
-            max_B = max(B_ypos)
-            if (B_ypos[A_num] == min_B):
+        if any(b >= thresh for b in delivery_B):
+            min_B = min(B_xpos)
+            max_B = max(B_xpos)
+            if (B_xpos[A_num] == min_B):
                 final_check.data[1] = 1
-            elif (B_ypos[A_num] == max_B):
+            elif (B_xpos[A_num] == max_B):
                 final_check.data[1] = 3
             else:
                 final_check.data[1] = 2
-            print(class_list[A_num + 3])
 
     #신호등 확인
     clearly_sign = traffic_sign[0]
@@ -70,66 +66,73 @@ def pub_detected(count):
             clearly_sign = traffic_sign[t]
             traffic_num = t
     if (clearly_sign >= thresh):
-        final_check.data[2] = traffic_num
-        print(class_list[traffic_num + 6])
+        final_check.data[2] = traffic_num + 1
     else:
         final_check.data[2] = 0
     
     #그 외 객체 판별
-    for i in range(len(detect_else)):
+    for i in range(len(detect_else)-2):
         if (detect_else[i] >= thresh):
             final_check.data[i + 3] = 1
-            print(class_list[i+11])
         else:
             final_check.data[i + 3] = 0
-    
+
     pub_ID = rospy.Publisher('/detect_ID', Int32MultiArray, queue_size=1)
     pub_ID.publish(final_check)
 
 
 def BoundingBoxes_callback(data):
     
-    now = time.gmtime(time.time())
-    sec = now.tm_sec
-    
     number = len(data.bounding_boxes)
     for i in range(number):
         class_id = data.bounding_boxes[i].id
+        class_name = data.bounding_boxes[i].Class
         xmin = data.bounding_boxes[i].xmin
         xmax = data.bounding_boxes[i].xmax
         ymin = data.bounding_boxes[i].ymin
         ymax = data.bounding_boxes[i].ymax
 
         #정확도 판별
-        if (data.bounding_boxes[i].probability > 0.5):
+        if (data.bounding_boxes[i].probability > 0.8):
             #신호등 인식 범위 지정
             if(class_id >= 6 and class_id <= 10):
-                if(xmin >= 100 and xmax <= 540):
+                if(xmin >= 200 and xmax <= 440):
                     detected_count[class_id] += 1
                     detected_time[class_id] = sec
+            elif class_id == 15:
+                if class_name == "parking":
+                    detected_count[class_id] += 1
+                    detected_time[class_id] = sec
+                elif class_name == "stopline":
+                    detected_count[class_id+1] += 1
+                    detected_time[class_id+1] = sec
             else:
                 detected_count[class_id] += 1
                 detected_time[class_id] = sec
                 #B 표지판 정보 저장
                 if (class_id >= 3 and class_id <= 5):
                     detected_count[17] = 1
-                    detected_count[class_id + 15] = ymin
-    #객체가 더이상 없다고 판단할 시간 설정
-    for i in range(6,len(detected_time)):
-        if (sec - detected_time[i] >= 3):
-            detected_count[i] = 0
-
-    pub_detected(detected_count)
+                    B_xpos=[0,0,0]
+                    B_xpos[class_id-3] = max(B_xpos[class_id-3],xmin)
+                    detected_count[class_id + 15] = B_xpos[class_id-3]
+                if all(detected_count[i] == 0 for i in range(3,6)):
+                    detected_count[17] = 0
+            print(str(class_id) + class_name + " - xmin : " + str(xmin) + " ymin : " + str(ymin))
 
 
 if __name__ == '__main__':
     
-    global pub_sign, detected_count, detected_time
+    global pub_sign, detected_count, detected_time, final_check, now, sec, A_num, B_flag
     
     detected_count = np.zeros(21, dtype=int)
     detected_time = np.zeros(17)
     for i in range(17):
         detected_time[i] = time.time()
+
+    A_num = 0
+
+    final_check=Int32MultiArray()
+    final_check.data = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     
     rospy.init_node('obj_ID', anonymous=True)
     rospy.Subscriber("/camera1/darknet_ros/bounding_boxes", BoundingBoxes, BoundingBoxes_callback)
@@ -144,9 +147,18 @@ if __name__ == '__main__':
 # int16 id
 # string Class
 # =============================================================================
-    
+
     while (True):
         try:
-            pass
+            now = time.gmtime(time.time())
+            sec = now.tm_sec
+
+	    #객체가 더이상 없다고 판단할 시간 설정
+            for i in range(3,len(detected_time)):
+                if (sec - detected_time[i] >= 3):
+                    detected_count[i] = 0
+
+            pub_detected(detected_count)
+
         except rospy.ROSInterruptException:
             pass

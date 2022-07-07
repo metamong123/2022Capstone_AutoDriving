@@ -5,9 +5,10 @@ import rospy
 from ackermann_msgs.msg import AckermannDriveStamped
 from std_msgs.msg import Int32MultiArray, Float64
 
-global car_mode, move_mode
+global car_mode, move_mode, dir_mode
 car_mode = 'default'
 move_mode = 'default'
+dir_mode = 'default'
 frenet_speed = 0
 frenet_angle = 0 
 frenet_gear = 0
@@ -118,7 +119,7 @@ if __name__=='__main__':
    while not rospy.is_shutdown():
       car_mode = rospy.get_param('car_mode')
       move_mode = rospy.get_param('move_mode')
-
+      dir_mode = rospy.get_param('dir_mode')
       if car_mode == 'global':
          if person == 1: # dynamic obstacles
             cmd.drive.speed = 0

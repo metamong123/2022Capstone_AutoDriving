@@ -143,6 +143,7 @@ contrastive_layer make_contrastive_layer(int batch, int w, int h, int c, int cla
         l.detection = 1;
         l.max_boxes = yolo_layer->max_boxes;
         l.labels = yolo_layer->labels;  // track id
+        l.class_ids = yolo_layer->class_ids;  // class_ids
         l.n = yolo_layer->n;            // num of embeddings per cell = num of anchors
         l.classes = yolo_layer->classes;// num of classes
         classes = l.classes;
@@ -313,6 +314,8 @@ void forward_contrastive_layer(contrastive_layer l, network_state state)
                                     const int z_index2 = b2*l.n*l.h*l.w + n2*l.h*l.w + h2*l.w + w2;
                                     if (l.labels[z_index2] < 0) continue;
                                     if (z_index == z_index2) continue;
+                                    if (l.detection)
+                                        if (l.class_ids[z_index] != l.class_ids[z_index2]) continue;
 
                                     const int time_step_i = b / mini_batch;
                                     const int time_step_j = b2 / mini_batch;
@@ -452,6 +455,8 @@ void forward_contrastive_layer(contrastive_layer l, network_state state)
                                         const int z_index2 = b2*l.n*l.h*l.w + n2*l.h*l.w + h2*l.w + w2;
                                         if (l.labels[z_index2] < 0) continue;
                                         if (z_index == z_index2) continue;
+                                        if (l.detection)
+                                            if (l.class_ids[z_index] != l.class_ids[z_index2]) continue;
 
                                         const int time_step_i = b / mini_batch;
                                         const int time_step_j = b2 / mini_batch;
@@ -493,27 +498,28 @@ void forward_contrastive_layer(contrastive_layer l, network_state state)
 
 
     // calc deltas
+    int bd = 0;
     #pragma omp parallel for
-    for (b = 0; b < l.batch; ++b) {
-        for (n = 0; n < l.n; ++n) {
-            for (h = 0; h < l.h; ++h) {
-                for (w = 0; w < l.w; ++w)
+    for (bd = 0; bd < l.batch; ++bd) {
+        for (int nd = 0; nd < l.n; ++nd) {
+            for (int hd = 0; hd < l.h; ++hd) {
+                for (int wd = 0; wd < l.w; ++wd)
                 {
-                    const int z_index = b*l.n*l.h*l.w + n*l.h*l.w + h*l.w + w;
+                    const int z_index = bd*l.n*l.h*l.w + nd*l.h*l.w + hd*l.w + wd;
                     const size_t step = l.batch*l.n*l.h*l.w;
                     if (l.labels[z_index] < 0) continue;
 
-                    const int delta_index = b*l.embedding_size*l.n*l.h*l.w + n*l.embedding_size*l.h*l.w + h*l.w + w;
+                    const int delta_index = bd*l.embedding_size*l.n*l.h*l.w + nd*l.embedding_size*l.h*l.w + hd*l.w + wd;
                     const int wh = l.w*l.h;
 
                     if (l.detection) {
                         // detector
 
                         // positive
-                        grad_contrastive_loss_positive_f(z_index, l.labels, step, z, l.embedding_size, l.temperature, l.delta + delta_index, wh, contrast_p, contr_size);
+                        grad_contrastive_loss_positive_f(z_index, l.class_ids, l.labels, step, z, l.embedding_size, l.temperature, l.delta + delta_index, wh, contrast_p, contr_size);
 
                         // negative
-                        grad_contrastive_loss_negative_f(z_index, l.labels, step, z, l.embedding_size, l.temperature, l.delta + delta_index, wh, contrast_p, contr_size);
+                        grad_contrastive_loss_negative_f(z_index, l.class_ids, l.labels, step, z, l.embedding_size, l.temperature, l.delta + delta_index, wh, contrast_p, contr_size, l.contrastive_neg_max);
                     }
                     else {
                         // classifier

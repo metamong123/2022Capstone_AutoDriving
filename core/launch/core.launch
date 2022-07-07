@@ -1,4 +1,5 @@
 <launch>
+	<rosparam file="/home/mds/catkin_ws/src/2022Capstone_AutoDriving/core/config/dir_mode.yaml" command="load" />
 	<param name="move_mode" type="string" value="default" />
 	<param name="car_mode" type="string" value="global" />
 	<param name="delivery_mode" type="string" value="default" />

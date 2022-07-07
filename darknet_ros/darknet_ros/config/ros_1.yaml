@@ -1,7 +1,7 @@
 subscribers:
 
   camera_reading:
-    topic: /camera1/usb_cam_1/image_raw
+    topic: /camera1/usb_cam/image_raw
     queue_size: 1
 
 actions:
