@@ -12,3 +12,4 @@
 	<?ignore <node name="core_control" pkg="core" type="core_based_stopline_qualifier.py" output="screen"/> ?>
 </launch>
  
+ rospy.set_param('~/.yaml',)
