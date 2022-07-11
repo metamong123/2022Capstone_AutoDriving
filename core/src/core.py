@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
+from rocon_std_msgs.msg import StringArray 
 from ackermann_msgs.msg import AckermannDriveStamped
 
 global car_mode, move_mode

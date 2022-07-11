@@ -364,31 +364,31 @@ if __name__ == "__main__":
 	nodes['parking'][11]=nodes['parking'][10]
  
  
-	with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking1.pkl", "rb") as f: #parking
+	with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking1.pkl", "rb") as f: #parking
 		nodes['parking']= pickle.load(f)
 	nodes['parking'][1]={}
 	nodes['parking'][1]=nodes['parking'][0]
-	with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking2.pkl", "rb") as f: #parking
+	with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking2.pkl", "rb") as f: #parking
 		park_2= pickle.load(f)
 		nodes['parking'][2]=park_2[0]
 	nodes['parking'][3]={}
 	nodes['parking'][3]=nodes['parking'][2]
-	with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking3.pkl", "rb") as f: #parking
+	with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking3.pkl", "rb") as f: #parking
 		park_4= pickle.load(f)
 		nodes['parking'][4]=park_4[0]
 	nodes['parking'][5]={}
 	nodes['parking'][5]=nodes['parking'][4]
-	with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking4.pkl", "rb") as f: #parking
+	with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking4.pkl", "rb") as f: #parking
 		park_6= pickle.load(f)
 		nodes['parking'][6]=park_6[0]
 	nodes['parking'][7]={}
 	nodes['parking'][7]=nodes['parking'][6]
-	with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking5.pkl", "rb") as f: #parking
+	with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking5.pkl", "rb") as f: #parking
 		park_8= pickle.load(f)
 		nodes['parking'][8]=park_8[0]
 	nodes['parking'][9]={}
 	nodes['parking'][9]=nodes['parking'][8]
-	with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking6.pkl", "rb") as f: #parking
+	with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking6.pkl", "rb") as f: #parking
 		park_10= pickle.load(f)
 		nodes['parking'][10]=park_10[0]
 	nodes['parking'][11]={}
