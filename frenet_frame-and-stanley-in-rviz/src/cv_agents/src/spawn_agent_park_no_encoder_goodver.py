@@ -17,6 +17,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Quaternion
 from object_msgs.msg import Object, ObjectArray
 from std_msgs.msg import String
+from rocon_std_msgs.msg import StringArray
 
 import pickle
 import argparse
@@ -173,6 +174,13 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 		"quaternion": quat,
 		"ackermann_msg" : c
 	}
+ 
+def mode_array(car_mode, move_mode, current_dir, next_dir):
+	m = StringArray()
+	# current_dir=dir_mode[0]
+	# next_dir=dir_mode[1]
+	m.strings=[car_mode, move_mode, current_dir, next_dir]
+	return m
 
 #obs_init1 = Object(x=1, y=11, yaw=1, L=4, W=5)
 #obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)
@@ -274,7 +282,10 @@ if __name__ == "__main__":
 	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
 	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
 	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
-	rospy.set_param('move_mode', 'global')
+	# car_mode_pub=rospy.Publisher("/car_mode", String, queue_size=1)
+	# move_mode_pub=rospy.Publisher("/move_mode", String, queue_size=1)
+	mode_pub=rospy.Publisher("/mode_selector", StringArray, queue_size=1)
+	# rospy.set_param('move_mode', 'global')
 	start_node_id = args.route
 	route_id_list = rn_id[start_node_id][args.dir]
 
@@ -487,7 +498,8 @@ if __name__ == "__main__":
 	my_wp={'global':0,'parking':0}
 	#my_wp = get_closest_waypoints(state.x, state.y, mapx[:100], mapy[:100],my_wp)
 	mode='global' ### global인지 parking인지 subscribe 한다고 치면..
-	rospy.set_param('car_mode', mode)
+	move_mode='forward'
+	# rospy.set_param('car_mode', move_mode)
 	my_wp[mode] = get_closest_waypoints(state.x, state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
 	prev_v = state.v
 	error_ia = 0
@@ -495,9 +507,19 @@ if __name__ == "__main__":
 	ai = 0
 
 	if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
-		rospy.set_param('move_mode', 'finish')
-		print("finish!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+		# rospy.set_param('move_mode', 'finish')
+		move_mode='finish'
+		print("finish!")
+		fin_wp=[my_wp[mode], link_ind[mode]+1]
 		link_ind[mode]+=1
+
+	if fin_wp == [my_wp[mode], link_ind[mode]]:
+		move_mode='finish'
+	else:
+		move_mode='forward'
+		
+	mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
+
 	# if (fin_wp!=0) and (fin_wp != my_wp[mode])and (mode!='parking'):
 	# 	rospy.set_param('move_mode', 'forward')
 	# 	fin_wp=0
@@ -537,7 +559,7 @@ if __name__ == "__main__":
 		# 	rospy.set_param('move_mode', 'forward')
 		# elif (mode=='parking') & ((link_ind[mode]==1)or(link_ind[mode]==3)or(link_ind[mode]==5)or(link_ind[mode]==7)):
 		# 	rospy.set_param('move_mode', 'backward')
-		if (mode == 'global') and ((my_wp[mode] >= 245) and (my_wp[mode] < 250)): ################parking mode 시작 웨이포인트 넣기
+		if (mode == 'global') and ((my_wp[mode] >= 169) and (my_wp[mode] < 173)): ################parking mode 시작 웨이포인트 넣기
 			# print("11111!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			prev_park_ind=0
 			for park_i in range(0,5,2):
@@ -560,11 +582,14 @@ if __name__ == "__main__":
 					# state = State(x=mapx['parking'][ind], y=mapy['parking'][ind], yaw=mapyaw['parking'][ind], v=1, dt=0.1)
 					print("choose: "+str(park_i))
 					mode='parking'
-					rospy.set_param('car_mode', mode)
+					# rospy.set_param('car_mode', mode)
+					mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 					break
 		if (mode=="parking"):
 			if (link_ind[mode]%2==0) and ((my_wp[mode]>=10) and (my_wp[mode]<23)):
-				rospy.set_param('move_mode', 'forward')
+				move_mode='forward'
+				# mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
+				# rospy.set_param('move_mode', 'forward')
 			# elif (link_ind[mode]%2==1) and (my_wp[mode]==23):
 			# 	rospy.set_param('move_mode', 'backward')
 
@@ -572,6 +597,7 @@ if __name__ == "__main__":
 			path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]], maps[mode][park_i][:link_len[mode][park_i]], opt_d, target_speed[mode])
 		else:
 			path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode], mapy[mode], maps[mode], opt_d, target_speed[mode])
+		
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
 			if mode =='parking':
@@ -579,46 +605,40 @@ if __name__ == "__main__":
 			else:
 				my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
 				dir=find_dir(link_dir, link_ind[mode])
-			# if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
-			# 	if link_ind[mode]==len(link_len[mode]):
-			# 		rospy.set_param('move_mode', 'finish')
-			# 		link_ind[mode]=len(link_len[mode])
-			# 	elif mode=='parking' and ((link_ind['parking']==1)or(link_ind['parking']==3)or(link_ind['parking']==5)or(link_ind['parking']==7)):
-			# 		rospy.set_param('move_mode', 'finish')
-			# 		mode = 'global'
-			# 		rospy.set_param('car_mode', mode)
-			# 	else:
-			# 		rospy.set_param('move_mode', 'finish')
-			# 		link_ind[mode]+=1
+			
 			if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
-				if link_ind[mode]==len(link_len[mode]):
-					rospy.set_param('move_mode', 'finish')
-					fin_wp = my_wp[mode]
+				if link_ind[mode]==len(link_len[mode]): #마지막 링크일때
+					# rospy.set_param('move_mode', 'finish')
+					move_mode='finish'
+					fin_wp = [my_wp[mode], link_ind[mode]]
 					link_ind[mode]=len(link_len[mode])
-				elif ((mode=='parking') and (link_ind['parking']%2==1)):
-					rospy.set_param('move_mode', 'finish')
-					fin_wp = my_wp[mode]
+				elif ((mode=='parking') and (link_ind['parking']%2==1)): #parking 후진의 마지막 waypoint
+					move_mode='finish'
+					print("parking finish!")
+					my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
+					fin_wp = [my_wp['global'], link_ind['global']]
 					mode = 'global'
-					rospy.set_param('car_mode', mode)
-				# elif (mode == 'parking') and (link_ind['parking']%2==0):
-				# 	if (my_wp[mode]==15):
-				# 		rospy.set_param('move_mode', 'finish')
-				# 		print("finish!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-				# 		fin_wp = my_wp[mode]
-				# 		link_ind[mode]+=1
 				else:
-					rospy.set_param('move_mode', 'finish')
-					print("finish!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-					fin_wp = my_wp[mode]
+					move_mode='finish'
+					print("finish!")
+					fin_wp=[my_wp[mode], link_ind[mode]+1]
 					link_ind[mode]+=1
 			elif (mode == 'parking') and (link_ind['parking']%2==0) and (my_wp[mode]==23):
-				rospy.set_param('move_mode', 'finish')
+				move_mode='finish'
 				print("finish!")
+				fin_wp=[my_wp[mode], link_ind[mode]+1]
 				link_ind[mode]+=1
+
+			if fin_wp == [my_wp[mode], link_ind[mode]]:
+				move_mode='finish'
+			else:
+				move_mode='forward'
+
+			mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 
 			prev_ind = link_ind[mode]-2
 			# rospy.set_param('dir_mode', [dir, find_dir(link_dir, (link_ind[mode]+1))])
-			rospy.set_param('dir_mode', [dir, find_dir(link_dir, (link_ind[mode]+1))])
+			# rospy.set_param('dir_mode', [dir, find_dir(link_dir, (link_ind[mode]+1))])
 			print("현재 링크 번호: "+ str(link_ind[mode])+", mode: "+str(mode)+", 링크 방향: "+str(dir))
 			# if (fin_wp!=0) and (fin_wp != my_wp[mode]) and (mode!='parking'):
 			# 	rospy.set_param('move_mode', 'forward')
@@ -687,36 +707,41 @@ if __name__ == "__main__":
 			dir=find_dir(link_dir, link_ind[mode])
 
 		if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
-			if link_ind[mode]==len(link_len[mode]):
-				rospy.set_param('move_mode', 'finish')
-				fin_wp = my_wp[mode]
+			if link_ind[mode]==len(link_len[mode]): #마지막 링크일때
+				# rospy.set_param('move_mode', 'finish')
+				move_mode='finish'
+				fin_wp = [my_wp[mode], link_ind[mode]]
 				link_ind[mode]=len(link_len[mode])
-			elif mode=='parking' and (link_ind['parking']%2==1):
-				rospy.set_param('move_mode', 'finish')
-				fin_wp = my_wp[mode]
+			elif ((mode=='parking') and (link_ind['parking']%2==1)): #parking 후진의 마지막 waypoint
+				move_mode='finish'
+				print("parking finish!")
+				my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
+				fin_wp = [my_wp['global'], link_ind['global']]
 				mode = 'global'
-				rospy.set_param('car_mode', mode)
-			elif (mode == 'parking') and (link_ind['parking']%2==0):
-				if (my_wp[mode]==23):
-					rospy.set_param('move_mode', 'finish')
-					print("finish!")
-					fin_wp = my_wp[mode]
-					link_ind[mode]+=1
 			else:
-				rospy.set_param('move_mode', 'finish')
-				fin_wp = my_wp[mode]
+				move_mode='finish'
+				print("finish!")
+				fin_wp=[my_wp[mode], link_ind[mode]+1]
 				link_ind[mode]+=1
 		elif (mode == 'parking') and (link_ind['parking']%2==0) and (my_wp[mode]==23):
-			rospy.set_param('move_mode', 'finish')
+			move_mode='finish'
 			print("finish!")
+			fin_wp=[my_wp[mode], link_ind[mode]+1]
 			link_ind[mode]+=1
+
+		if fin_wp == [my_wp[mode], link_ind[mode]]:
+			move_mode='finish'
+		else:
+			move_mode='forward'
+
+		mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 
 		# if (fin_wp!=0) and (fin_wp != my_wp[mode]) and (mode!='parking'):
 		# 	rospy.set_param('move_mode', 'forward')
 		# 	fin_wp=0
 		# prev_ind = link_ind[mode]-2
 
-		rospy.set_param('dir_mode', [dir, find_dir(link_dir, (link_ind[mode]+1))])
+		# rospy.set_param('dir_mode', [dir, find_dir(link_dir, (link_ind[mode]+1))])
 		# rospy.set_param('dir_mode', [dir, find_dir(link_dir, (link_ind[mode]+1))])
 		print("현재 링크 번호: "+ str(link_ind[mode])+", mode: "+str(mode)+", 링크 방향: "+str(dir))
 
@@ -779,5 +804,6 @@ if __name__ == "__main__":
 		opt_frenet_pub.publish(opt_frenet_path.ma)
 		cand_frenet_pub.publish(cand_frenet_paths.ma)
 		control_pub.publish(msg)
+		mode_pub.publish(mode_msg)
 
 		r.sleep()
