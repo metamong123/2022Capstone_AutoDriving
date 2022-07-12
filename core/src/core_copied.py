@@ -26,6 +26,7 @@ uturnsign = 0
 kidzonesign = 0
 parkingsign = 0
 stopline = 0
+assist_steer=0
 
 def mode_selector_callback(msg):
     global mode_selector, car_mode, move_mode, cur_dir_mode, next_dir_mode
@@ -35,7 +36,7 @@ def mode_selector_callback(msg):
     move_mode = mode_selector[1]
     cur_dir_mode = mode_selector[2]
     next_dir_mode = mode_selector[3]
-    print("car_mode = ",car_mode, "move_mode = ", move_mode, "cur_dir_mode = ", cur_dir_mode, "next_dir_mode = ", next_dir_mode)
+    #print("car_mode = ",car_mode, "move_mode = ", move_mode, "cur_dir_mode = ", cur_dir_mode, "next_dir_mode = ", next_dir_mode)
 
 def lanenet_callback(msg):
     global assist_steer
@@ -63,19 +64,19 @@ def parking_decision():
         parking_angle = frenet_angle
         parking_gear = frenet_gear
         parking_brake = 0
-        print('parking mode forward!!!')
+        #print('parking mode forward!!!')
     elif move_mode == 'finish':
-        parking_speed = backward_speed
+        parking_speed = 0#backward_speed
         parking_angle = backward_angle
         parking_gear = backward_gear
         parking_brake = 200 #backward_brake
-        print('parking finish!!! stop!!')
+        #print('parking finish!!! stop!!')
     elif move_mode == 'backward':
         parking_speed = backward_speed
         parking_angle = backward_angle
         parking_gear = backward_gear
         parking_brake = backward_brake
-        print('parking mode backward!!!')
+        #print('parking mode backward!!!')
     return parking_speed, parking_angle, parking_gear, parking_brake
 
 def yolo_callback(msg):
@@ -140,15 +141,12 @@ if __name__=='__main__':
 
     rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
     rospy.Subscriber("/ackermann_cmd_parking_backward",AckermannDriveStamped,parking_callback)
-    rospy.Subscriber("/mode_selector",StringArray,mode_selector_callback,queue_size=5)
+    rospy.Subscriber("/mode_selector",StringArray,mode_selector_callback)
     rospy.Subscriber("/detect_ID", Int32MultiArray, yolo_callback)
     rospy.Subscriber("/assist_steer",Float64,lanenet_callback)
     cmd=AckermannDriveStamped()
-
     final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
-
     while not rospy.is_shutdown():
-
         if car_mode == 'global':
             if move_mode == 'finish':
                 cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = traffic_decision()
@@ -161,7 +159,11 @@ if __name__=='__main__':
 
         elif car_mode == 'parking':
             cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = parking_decision()
+            print(cmd.drive.jerk)
+            final_cmd_Pub.publish(cmd)
 
-
+        rospy.sleep(0.1)
         final_cmd_Pub.publish(cmd)
+
+
 

@@ -255,7 +255,7 @@ if __name__ == "__main__":
 	a_list=[]
 	v_list=[]
 	steer_list=[]
-	fin_wp = 0
+	fin_wp = [0,0]
 	obs_wp=0
 	parser = argparse.ArgumentParser(description='Spawn a CV agent')
 
@@ -349,16 +349,16 @@ if __name__ == "__main__":
 	nodes['global'][0]['s'] = nodes['global'][0]['s'][:300]
 	nodes['global'][0]['yaw'] = nodes['global'][0]['yaw'][:300]
  
-	with open(path_map + "/src/frontier/parking1.pkl", "rb") as f: #parking
+	with open(path_map + "/src/frontier/route_parking1.pkl", "rb") as f: #parking
 		nodes['parking']= pickle.load(f)
 	nodes['parking'][1]={}
 	nodes['parking'][1]=nodes['parking'][0]
-	with open(path_map + "/src/frontier/parking2.pkl", "rb") as f: #parking
+	with open(path_map + "/src/frontier/route_parking2.pkl", "rb") as f: #route_
 		park_2= pickle.load(f)
 		nodes['parking'][2]=park_2[0]
 	nodes['parking'][3]={}
 	nodes['parking'][3]=nodes['parking'][2]
-	with open(path_map + "/src/frontier/parking3.pkl", "rb") as f: #parking
+	with open(path_map + "/src/frontier/route_parking3.pkl", "rb") as f: #parking
 		park_4= pickle.load(f)
 		nodes['parking'][4]=park_4[0]
 	nodes['parking'][5]={}
@@ -578,7 +578,7 @@ if __name__ == "__main__":
 		# 	rospy.set_param('move_mode', 'forward')
 		# elif (mode=='parking') & ((link_ind[mode]==1)or(link_ind[mode]==3)or(link_ind[mode]==5)or(link_ind[mode]==7)):
 		# 	rospy.set_param('move_mode', 'backward')
-		if (mode == 'global') and ((my_wp[mode] >= 169) and (my_wp[mode] < 173)): ################parking mode 시작 웨이포인트 넣기
+		if (mode == 'global') and ((my_wp[mode] >= 240) and (my_wp[mode] < 250)): ################parking mode 시작 웨이포인트 넣기
 			# print("11111!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			prev_park_ind=0
 			for park_i in range(0,5,2):
@@ -600,13 +600,17 @@ if __name__ == "__main__":
 					link_ind['parking']=park_i
 					# state = State(x=mapx['parking'][ind], y=mapy['parking'][ind], yaw=mapyaw['parking'][ind], v=1, dt=0.1)
 					print("choose: "+str(park_i))
-					mode='parking'
+					move_mode='finish'
+					fin_wp == [my_wp['parking'], link_ind['parking']]
 					# rospy.set_param('car_mode', mode)
 					mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
+					mode='parking'
 					break
 		if (mode=="parking"):
 			if (link_ind[mode]%2==0) and ((my_wp[mode]>=10) and (my_wp[mode]<23)):
 				move_mode='forward'
+		# elif mode == 'parking' and 
+		# 		move_mode='forward'
 				# mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 				# rospy.set_param('move_mode', 'forward')
 			# elif (link_ind[mode]%2==1) and (my_wp[mode]>=23):
@@ -647,9 +651,17 @@ if __name__ == "__main__":
 				print("finish!")
 				fin_wp=[my_wp[mode], link_ind[mode]+1]
 				link_ind[mode]+=1
+			# elif (mode == 'parking') and (link_ind['parking']%2==0) and (my_wp[mode]>=23):
+			# 	move_mode='finish'
+			# 	print("finish!")
+			# 	fin_wp=[my_wp[mode], link_ind[mode]+1]
+			# 	link_ind[mode]+=1
 
 			if fin_wp == [my_wp[mode], link_ind[mode]]:
 				move_mode='finish'
+			elif (mode == 'parking') and (fin_wp[0] <= my_wp[mode]):
+				if my_wp[mode] < 10:
+					move_mode='finish'
 			else:
 				move_mode='forward'
 
@@ -748,8 +760,11 @@ if __name__ == "__main__":
 			fin_wp=[my_wp[mode], link_ind[mode]+1]
 			link_ind[mode]+=1
 
-		if fin_wp == [my_wp[mode], link_ind[mode]]:
+		if (fin_wp == [my_wp[mode], link_ind[mode]]):
 			move_mode='finish'
+		elif (mode == 'parking') and (fin_wp[0] <= my_wp[mode]):
+				if my_wp[mode] < 10:
+					move_mode='finish'
 		else:
 			move_mode='forward'
 
