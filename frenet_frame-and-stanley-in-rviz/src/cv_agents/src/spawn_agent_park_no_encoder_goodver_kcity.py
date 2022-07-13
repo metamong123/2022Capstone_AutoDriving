@@ -331,100 +331,91 @@ if __name__ == "__main__":
 
 	link_dir={'straight':[0,1,2,3,4,5,6,10,11,12,14,16,18,21,22,23,24,25,29,31,32,37,38,40,41,42,43,44,45],'left':[7,8,26,27,28,30,33,34],'right':[9,13,15,17,19,20,35,36,39]}
 	dir=[]
- 
- 
-	with open(path_map + "/src/kcity/parking1.pkl", "rb") as f: #parking
-		nodes['parking']= pickle.load(f)
-	nodes['parking'][1]={}
-	nodes['parking'][1]=nodes['parking'][0]
-	with open(path_map + "/src/kcity/parking2.pkl", "rb") as f: #parking
-		park_2= pickle.load(f)
-		nodes['parking'][2]=park_2[0]
-	nodes['parking'][3]={}
-	nodes['parking'][3]=nodes['parking'][2]
+
+
+	
 	with open(path_map + "/src/kcity/parking3.pkl", "rb") as f: #parking
 		park_4= pickle.load(f)
-		nodes['parking'][4]=park_4[0]
-	nodes['parking'][5]={}
-	nodes['parking'][5]=nodes['parking'][4]
-	with open(path_map + "/src/kcity/parking4.pkl", "rb") as f: #parking
-		park_6= pickle.load(f)
-		nodes['parking'][6]=park_6[0]
-	nodes['parking'][7]={}
-	nodes['parking'][7]=nodes['parking'][6]
-	with open(path_map + "/src/kcity/parking5.pkl", "rb") as f: #parking
-		park_8= pickle.load(f)
-		nodes['parking'][8]=park_8[0]
-	nodes['parking'][9]={}
-	nodes['parking'][9]=nodes['parking'][8]
-	with open(path_map + "/src/kcity/parking6.pkl", "rb") as f: #parking
-		park_10= pickle.load(f)
-		nodes['parking'][10]=park_10[0]
-	nodes['parking'][11]={}
-	nodes['parking'][11]=nodes['parking'][10]
- 
- 
-<<<<<<< Updated upstream:frenet_frame-and-stanley-in-rviz/src/cv_agents/src/spawn_agent_park_no_encoder_goodver.py
-	with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking1.pkl", "rb") as f: #parking
-		nodes['parking']= pickle.load(f)
+		nodes['parking'][0]=park_4[0]
 	nodes['parking'][1]={}
 	nodes['parking'][1]=nodes['parking'][0]
-	with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking2.pkl", "rb") as f: #parking
-		park_2= pickle.load(f)
-		nodes['parking'][2]=park_2[0]
+	with open(path_map + "/src/kcity/parking4.pkl", "rb") as f: #parking
+		park_6= pickle.load(f)
+		nodes['parking'][2]=park_6[0]
 	nodes['parking'][3]={}
 	nodes['parking'][3]=nodes['parking'][2]
-	with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking3.pkl", "rb") as f: #parking
-		park_4= pickle.load(f)
-		nodes['parking'][4]=park_4[0]
+	with open(path_map + "/src/kcity/parking5.pkl", "rb") as f: #parking
+		park_8= pickle.load(f)
+		nodes['parking'][4]=park_8[0]
 	nodes['parking'][5]={}
 	nodes['parking'][5]=nodes['parking'][4]
-	with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking4.pkl", "rb") as f: #parking
-		park_6= pickle.load(f)
-		nodes['parking'][6]=park_6[0]
+	with open(path_map + "/src/kcity/parking6.pkl", "rb") as f: #parking
+		park_10= pickle.load(f)
+		nodes['parking'][6]=park_10[0]
 	nodes['parking'][7]={}
 	nodes['parking'][7]=nodes['parking'][6]
-	with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking5.pkl", "rb") as f: #parking
-		park_8= pickle.load(f)
-		nodes['parking'][8]=park_8[0]
-	nodes['parking'][9]={}
-	nodes['parking'][9]=nodes['parking'][8]
-	with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking6.pkl", "rb") as f: #parking
-		park_10= pickle.load(f)
-		nodes['parking'][10]=park_10[0]
-	nodes['parking'][11]={}
-	nodes['parking'][11]=nodes['parking'][10]
-=======
-	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking1.pkl", "rb") as f: #parking
+
+ 
+	# with open(path_map + "/src/kcity/parking1.pkl", "rb") as f: #parking
 	# 	nodes['parking']= pickle.load(f)
 	# nodes['parking'][1]={}
 	# nodes['parking'][1]=nodes['parking'][0]
-	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking2.pkl", "rb") as f: #parking
+	# with open(path_map + "/src/kcity/parking2.pkl", "rb") as f: #parking
 	# 	park_2= pickle.load(f)
 	# 	nodes['parking'][2]=park_2[0]
 	# nodes['parking'][3]={}
 	# nodes['parking'][3]=nodes['parking'][2]
-	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking3.pkl", "rb") as f: #parking
+	# with open(path_map + "/src/kcity/parking3.pkl", "rb") as f: #parking
 	# 	park_4= pickle.load(f)
 	# 	nodes['parking'][4]=park_4[0]
 	# nodes['parking'][5]={}
 	# nodes['parking'][5]=nodes['parking'][4]
-	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking4.pkl", "rb") as f: #parking
+	# with open(path_map + "/src/kcity/parking4.pkl", "rb") as f: #parking
 	# 	park_6= pickle.load(f)
 	# 	nodes['parking'][6]=park_6[0]
 	# nodes['parking'][7]={}
 	# nodes['parking'][7]=nodes['parking'][6]
-	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking5.pkl", "rb") as f: #parking
+	# with open(path_map + "/src/kcity/parking5.pkl", "rb") as f: #parking
 	# 	park_8= pickle.load(f)
 	# 	nodes['parking'][8]=park_8[0]
 	# nodes['parking'][9]={}
 	# nodes['parking'][9]=nodes['parking'][8]
-	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking6.pkl", "rb") as f: #parking
+	# with open(path_map + "/src/kcity/parking6.pkl", "rb") as f: #parking
 	# 	park_10= pickle.load(f)
 	# 	nodes['parking'][10]=park_10[0]
 	# nodes['parking'][11]={}
 	# nodes['parking'][11]=nodes['parking'][10]
->>>>>>> Stashed changes:frenet_frame-and-stanley-in-rviz/src/cv_agents/src/spawn_agent_park_no_encoder_goodver_kcity.py
+ 
+ 
+	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking1.pkl", "rb") as f: #parking
+	# 	nodes['parking']= pickle.load(f)
+	# nodes['parking'][1]={}
+	# nodes['parking'][1]=nodes['parking'][0]
+	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking2.pkl", "rb") as f: #parking
+	# 	park_2= pickle.load(f)
+	# 	nodes['parking'][2]=park_2[0]
+	# nodes['parking'][3]={}
+	# nodes['parking'][3]=nodes['parking'][2]
+	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking3.pkl", "rb") as f: #parking
+	# 	park_4= pickle.load(f)
+	# 	nodes['parking'][4]=park_4[0]
+	# nodes['parking'][5]={}
+	# nodes['parking'][5]=nodes['parking'][4]
+	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking4.pkl", "rb") as f: #parking
+	# 	park_6= pickle.load(f)
+	# 	nodes['parking'][6]=park_6[0]
+	# nodes['parking'][7]={}
+	# nodes['parking'][7]=nodes['parking'][6]
+	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking5.pkl", "rb") as f: #parking
+	# 	park_8= pickle.load(f)
+	# 	nodes['parking'][8]=park_8[0]
+	# nodes['parking'][9]={}
+	# nodes['parking'][9]=nodes['parking'][8]
+	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking6.pkl", "rb") as f: #parking
+	# 	park_10= pickle.load(f)
+	# 	nodes['parking'][10]=park_10[0]
+	# nodes['parking'][11]={}
+	# nodes['parking'][11]=nodes['parking'][10]
  
 
 
@@ -450,9 +441,12 @@ if __name__ == "__main__":
 
 
 	link_ind={'global':0, 'parking':0}
-	wx = {'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
-	wy = {'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
-	wyaw = {'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
+	wx = {'global':[],'parking':{0:[],2:[],4:[],6:[]}}
+	wy = {'global':[],'parking':{0:[],2:[],4:[],6:[]}}
+	wyaw = {'global':[],'parking':{0:[],2:[],4:[],6:[]}}
+	# wx = {'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
+	# wy = {'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
+	# wyaw = {'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
 
 	for i in nodes.keys():
 		for _id in nodes[i].keys():
@@ -470,7 +464,8 @@ if __name__ == "__main__":
 				wy[i].append(nodes[i][_id]["y"][1:])
 				wyaw[i].append(nodes[i][_id]["yaw"][1:])
 		if i == 'parking':
-			for j in range(0, 11, 2):
+			# for j in range(0, 11, 2):
+			for j in range(0, 7, 2):
 				wx[i][j] = np.concatenate(wx[i][j])
 				wy[i][j] = np.concatenate(wy[i][j])
 				wyaw[i][j] = np.concatenate(wyaw[i][j])
@@ -485,23 +480,29 @@ if __name__ == "__main__":
 	# 	y = wy[i]
 	# 	sd = get_frenet(x, y, wx, wy)
 	# 	ws[i] = sd[0]
- 
-	waypoints={'global':[],'parking':{0:[],2:[],4:[]}}
+	# waypoints={'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
+	waypoints={'global':[],'parking':{0:[],2:[],4:[],6:[]}}
 	for i in nodes:
 		if i == 'parking':
-			for j in range(0, 11, 2):
+			# for j in range(0, 11, 2):
+			for j in range(0, 7, 2):
 				waypoints[i][j] = interpolate_waypoints(wx[i][j], wy[i][j], space=0.5)
 		else:
 			waypoints[i] = interpolate_waypoints(wx[i], wy[i], space=0.5)
 
-	mapx={'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
-	mapy={'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
-	mapyaw={'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
-	maps={'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
+	# mapx={'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
+	# mapy={'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
+	# mapyaw={'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
+	# maps={'global':[],'parking':{0:[],2:[],4:[],6:[],8:[],10:[]}}
+	mapx={'global':[],'parking':{0:[],2:[],4:[],6:[]}}
+	mapy={'global':[],'parking':{0:[],2:[],4:[],6:[]}}
+	mapyaw={'global':[],'parking':{0:[],2:[],4:[],6:[]}}
+	maps={'global':[],'parking':{0:[],2:[],4:[],6:[]}}
 
 	for i in waypoints:
 		if i == 'parking':
-			for j in range(0, 11, 2):
+			# for j in range(0, 11, 2):
+			for j in range(0, 7, 2):
 				mapx[i][j] = waypoints[i][j]["x"]
 				mapy[i][j] = waypoints[i][j]["y"]
 				mapyaw[i][j] = waypoints[i][j]["yaw"]
@@ -644,12 +645,12 @@ if __name__ == "__main__":
 					move_mode='finish'
 					fin_wp = [my_wp[mode], link_ind[mode]]
 					link_ind[mode]=len(link_len[mode])
-				elif ((mode=='parking') and (link_ind['parking']%2==1)): #parking 후진의 마지막 waypoint
-					move_mode='finish'
-					print("parking finish!")
-					my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
-					fin_wp = [my_wp['global'], link_ind['global']]
-					mode = 'global'
+				# elif ((mode=='parking') and (link_ind['parking']%2==1)): #parking 후진의 마지막 waypoint
+				# 	move_mode='finish'
+				# 	print("parking finish!")
+				# 	my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
+				# 	fin_wp = [my_wp['global'], link_ind['global']]
+				# 	mode = 'global'
 				else:
 					move_mode='finish'
 					print("finish!")
@@ -660,6 +661,12 @@ if __name__ == "__main__":
 				print("finish!")
 				fin_wp=[my_wp[mode], link_ind[mode]+1]
 				link_ind[mode]+=1
+			elif ((mode=='parking') and (link_ind['parking']%2==1)) and (my_wp[mode]<=11): #parking 후진의 마지막 waypoint
+					move_mode='finish'
+					print("parking finish!")
+					my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
+					fin_wp = [my_wp['global'], link_ind['global']]
+					mode = 'global'
 
 			if fin_wp == [my_wp[mode], link_ind[mode]]:
 				move_mode='finish'
@@ -760,6 +767,12 @@ if __name__ == "__main__":
 			print("finish!")
 			fin_wp=[my_wp[mode], link_ind[mode]+1]
 			link_ind[mode]+=1
+		elif ((mode=='parking') and (link_ind['parking']%2==1)) and (my_wp[mode]<=11): #parking 후진의 마지막 waypoint
+				move_mode='finish'
+				print("parking finish!")
+				my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
+				fin_wp = [my_wp['global'], link_ind['global']]
+				mode = 'global'
 
 		if fin_wp == [my_wp[mode], link_ind[mode]]:
 			move_mode='finish'

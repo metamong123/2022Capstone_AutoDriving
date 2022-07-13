@@ -91,8 +91,8 @@ if __name__ == "__main__":
 	parking6_cv = Converter(parking6_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
 
 	link_pub = rospy.Publisher("/rviz/lane_links", MarkerArray, queue_size=1.2, latch=True)
-	parking_link1_pub = rospy.Publisher("/rviz/parking_link_1", MarkerArray, queue_size=1, latch=True)
-	parking_link2_pub = rospy.Publisher("/rviz/parking_link_2", MarkerArray, queue_size=1, latch=True)
+	# parking_link1_pub = rospy.Publisher("/rviz/parking_link_1", MarkerArray, queue_size=1, latch=True)
+	# parking_link2_pub = rospy.Publisher("/rviz/parking_link_2", MarkerArray, queue_size=1, latch=True)
 	parking_link3_pub = rospy.Publisher("/rviz/parking_link_3", MarkerArray, queue_size=1, latch=True)
 	parking_link4_pub = rospy.Publisher("/rviz/parking_link_4", MarkerArray, queue_size=1, latch=True)
 	parking_link5_pub = rospy.Publisher("/rviz/parking_link_5", MarkerArray, queue_size=1, latch=True)
@@ -101,8 +101,8 @@ if __name__ == "__main__":
 	rospy.sleep(1)
 	while not rospy.is_shutdown():
 		link_pub.publish(link_cv.ma)
-		parking_link1_pub.publish(parking1_cv.ma)
-		parking_link2_pub.publish(parking2_cv.ma)
+		# parking_link1_pub.publish(parking1_cv.ma)
+		# parking_link2_pub.publish(parking2_cv.ma)
 		parking_link3_pub.publish(parking3_cv.ma)
 		parking_link4_pub.publish(parking4_cv.ma)
 		parking_link5_pub.publish(parking5_cv.ma)
