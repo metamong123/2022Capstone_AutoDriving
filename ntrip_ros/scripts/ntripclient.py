@@ -39,6 +39,7 @@ class ntripconnect(Thread):
             'Authorization': 'Basic ' + b64encode(self.ntc.ntrip_user + ':' + str(self.ntc.ntrip_pass))
         }
         connection = HTTPConnection(self.ntc.ntrip_server)
+        #print(self.ntc.ntrip_server)
         connection.request('GET', '/'+self.ntc.ntrip_stream, self.ntc.nmea_gga, headers)
         response = connection.getresponse()
         if response.status != 200: raise Exception("blah")
@@ -96,10 +97,10 @@ class ntripconnect(Thread):
 class ntripclient:
     def __init__(self):
         rospy.init_node('ntripclient', anonymous=True)
-
+        
         self.rtcm_topic = rospy.get_param('~rtcm_topic', 'rtcm')
         self.nmea_topic = rospy.get_param('~nmea_topic', 'nmea')
-
+        
         self.ntrip_server = rospy.get_param('~ntrip_server')
         self.ntrip_user = rospy.get_param('~ntrip_user')
         self.ntrip_pass = rospy.get_param('~ntrip_pass')

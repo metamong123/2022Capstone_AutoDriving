@@ -1,5 +1,5 @@
 <launch>
-	<node name="parking_backward" pkg="parking_mission" type="parking_backward.py"/>
+	<node name="parking_backward" pkg="parking_mission" type="parking_backward_copied.py"/>
 	<?ignore <node name="core_control" pkg="core" type="core_based_waypoint.py" output="screen"/> ?>
 	<?ignore <node name="core_control" pkg="core" type="core_based_stopline.py" output="screen"/> ?>
 	<node name="core_control" pkg="core" type="core_copied.py" output="screen"/>

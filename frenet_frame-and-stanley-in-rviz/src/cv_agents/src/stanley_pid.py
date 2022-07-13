@@ -7,8 +7,10 @@ dt = 0.1
 kp = 0.5 # control gain
 # ki=0.01
 # kd=0.5
-ki = 0
-kd = 0
+# ki = 0.01
+# kd = 0.7
+ki=0
+kd=0
 
 # ERP42 PARAMETERS
 LENGTH = 1.600

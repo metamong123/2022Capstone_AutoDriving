@@ -1,16 +1,51 @@
 # autonomous-vehicle-MDS
+``2020-07-09``
 
 
 ## Commands
+### reviced Commands for versionE - 1
+
+``roslaunch stauto_sensor stauto_setting.launch``
+
+``roslaunch stauto_sensor versionE.launch``
+
+``rosrun stauto_sensor get_gps_data.py``
+
+``roslaunch stauto_core stauto_core.launch``
+
+``roslaunch mapviz mapviz.launch``
+
+``roslaunch velodyne_pointcloud VLP16_points.launch``
+
+``roslaunch adaptive_clustering adaptive_clustering.launch``
+
+``rosrun stauto_sensor camera.py``
+
+``roslaunch darknet_ros deeplearning.launch``
+
+``rosrun stauto_sensor parking_move.py``
+
+``rosrun adaptive_clustering parkin.py``
 
 
-### Commands Pure_Pursuit Control VersionD
+### Commands for versionE
 
-``roslaunch stauto_senor stauto_setting.launch``
+``roslaunch stauto_sensor stauto_setting.launch``
 
-``rosrun stauto_senor get_gps_data.py``
+``roslaunch stauto_sensor versionE.launch``
 
-``roslaunch stauto_senor versionD.launch``
+``rosrun stauto_sensor get_gps_data.py``
+
+``roslaunch stauto_core stauto_core.launch``
+
+``roslaunch mapviz mapviz.launch``
+
+``roslaunch velodyne_pointcloud VLP16_points.launch``
+
+``roslaunch adaptive_clustering adaptive_clustering.launch``
+
+``rosrun teb_local_planner_tutorials cmd_vel_to_ackermann_drive.py``
+
 
 ### Commands Pure_Pursuit Control VersionC
 
@@ -63,6 +98,10 @@
 ``rosrun stauto_sensor save_gps_from_rosbag.py
 ``
 
+### GPS Path
+
+``rosrun stauto_sensor save_gps_from_rosbag.py
+``
 
 ### Lidar + camera fusion
 

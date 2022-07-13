@@ -38,11 +38,18 @@ WB = 1.04
 # DT = 0.1 # timestep for update
 
 
+# ## 10km/h
+# MIN_T = 2.0 # minimum terminal time [s]
+# MAX_T = 6.0 # maximum terminal time [s], default = 2
+# DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+# DT = 0.5 # timestep for update
+
 ## 10km/h
 MIN_T = 2.0 # minimum terminal time [s]
-MAX_T = 6.0 # maximum terminal time [s], default = 2
+MAX_T = 4.0 # maximum terminal time [s], default = 2
 DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 DT = 0.5 # timestep for update
+
 
 # MIN_T = 2.0 # minimum terminal time [s]
 # MAX_T = 4.0 # maximum terminal time [s], default = 2

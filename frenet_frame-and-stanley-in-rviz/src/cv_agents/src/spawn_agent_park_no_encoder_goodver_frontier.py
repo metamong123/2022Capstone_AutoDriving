@@ -578,7 +578,7 @@ if __name__ == "__main__":
 		# 	rospy.set_param('move_mode', 'forward')
 		# elif (mode=='parking') & ((link_ind[mode]==1)or(link_ind[mode]==3)or(link_ind[mode]==5)or(link_ind[mode]==7)):
 		# 	rospy.set_param('move_mode', 'backward')
-		if (mode == 'global') and ((my_wp[mode] >= 240) and (my_wp[mode] < 250)): ################parking mode 시작 웨이포인트 넣기
+		if (mode == 'global') and ((my_wp[mode] >= 240) and (my_wp[mode] < 245)): ################parking mode 시작 웨이포인트 넣기
 			# print("11111!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			prev_park_ind=0
 			for park_i in range(0,5,2):
@@ -600,14 +600,14 @@ if __name__ == "__main__":
 					link_ind['parking']=park_i
 					# state = State(x=mapx['parking'][ind], y=mapy['parking'][ind], yaw=mapyaw['parking'][ind], v=1, dt=0.1)
 					print("choose: "+str(park_i))
-					move_mode='finish'
+					# move_mode='finish'
 					fin_wp == [my_wp['parking'], link_ind['parking']]
 					# rospy.set_param('car_mode', mode)
 					mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 					mode='parking'
 					break
 		if (mode=="parking"):
-			if (link_ind[mode]%2==0) and ((my_wp[mode]>=10) and (my_wp[mode]<23)):
+			if ((my_wp[mode]>=10) and (my_wp[mode]<20)):
 				move_mode='forward'
 		# elif mode == 'parking' and 
 		# 		move_mode='forward'
@@ -629,28 +629,43 @@ if __name__ == "__main__":
 				my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
 				dir=find_dir(link_dir, link_ind[mode])
 			
-			if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
+			if (mode == 'global') and (my_wp[mode] >= (link_len[mode][link_ind[mode]]-10)):
 				if link_ind[mode]==len(link_len[mode]): #마지막 링크일때
 					# rospy.set_param('move_mode', 'finish')
 					move_mode='finish'
+					mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 					fin_wp = [my_wp[mode], link_ind[mode]]
 					link_ind[mode]=len(link_len[mode])
-				elif ((mode=='parking') and (link_ind['parking']%2==1)): #parking 후진의 마지막 waypoint
-					move_mode='finish'
-					print("parking finish!")
-					my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
-					fin_wp = [my_wp['global'], link_ind['global']]
-					mode = 'global'
+				# elif ((mode=='parking') and (link_ind['parking']%2==1)): #parking 후진의 마지막 waypoint
+				# 	move_mode='finish'
+				# 	print("parking finish!")
+				# 	my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
+				# 	fin_wp = [my_wp['global'], link_ind['global']]
+				# 	mode = 'global'
 				else:
 					move_mode='finish'
+					mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 					print("finish!")
 					fin_wp=[my_wp[mode], link_ind[mode]+1]
 					link_ind[mode]+=1
-			elif (mode == 'parking') and (link_ind['parking']%2==0) and (my_wp[mode]>=23):
+			# elif (mode == 'parking') and (link_ind['parking']%2==0) and (my_wp[mode]>=20):
+			# 	move_mode='finish'
+			# 	print("finish!")
+			# 	fin_wp=[my_wp[mode], link_ind[mode]+1]
+			# 	link_ind[mode]+=1
+			elif (mode == 'parking') and (my_wp[mode]>=21):
 				move_mode='finish'
 				print("finish!")
+				mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 				fin_wp=[my_wp[mode], link_ind[mode]+1]
-				link_ind[mode]+=1
+				if (link_ind['parking']%2==0):
+					link_ind[mode]+=1
+			elif ((mode=='parking') and (link_ind['parking']%2==1)) and (my_wp[mode]<=5): #parking 후진의 마지막 waypoint
+				move_mode='finish'
+				print("parking finish!")
+				my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
+				fin_wp = [my_wp['global'], link_ind['global']]
+				mode = 'global'
 			# elif (mode == 'parking') and (link_ind['parking']%2==0) and (my_wp[mode]>=23):
 			# 	move_mode='finish'
 			# 	print("finish!")
@@ -659,9 +674,10 @@ if __name__ == "__main__":
 
 			if fin_wp == [my_wp[mode], link_ind[mode]]:
 				move_mode='finish'
-			elif (mode == 'parking') and (fin_wp[0] <= my_wp[mode]):
-				if my_wp[mode] < 10:
-					move_mode='finish'
+				mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
+			# elif (mode == 'parking') and (fin_wp[0] <= my_wp[mode]):
+			# 	if my_wp[mode] < 10:
+			# 		move_mode='finish'
 			else:
 				move_mode='forward'
 
@@ -737,34 +753,48 @@ if __name__ == "__main__":
 			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
 			dir=find_dir(link_dir, link_ind[mode])
 
-		if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
+		if (mode == 'global') and (my_wp[mode] >= (link_len[mode][link_ind[mode]]-10)):
 			if link_ind[mode]==len(link_len[mode]): #마지막 링크일때
 				# rospy.set_param('move_mode', 'finish')
 				move_mode='finish'
 				fin_wp = [my_wp[mode], link_ind[mode]]
 				link_ind[mode]=len(link_len[mode])
-			elif ((mode=='parking') and (link_ind['parking']%2==1)): #parking 후진의 마지막 waypoint
-				move_mode='finish'
-				print("parking finish!")
-				my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
-				fin_wp = [my_wp['global'], link_ind['global']]
-				mode = 'global'
+			# elif ((mode=='parking') and (link_ind['parking']%2==1)): #parking 후진의 마지막 waypoint
+			# 	move_mode='finish'
+			# 	print("parking finish!")
+			# 	my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
+			# 	fin_wp = [my_wp['global'], link_ind['global']]
+			# 	mode = 'global'
 			else:
 				move_mode='finish'
 				print("finish!")
+				mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 				fin_wp=[my_wp[mode], link_ind[mode]+1]
 				link_ind[mode]+=1
-		elif (mode == 'parking') and (link_ind['parking']%2==0) and (my_wp[mode]>=23):
+		# elif (mode == 'parking') and (link_ind['parking']%2==0) and (my_wp[mode]>=20):
+		# 	move_mode='finish'
+		# 	print("finish!")
+		# 	fin_wp=[my_wp[mode], link_ind[mode]+1]
+		# 	link_ind[mode]+=1
+		elif (mode == 'parking') and (my_wp[mode]>=21):
 			move_mode='finish'
 			print("finish!")
+			mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 			fin_wp=[my_wp[mode], link_ind[mode]+1]
-			link_ind[mode]+=1
+			if (link_ind['parking']%2==0):
+				link_ind[mode]+=1
+		elif ((mode=='parking') and (link_ind['parking']%2==1)) and (my_wp[mode]<=5): #parking 후진의 마지막 waypoint
+			move_mode='finish'
+			print("parking finish!")
+			my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
+			fin_wp = [my_wp['global'], link_ind['global']]
+			mode = 'global'
 
 		if (fin_wp == [my_wp[mode], link_ind[mode]]):
 			move_mode='finish'
-		elif (mode == 'parking') and (fin_wp[0] <= my_wp[mode]):
-				if my_wp[mode] < 10:
-					move_mode='finish'
+		# elif (mode == 'parking') and (fin_wp[0] <= my_wp[mode]):
+		# 		if my_wp[mode] < 10:
+		# 			move_mode='finish'
 		else:
 			move_mode='forward'
 

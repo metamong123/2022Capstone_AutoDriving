@@ -106,9 +106,10 @@ def Send_to_ERP42(gear, speed, steer, brake):
 
     for i in range(len(vals)):
         ser.write(vals[i]) # send!
-        print(speed)
-        print(steer)
-
+        print("speed :", speed)
+        print("steer :", steer)
+        print("gear :" , gear)
+        print("brake :", brake)
 cur_ENC_backup=0
 
 
@@ -144,7 +145,7 @@ def acker_callback(msg):
 if __name__ == '__main__':
     rospy.init_node('serial_node')
 
-    rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,acker_callback)
+    rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
 
     rate = rospy.Rate(10)
     
