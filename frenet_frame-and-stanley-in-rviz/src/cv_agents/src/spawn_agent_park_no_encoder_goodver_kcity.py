@@ -255,7 +255,7 @@ if __name__ == "__main__":
 	a_list=[]
 	v_list=[]
 	steer_list=[]
-	fin_wp = 0
+	fin_wp = [0,0]
 	obs_wp=0
 	parser = argparse.ArgumentParser(description='Spawn a CV agent')
 
@@ -356,8 +356,6 @@ if __name__ == "__main__":
 	nodes['parking'][7]=nodes['parking'][6]
 
  
-	# with open(path_map + "/src/kcity/parking1.pkl", "rb") as f: #parking
-	# 	nodes['parking']= pickle.load(f)
 	# nodes['parking'][1]={}
 	# nodes['parking'][1]=nodes['parking'][0]
 	# with open(path_map + "/src/kcity/parking2.pkl", "rb") as f: #parking
@@ -416,8 +414,24 @@ if __name__ == "__main__":
 	# 	nodes['parking'][10]=park_10[0]
 	# nodes['parking'][11]={}
 	# nodes['parking'][11]=nodes['parking'][10]
- 
 
+
+	# # dain_map
+	# with open(path_map + "/src/global.pkl", "rb") as f:
+	# 	nodes = pickle.load(f)
+
+	# node_wp_num=[]
+	# node_wp_num=[100,300,500,720,750,775,800,950,1000,1025,1060,1230,1280,1320,1360,1500,1600,1780,1820,1900,1960,2140,2190,2250,2300,2480,2550,2600,2750,3180]
+
+	# for i in range(1,len(node_wp_num)):
+	# 	nodes[i]={'x':nodes[0]['x'][node_wp_num[i-1]:node_wp_num[i]], 'y':nodes[0]['y'][node_wp_num[i-1]:node_wp_num[i]], 's':nodes[0]['s'][node_wp_num[i-1]:node_wp_num[i]], 'yaw':nodes[0]['yaw'][node_wp_num[i-1]:node_wp_num[i]]}
+	# nodes[len(node_wp_num)]={'x':nodes[0]['x'][node_wp_num[len(node_wp_num)-1]:], 'y':nodes[0]['y'][node_wp_num[len(node_wp_num)-1]:], 's':nodes[0]['s'][node_wp_num[len(node_wp_num)-1]:], 'yaw':nodes[0]['yaw'][node_wp_num[len(node_wp_num)-1]:]}
+	# nodes[0]['x'] = nodes[0]['x'][:node_wp_num[0]]
+	# nodes[0]['y'] = nodes[0]['y'][:node_wp_num[0]]
+	# nodes[0]['s'] = nodes[0]['s'][:node_wp_num[0]]
+	# nodes[0]['yaw'] = nodes[0]['yaw'][:node_wp_num[0]]
+	# link_dir={'straight':[1,2,4,7,9,11,13,15,16,17,19,21,23,25,26,28,29],'left':[3,6,10,18,20,22,25],'right':[0,5,8,12,14,24,27,30]}
+	
 
 	error_icte=0
 	prev_cte =0

@@ -135,6 +135,14 @@ Visualization Manager:
         "": true
       Queue Size: 100
       Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /rviz/global_links
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -163,16 +171,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 379.53302001953125
+      Distance: 272.6101379394531
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 935545.75
-        Y: 1915890
-        Z: -0.4323662221431732
+        X: 935586.25
+        Y: 1915990.75
+        Z: -0.28712061047554016
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
@@ -200,4 +208,4 @@ Window Geometry:
     collapsed: true
   Width: 1267
   X: 67
-  Y: 30
+  Y: 27
