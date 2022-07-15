@@ -22,7 +22,9 @@ if (CUDA_FOUND)
   set(
     CUDA_NVCC_FLAGS
     ${CUDA_NVCC_FLAGS};
+    -gencode arch=compute_61,code=[sm_61,compute_61]
     -gencode arch=compute_75,code=[sm_75,compute_75]
+    -gencode arch=compute_86,code=[sm_86,compute_86]
   )
   add_definitions(-DGPU)
 else()
@@ -221,7 +223,7 @@ install(DIRECTORY config launch yolo_network_config
 )
 
 # Download yolov2-tiny.weights
-set(PATH "${CMAKE_CURRENT_SOURCE_DIR}/yolo_network_config/weights")
+set(PATH "${CMAKE_CURRENT_SOURCE_DIR}/yolo_network_config/weights/basic")
 set(FILE "${PATH}/yolov2-tiny.weights")
 message(STATUS "Checking and downloading yolov2-tiny.weights if needed ...")
 if (NOT EXISTS "${FILE}")
@@ -251,7 +253,7 @@ endif()
 
 if(CATKIN_ENABLE_TESTING)
   # Download yolov2.weights
-  set(PATH "${CMAKE_CURRENT_SOURCE_DIR}/yolo_network_config/weights")
+  set(PATH "${CMAKE_CURRENT_SOURCE_DIR}/yolo_network_config/weights/basic")
   set(FILE "${PATH}/yolov2.weights")
   message(STATUS "Checking and downloading yolov2.weights if needed ...")
   if (NOT EXISTS "${FILE}")
