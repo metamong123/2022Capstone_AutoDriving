@@ -665,6 +665,9 @@ if __name__ == "__main__":
 				print("parking finish!")
 				my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
 				fin_wp = [my_wp['global'], link_ind['global']]
+				msg.drive.jerk=200
+				control_pub.publish(msg)
+				rospy.sleep(5)
 				mode = 'global'
 			# elif (mode == 'parking') and (link_ind['parking']%2==0) and (my_wp[mode]>=23):
 			# 	move_mode='finish'
@@ -680,6 +683,7 @@ if __name__ == "__main__":
 			# 		move_mode='finish'
 			else:
 				move_mode='forward'
+				msg.drive.jerk=0
 
 			mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 
@@ -788,6 +792,9 @@ if __name__ == "__main__":
 			print("parking finish!")
 			my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
 			fin_wp = [my_wp['global'], link_ind['global']]
+			msg.drive.jerk=200
+			control_pub.publish(msg)
+			rospy.sleep(5)
 			mode = 'global'
 
 		if (fin_wp == [my_wp[mode], link_ind[mode]]):
@@ -797,6 +804,7 @@ if __name__ == "__main__":
 		# 			move_mode='finish'
 		else:
 			move_mode='forward'
+			msg.drive.jerk=0
 
 		mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 
