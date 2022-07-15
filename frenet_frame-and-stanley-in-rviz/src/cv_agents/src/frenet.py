@@ -15,7 +15,6 @@ path = rospack.get_path("obstacles")
 sys.path.append(path + "/src/")
 from separation_axis_theorem import *
 
-
 # initialize
 # initialize
 LANE_WIDTH = 3.5  # lane width [m]
@@ -90,6 +89,7 @@ K_LON = 1.0 # weight for longitudinal direction (종방향을 위한 웨이트)
 
 # lateral planning 시 terminal position condition 후보  (양 차선 중앙), default len(DF_SET) = 2
 DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
+
 
 def next_waypoint(x, y, mapx, mapy, prev_wp):
 	closest_wp = get_closest_waypoints(x, y, mapx, mapy, prev_wp)
@@ -291,6 +291,7 @@ class FrenetPath:
 		self.ds = []
 		self.kappa = []
 
+# def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET):
 def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed):
 	frenet_paths = []
 
@@ -430,8 +431,9 @@ def check_path(fplist, obs_info, mapx, mapy, maps):
 	print("total = " + str(len(fplist)) + ", selected = " + str(len(fplist) - curv - col - vel - a) + "\n")
 	return [fplist[i] for i in ok_ind]
 
-
+# def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed, DF_SET):
 def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed):
+    # fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed,DF_SET)
 	fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed)
 	fplist = calc_global_paths(fplist, mapx, mapy, maps)
 

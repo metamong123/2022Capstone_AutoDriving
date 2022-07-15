@@ -16,7 +16,7 @@ from scipy.interpolate import interp1d
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Quaternion
 from object_msgs.msg import Object, ObjectArray
-from std_msgs.msg import String
+from std_msgs.msg import Float64
 from rocon_std_msgs.msg import StringArray
 
 import pickle
@@ -182,6 +182,11 @@ def mode_array(car_mode, move_mode, current_dir, next_dir):
 	m.strings=[car_mode, move_mode, current_dir, next_dir]
 	return m
 
+def lane_width_msg(lane_width):
+    l = Float64()
+    l.data=lane_width
+    return l
+
 #obs_init1 = Object(x=1, y=11, yaw=1, L=4, W=5)
 #obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)
 # hightech
@@ -285,6 +290,7 @@ if __name__ == "__main__":
 	# car_mode_pub=rospy.Publisher("/car_mode", String, queue_size=1)
 	# move_mode_pub=rospy.Publisher("/move_mode", String, queue_size=1)
 	mode_pub=rospy.Publisher("/mode_selector", StringArray, queue_size=1)
+	# lane_width_pub=rospy.Publisher("/lane_width", StringArray, queue_size=1)
 	# rospy.set_param('move_mode', 'global')
 	start_node_id = args.route
 	route_id_list = rn_id[start_node_id][args.dir]
@@ -332,7 +338,7 @@ if __name__ == "__main__":
 	link_dir={'straight':[0,1,2,3,4,5,6,10,11,12,14,16,18,21,22,23,24,25,29,31,32,37,38,40,41,42,43,44,45],'left':[7,8,26,27,28,30,33,34],'right':[9,13,15,17,19,20,35,36,39]}
 	dir=[]
 
-
+	lane_width={}
 	
 	with open(path_map + "/src/kcity/parking3.pkl", "rb") as f: #parking
 		park_4= pickle.load(f)
@@ -566,7 +572,7 @@ if __name__ == "__main__":
 		move_mode='forward'
 		
 	mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
-
+	# lane_msg=lane_width_msg(find_dir(lane_width, link_ind[mode]))
 	# if (fin_wp!=0) and (fin_wp != my_wp[mode])and (mode!='parking'):
 	# 	rospy.set_param('move_mode', 'forward')
 	# 	fin_wp=0
@@ -643,6 +649,9 @@ if __name__ == "__main__":
 		if mode =='parking':
 			path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]], maps[mode][park_i][:link_len[mode][park_i]], opt_d, target_speed[mode])
 		else:
+			# LANE_WIDTH=find_dir(lane_width, link_ind[mode])
+			# DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
+			# path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode], mapy[mode], maps[mode], opt_d, target_speed[mode], DF_SET)
 			path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode], mapy[mode], maps[mode], opt_d, target_speed[mode])
 		
 		# update state with acc, delta
@@ -794,6 +803,7 @@ if __name__ == "__main__":
 			move_mode='forward'
 
 		mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
+		# lane_msg=lane_width_msg(find_dir(lane_width, link_ind[mode]))
 
 		# if (fin_wp!=0) and (fin_wp != my_wp[mode]) and (mode!='parking'):
 		# 	rospy.set_param('move_mode', 'forward')
@@ -863,6 +873,7 @@ if __name__ == "__main__":
 		opt_frenet_pub.publish(opt_frenet_path.ma)
 		cand_frenet_pub.publish(cand_frenet_paths.ma)
 		control_pub.publish(msg)
-		mode_pub.publish(mode_msg)
+		# mode_pub.publish(mode_msg)
+		# lane_width_pub.publish(lane_width_msg)
 
 		r.sleep()

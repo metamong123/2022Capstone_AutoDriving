@@ -34,6 +34,12 @@ rn_id = dict()
 # rn_id[5] = {'right': [0, 1, 2, 3, 4, 5, 6]}  # ego route
 rn_id[5] = {'right': [0]}
 
+def find_dir(link_dict, link_ind):
+	for i in link_dict.keys():
+		for j in link_dict[i]:
+			if link_ind == j:
+				return i
+
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
 
@@ -325,7 +331,7 @@ if __name__ == "__main__":
 	# for i in range(len(nodes)):
 	# 	link_i+=len(nodes[i]["x"])
 	# 	link_len.append(link_i)
-
+	lane_width={}
 	link_ind=0
 
 	wx = []
@@ -415,6 +421,11 @@ if __name__ == "__main__":
 		# YOUR CODE HERE
 		# path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed)
 		# prev_path=path[opt_ind]
+  
+  
+		# LANE_WIDTH=find_dir(lane_width, link_ind[mode])
+		# DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
+		# path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, [], mapx, mapy, maps, opt_d, target_speed,DF_SET)	
 		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, [], mapx, mapy, maps, opt_d, target_speed)
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!

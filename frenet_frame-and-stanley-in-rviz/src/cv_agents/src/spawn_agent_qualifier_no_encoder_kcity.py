@@ -273,7 +273,7 @@ if __name__ == "__main__":
 	# 	link_i+=len(nodes[i]["x"])
 	# 	link_len.append(link_i)
 
-
+	lane_width={}
 	link_ind=0
 
 	wx = []
@@ -367,7 +367,10 @@ if __name__ == "__main__":
 	while not rospy.is_shutdown():
 		# generate acceleration ai, and steering di
 		# YOUR CODE HERE
-
+		
+		# LANE_WIDTH=find_dir(lane_width, link_ind[mode])
+		# DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
+		# path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed,DF_SET)	
 		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed)
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
