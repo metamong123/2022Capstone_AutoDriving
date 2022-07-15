@@ -137,14 +137,17 @@ def parking_decision():
 	global parking_angle, parking_brake, parking_speed, parking_gear
 	if parking_flag == 'backward':
 		if (len(save_speed) > 0) and (len(save_angle) > 0):
-			parking_speed = save_speed.pop()
-			parking_angle = save_angle.pop()
+			parking_speed = 10/3.6#save_speed.pop()
+			parking_angle = -save_angle.pop()
 			parking_gear = 2 #backward gear
 			parking_brake = 0
 			#print('parking mode backward!!!')
 			print(save_speed)
-		if (len(save_speed) == 0) and (len(save_angle)==0):
-			
+		if (len(save_speed) == 0) or (len(save_angle)==0):
+			parking_speed = 0
+			parking_angle = 0
+			parking_gear = 0
+			parking_brake = 200
 			parking_flag == 'end'
 	else:
 		parking_speed = frenet_speed
