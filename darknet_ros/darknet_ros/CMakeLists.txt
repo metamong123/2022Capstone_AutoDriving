@@ -136,6 +136,8 @@ set(DARKNET_CORE_FILES
     ${DARKNET_PATH}/src/yolo_layer.c
     ${DARKNET_PATH}/src/dice.c
     ${DARKNET_PATH}/src/rnn_vid.c
+
+    ${DARKNET_PATH}/src/representation_layer.c
 )
 
 set(DARKNET_CUDA_FILES
