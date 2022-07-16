@@ -362,7 +362,7 @@ if __name__ == "__main__":
 	v=0
 	prev_ind=0
 	# ind = 10
-	target_speed = 10.0 / 3.6
+	target_speed = 8.0 / 3.6
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 	state.x=obj_msg.x
 	state.y=obj_msg.y
