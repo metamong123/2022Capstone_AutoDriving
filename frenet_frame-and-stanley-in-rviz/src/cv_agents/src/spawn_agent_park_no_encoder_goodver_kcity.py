@@ -361,31 +361,31 @@ if __name__ == "__main__":
 	# nodes['parking'][7]={}
 	# nodes['parking'][7]=nodes['parking'][6]
 
-	with open(path_map + "/src/kcity/parking1_v3.pkl", "rb") as f: #parking
+	with open(path_map + "/src/kcity/parking2.pkl", "rb") as f: #parking
 		nodes['parking']= pickle.load(f)
 	nodes['parking'][1]={}
 	nodes['parking'][1]=nodes['parking'][0]
-	with open(path_map + "/src/kcity/parking2_v3.pkl", "rb") as f: #parking
+	with open(path_map + "/src/kcity/parking1_v3.pkl", "rb") as f: #parking
 		park_2= pickle.load(f)
 		nodes['parking'][2]=park_2[0]
 	nodes['parking'][3]={}
 	nodes['parking'][3]=nodes['parking'][2]
-	with open(path_map + "/src/kcity/parking3_v3.pkl", "rb") as f: #parking
+	with open(path_map + "/src/kcity/parking2_v3.pkl", "rb") as f: #parking
 		park_4= pickle.load(f)
 		nodes['parking'][4]=park_4[0]
 	nodes['parking'][5]={}
 	nodes['parking'][5]=nodes['parking'][4]
-	with open(path_map + "/src/kcity/parking4_v3.pkl", "rb") as f: #parking
+	with open(path_map + "/src/kcity/parking3_v3.pkl", "rb") as f: #parking
 		park_6= pickle.load(f)
 		nodes['parking'][6]=park_6[0]
 	nodes['parking'][7]={}
 	nodes['parking'][7]=nodes['parking'][6]
-	with open(path_map + "/src/kcity/parking5_v3.pkl", "rb") as f: #parking
+	with open(path_map + "/src/kcity/parking4_v3.pkl", "rb") as f: #parking
 		park_8= pickle.load(f)
 		nodes['parking'][8]=park_8[0]
 	nodes['parking'][9]={}
 	nodes['parking'][9]=nodes['parking'][8]
-	with open(path_map + "/src/kcity/parking6_v3.pkl", "rb") as f: #parking
+	with open(path_map + "/src/kcity/parking5_v3.pkl", "rb") as f: #parking
 		park_10= pickle.load(f)
 		nodes['parking'][10]=park_10[0]
 	nodes['parking'][11]={}
@@ -439,6 +439,9 @@ if __name__ == "__main__":
 	# nodes[0]['yaw'] = nodes[0]['yaw'][:node_wp_num[0]]
 	# link_dir={'straight':[1,2,4,7,9,11,13,15,16,17,19,21,23,25,26,28,29],'left':[3,6,10,18,20,22,25],'right':[0,5,8,12,14,24,27,30]}
 	
+	stopline_wp=[]
+	stopline_wp=[248, 337, 443,721,937,1318,1514,1789,2143,2260,2475,2740,2836]
+	stopline_wp_v2=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846]
 
 	error_icte=0
 	prev_cte =0
@@ -537,7 +540,7 @@ if __name__ == "__main__":
 	v=0
 	prev_ind={'global':0,'parking':0}
 	# ind = 10
-	target_speed = {'global':10.0 / 3.6, 'parking': 10.0/3.6}
+	target_speed = {'global':8.0 / 3.6, 'parking': 8.0/3.6}
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 	state.x=obj_msg.x
 	state.y=obj_msg.y
@@ -692,11 +695,17 @@ if __name__ == "__main__":
 				fin_wp=[my_wp[mode], link_ind[mode]+1]
 				link_ind[mode]+=1
 			elif ((mode=='parking') and (link_ind['parking']%2==1)) and (my_wp[mode]<=11): #parking 후진의 마지막 waypoint
-					move_mode='finish'
-					print("parking finish!")
-					my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
-					fin_wp = [my_wp['global'], link_ind['global']]
-					mode = 'global'
+				move_mode='finish'
+				print("parking finish!")
+				my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
+				fin_wp = [my_wp['global'], link_ind['global']]
+				mode = 'global'
+			elif ((mode=='global')):
+				for i in range(len(stopline_wp)):
+					if my_wp[mode]==stopline_wp[i]:
+						move_mode='finish'
+						print("finish!")
+				
 
 			if fin_wp == [my_wp[mode], link_ind[mode]]:
 				move_mode='finish'
@@ -803,6 +812,11 @@ if __name__ == "__main__":
 				my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
 				fin_wp = [my_wp['global'], link_ind['global']]
 				mode = 'global'
+		elif (mode=='global'):
+			for i in range(len(stopline_wp)):
+				if my_wp[mode]==stopline_wp[i]:
+					move_mode='finish'
+					print("finish!")
 
 		if fin_wp == [my_wp[mode], link_ind[mode]]:
 			move_mode='finish'

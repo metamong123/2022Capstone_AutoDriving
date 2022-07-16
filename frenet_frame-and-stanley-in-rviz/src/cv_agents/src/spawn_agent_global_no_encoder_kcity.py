@@ -250,7 +250,7 @@ if __name__ == "__main__":
 	#object_pub = rospy.Publisher("/objects/car_" + str(id), Object, queue_size=1)
 	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
 	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
-	control_pub = rospy.Publisher("/ackermann_cmd", AckermannDriveStamped, queue_size=1)
+	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
 	mode_pub=rospy.Publisher("/mode_selector", StringArray, queue_size=1)
 	start_node_id = args.route
 	#route_id_list = [start_node_id] + rn_id[start_node_id][args.dir]
@@ -315,6 +315,10 @@ if __name__ == "__main__":
 	# nodes[0]['yaw'] = nodes[0]['yaw'][:node_wp_num[0]]
 	# link_dir={'straight':[1,2,4,7,9,11,13,15,16,17,19,21,23,25,26,28,29],'left':[3,6,10,18,20,22,25],'right':[0,5,8,12,14,24,27,30]}
 	
+	stopline_wp=[]
+	stopline_wp=[248, 337, 443,721,937,1318,1514,1789,2143,2260,2475,2740,2836]
+	stopline_wp_v2=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846]
+
 	lane_width={}
 	error_icte=0
 	prev_cte =0
@@ -442,7 +446,12 @@ if __name__ == "__main__":
 					print("finish!")
 					fin_wp=[my_wp, link_ind+1]
 					link_ind+=1
-     
+
+			for i in range(len(stopline_wp)):
+				if my_wp==stopline_wp[i]:
+					move_mode='finish'
+					print("finish!")
+
 			if fin_wp == [my_wp, link_ind]:
 				move_mode='finish'
 			else:
@@ -512,6 +521,11 @@ if __name__ == "__main__":
 				print("finish!")
 				fin_wp=[my_wp, link_ind+1]
 				link_ind+=1
+
+		for i in range(len(stopline_wp)):
+			if my_wp==stopline_wp[i]:
+				move_mode='finish'
+				print("finish!")
 
 		if fin_wp == [my_wp, link_ind]:
 				move_mode='finish'

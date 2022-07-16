@@ -32,8 +32,8 @@ from map_visualizer import Converter
 rn_id = dict()
 
 # rn_id[5] = {'right': [0, 1, 2, 3, 4, 5, 6]}  # ego route
-rn_id[5] = {'right': [i for i in range(46)]}
-
+# rn_id[5] = {'right': [i for i in range(46)]}
+rn_id[5] = {'right': [0]}
 
 def find_dir(link_dict, link_ind):
 	for i in link_dict.keys():
@@ -92,10 +92,8 @@ class State:
 	def update(self, a, delta):
 		dt = self.dt
 		WB = self.WB
-
-		self.x += self.v * math.cos(self.yaw) * dt
-		self.y += self.v * math.sin(self.yaw) * dt
-		self.yaw += self.v / WB * math.tan(delta) * dt
+with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/qualifier_qgis.pkl", "rb") as f:
+		nodes = pickle.load(f)an(delta) * dt
 		self.yaw = pi_2_pi(self.yaw)
 		self.v += a * dt
 		self.rear_x = self.x - ((WB / 2) * math.cos(self.yaw))
@@ -256,9 +254,13 @@ if __name__ == "__main__":
 	route_id_list = rn_id[start_node_id][args.dir]
 	#route_id_list = rn_id[start_node_id]['right']+rn_id[5]['left']+rn_id[6]['right']
 
-	with open(path_map + "/src/kcity/qualifier.pkl", "rb") as f:
+	with open(path_map + "/src/kcity/qualifier_qgis.pkl", "rb") as f:
 		nodes = pickle.load(f)
 
+ 
+
+	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/qualifier_qgis.pkl", "rb") as f:
+	# 	nodes = pickle.load(f)
  
 	error_icte=0
 	prev_cte =0

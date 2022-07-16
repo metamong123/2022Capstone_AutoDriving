@@ -74,14 +74,17 @@ if __name__ == "__main__":
 	path = rospack.get_path("map_server")
 
 	# TODO: AS CONFIGURATION FILE
-	link_file = path + "/src/kcity/qualifier.pkl"
-	# parking6_file = path + "/src/kcity/parking6_v2.pkl"
+	google_file = path + "/src/kcity/qualifier.pkl"
+	qgis_file = path + "/src/kcity/qualifier_qgis.pkl"
 
-	link_cv = Converter(link_file, 2000, r=255/255.0, g=236/255.0, b=139/255.0, a=0.8, scale=0.5)
-	link_pub = rospy.Publisher("/rviz/lane_links", MarkerArray, queue_size=1.2, latch=True)
+	google_cv = Converter(google_file, 2000, r=255/255.0, g=0/255.0, b=139/255.0, a=0.8, scale=0.5)
+	qgis_cv = Converter(qgis_file, 2000, r=255/255.0, g=236/255.0, b=139/255.0, a=0.8, scale=0.5)
+	google_pub = rospy.Publisher("/rviz/google_links", MarkerArray, queue_size=1.2, latch=True)
+	qgis_pub = rospy.Publisher("/rviz/qgis_links", MarkerArray, queue_size=1.2, latch=True)
 
 
 	rospy.sleep(1)
 	while not rospy.is_shutdown():
-		link_pub.publish(link_cv.ma)
+		google_pub.publish(google_cv.ma)
+		qgis_pub.publish(qgis_cv.ma)
 		rospy.sleep(1)
