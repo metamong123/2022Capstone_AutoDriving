@@ -433,7 +433,7 @@ if __name__ == "__main__":
 			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 			dir=find_dir(link_dir, link_ind)
 			if my_wp >= (link_len[link_ind]-10):
-				if link_ind==len(link_len[link_ind]):
+				if link_ind==len(link_len):
 					move_mode='finish'
 					fin_wp = [my_wp, link_ind]
 					link_ind=len(link_ind)
@@ -503,7 +503,7 @@ if __name__ == "__main__":
 		dir=find_dir(link_dir, link_ind)
 
 		if my_wp >= (link_len[link_ind]-10):
-			if link_ind==len(link_len[link_ind]):
+			if link_ind==len(link_len):
 				move_mode='finish'
 				fin_wp = [my_wp, link_ind]
 				link_ind=len(link_ind)
