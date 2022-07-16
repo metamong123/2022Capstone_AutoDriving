@@ -92,12 +92,15 @@ class State:
 	def update(self, a, delta):
 		dt = self.dt
 		WB = self.WB
-with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/qualifier_qgis.pkl", "rb") as f:
-		nodes = pickle.load(f)an(delta) * dt
+
+		self.x += self.v * math.cos(self.yaw) * dt
+		self.y += self.v * math.sin(self.yaw) * dt
+		self.yaw += self.v / WB * math.tan(delta) * dt
 		self.yaw = pi_2_pi(self.yaw)
 		self.v += a * dt
 		self.rear_x = self.x - ((WB / 2) * math.cos(self.yaw))
 		self.rear_y = self.y - ((WB / 2) * math.sin(self.yaw))
+
 
 	def calc_distance(self, point_x, point_y):
 		dx = self.rear_x - point_x

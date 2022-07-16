@@ -60,7 +60,7 @@ Visualization Manager:
       Marker Topic: /rviz/lane_links
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -92,7 +92,7 @@ Visualization Manager:
       Marker Topic: /rviz/parking_link_1
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -100,7 +100,7 @@ Visualization Manager:
       Marker Topic: /rviz/parking_link_2
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -108,7 +108,7 @@ Visualization Manager:
       Marker Topic: /rviz/parking_link_3
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -116,7 +116,7 @@ Visualization Manager:
       Marker Topic: /rviz/parking_link_4
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -124,7 +124,7 @@ Visualization Manager:
       Marker Topic: /rviz/parking_link_5
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -132,12 +132,28 @@ Visualization Manager:
       Marker Topic: /rviz/parking_link_6
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /rviz/global_links
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /rviz/google_links
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /rviz/qgis_links
       Name: MarkerArray
       Namespaces:
         "": true
@@ -171,25 +187,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 272.6101379394531
+      Distance: 267.95770263671875
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 935586.25
-        Y: 1915990.75
-        Z: -0.28712061047554016
+        X: 935561.125
+        Y: 1915940.75
+        Z: -8.974398612976074
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5697963237762451
+      Pitch: 1.424796462059021
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.73817253112793
+      Yaw: 4.34316349029541
     Saved: ~
 Window Geometry:
   Displays:
