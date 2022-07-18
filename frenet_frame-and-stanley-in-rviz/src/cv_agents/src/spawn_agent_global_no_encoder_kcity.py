@@ -448,7 +448,7 @@ if __name__ == "__main__":
 					link_ind+=1
 
 			for i in range(len(stopline_wp)):
-				if my_wp==stopline_wp[i]:
+				if (my_wp>=stopline_wp[i]) and (my_wp<=stopline_wp_v2[i]):
 					move_mode='finish'
 					print("finish!")
 
@@ -523,7 +523,7 @@ if __name__ == "__main__":
 				link_ind+=1
 
 		for i in range(len(stopline_wp)):
-			if my_wp==stopline_wp[i]:
+			if (my_wp>=stopline_wp[i]) and (my_wp<=stopline_wp_v2[i]):
 				move_mode='finish'
 				print("finish!")
 

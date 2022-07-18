@@ -118,16 +118,17 @@ def frenet_callback(msg):
    
 
 def yolo_callback(msg):
-    global deliveryA, deliveryB, traffic_light, person, car, uturnsign, kidzonesign, parkingsign, stopline
-    deliveryA = msg.data[0]
-    deliveryB = msg.data[1]
-    traffic_light = msg.data[2]
-    person = msg.data[3]
-    car = msg.data[4]
-    uturnsign = msg.data[5]
-    kidzonesign = msg.data[6]
-    parkingsign = msg.data[7]
-    stopline = msg.data[8]
+	global deliveryA, deliveryB, traffic_light, person, car, uturnsign, kidzonesign, parkingsign, stopline
+	deliveryA = msg.data[0]
+	deliveryB = msg.data[1]
+	traffic_light = msg.data[2]
+	#print(traffic_light)
+	person = msg.data[3]
+	car = msg.data[4]
+	uturnsign = msg.data[5]
+	kidzonesign = msg.data[6]
+	parkingsign = msg.data[7]
+	stopline = msg.data[8]
 
 def parking_decision():
 	global parking_flag
@@ -161,49 +162,49 @@ def parking_decision():
 	return parking_speed, parking_angle, parking_gear, parking_brake
 
 def traffic_decision():
-    
-    if next_dir_mode == 'left':
-        if traffic_light == 1 or traffic_light == 3:
-            traffic_speed = frenet_speed
-            traffic_angle = frenet_angle
-            traffic_gear = frenet_gear
-            traffic_brake = 0
-        else :
-            traffic_speed = 0
-            traffic_angle = 0
-            traffic_gear = 0
-            traffic_brake = 200
-    
-    elif next_dir_mode == 'straight':
-        if traffic_light == 0 or traffic_light == 3:
-            traffic_speed = frenet_speed
-            traffic_angle = frenet_angle
-            traffic_gear = frenet_gear
-            traffic_brake = 0
-        else :
-            traffic_speed = 0
-            traffic_angle = 0
-            traffic_gear = 0
-            traffic_brake = 200
-    
-    elif next_dir_mode == 'right':
-        if traffic_light == 0 or traffic_light == 3:
-            traffic_speed = frenet_speed
-            traffic_angle = frenet_angle
-            traffic_gear = frenet_gear
-            traffic_brake = 0
-        else :
-            traffic_speed = 0
-            traffic_angle = 0
-            traffic_gear = 0
-            traffic_brake = 200   
-                
-    traffic_speed = frenet_speed
-    traffic_angle = frenet_angle
-    traffic_gear = frenet_gear
-    traffic_brake = 0  
+	global next_dir_mode
 
-    return traffic_speed, traffic_angle, traffic_gear, traffic_brake
+	if next_dir_mode == 'left':
+		if traffic_light == 1 or traffic_light == 3 or traffic_light == 5:  # 0 none 1 green 2 left 3 red 4 straightleft 5 yellow
+			traffic_speed = 0
+			traffic_angle = 0
+			traffic_gear = 0
+			traffic_brake = 200
+			print("traffic mode : stop")
+		else :
+			traffic_speed = frenet_speed
+			traffic_angle = frenet_angle
+			traffic_gear = 0
+			traffic_brake = 0
+			print("traffic mode : go")
+    
+	elif next_dir_mode == 'straight':
+		if traffic_light == 0 or traffic_light == 3 or traffic_light == 5:
+			traffic_speed = 0
+			traffic_angle = 0
+			traffic_gear = 0
+			traffic_brake = 200
+			print("traffic mode : stop")
+		else :
+			traffic_speed = frenet_speed
+			traffic_angle = frenet_angle
+			traffic_gear = 0
+			traffic_brake = 0
+			print("traffic mode : go")
+	elif next_dir_mode == 'right':
+		if traffic_light == 0 or traffic_light == 3 or traffic_light == 5:
+			traffic_speed = 0
+			traffic_angle = 0
+			traffic_gear = 0
+			traffic_brake = 200
+			print("traffic mode : stop")
+		else :
+			traffic_speed = frenet_speed
+			traffic_angle = frenet_angle
+			traffic_gear = 0
+			traffic_brake = 0
+			print("traffic mode : go")
+	return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
 if __name__=='__main__':
 
@@ -218,7 +219,7 @@ if __name__=='__main__':
 	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
 	while not rospy.is_shutdown():
 		if car_mode == 'global':
-			if move_mode == 'finish':
+			if move_mode == 'forward':
 				cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = traffic_decision()
 			else:
 				if assist_steer == 0:
