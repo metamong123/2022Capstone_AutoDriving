@@ -16,7 +16,7 @@ from scipy.interpolate import interp1d
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Quaternion
 from object_msgs.msg import Object, ObjectArray
-from std_msgs.msg import String
+from std_msgs.msg import String, Float64
 from rocon_std_msgs.msg import StringArray
 
 import pickle
