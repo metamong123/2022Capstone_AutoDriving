@@ -16,6 +16,7 @@ from scipy.interpolate import interp1d
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Quaternion
 from object_msgs.msg import Object, ObjectArray
+from std_msgs.msg import Float64
 from rocon_std_msgs.msg import StringArray
 
 import pickle
@@ -185,6 +186,11 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 ## obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, L=1.600, W=1.04)
 # obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
 
+def waypoint_topic(my_wp):
+	f=Float64()
+	f.data = my_wp
+	return f
+
 def mode_array(car_mode, move_mode, current_dir, next_dir):
 	m = StringArray()
 	# current_dir=dir_mode[0]
@@ -255,6 +261,7 @@ if __name__ == "__main__":
 	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
 	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
 	control_pub = rospy.Publisher("/ackermann_cmd", AckermannDriveStamped, queue_size=1)
+	waypoint_pub = rospy.Publisher("/waypoint", Float64, queue_size=1)
 	mode_pub=rospy.Publisher("/mode_selector", StringArray, queue_size=1)
 	start_node_id = args.route
 	#route_id_list = [start_node_id] + rn_id[start_node_id][args.dir]
@@ -364,6 +371,7 @@ if __name__ == "__main__":
 	move_mode='forward'
 	#my_wp = get_closest_waypoints(state.x, state.y, mapx[:100], mapy[:100],my_wp)
 	my_wp = get_closest_waypoints(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
+	waypoint_topic(my_wp)
 	prev_v = state.v
 	error_ia = 0
 	r = rospy.Rate(10)
@@ -416,6 +424,7 @@ if __name__ == "__main__":
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
 			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
+			waypoint_topic(my_wp)
 			dir=find_dir(link_dir, link_ind)
 			if my_wp >= (link_len[link_ind]):
 				if link_ind==len(link_len):
@@ -487,6 +496,7 @@ if __name__ == "__main__":
 		state.yaw=obj_msg.yaw
 		# state.v=obj_msg.v
 		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
+		waypoint_msg=waypoint_topic(my_wp)
 		dir=find_dir(link_dir, link_ind)
 		if my_wp >= (link_len[link_ind]):
 			if link_ind==len(link_len):
@@ -554,6 +564,7 @@ if __name__ == "__main__":
 		cand_frenet_pub.publish(cand_frenet_paths.ma)
 		control_pub.publish(msg)
 		mode_pub.publish(mode_msg)
+		waypoint_pub.publish(waypoint_msg)
 
 		r.sleep()
 	
