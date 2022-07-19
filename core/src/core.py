@@ -2,10 +2,15 @@
 
 from operator import ne
 import rospy
+import math
 from tokenize import String
 from std_msgs.msg import Int32MultiArray, Float64
 from rocon_std_msgs.msg import StringArray 
 from ackermann_msgs.msg import AckermannDriveStamped
+from nav_msgs.msg import Odometry
+
+import numpy as np
+
 
 global car_mode, move_mode
 car_mode = 'default'
@@ -30,6 +35,32 @@ kidzonesign = 0
 parkingsign = 0
 stopline = 0
 assist_steer=0
+waypoint = 0
+w = 0
+z = 0
+parking_yaw = 0
+
+def euler_from_quaternion(x, y, z, w):
+        """
+        Convert a quaternion into euler angles (roll, pitch, yaw)
+        roll is rotation around x in radians (counterclockwise)
+        pitch is rotation around y in radians (counterclockwise)
+        yaw is rotation around z in radians (counterclockwise)
+        """
+        t0 = +2.0 * (w * x + y * z)
+        t1 = +1.0 - 2.0 * (x * x + y * y)
+        roll_x = math.atan2(t0, t1)
+     
+        t2 = +2.0 * (w * y - z * x)
+        t2 = +1.0 if t2 > +1.0 else t2
+        t2 = -1.0 if t2 < -1.0 else t2
+        pitch_y = math.asin(t2)
+     
+        t3 = +2.0 * (w * z + x * y)
+        t4 = +1.0 - 2.0 * (y * y + z * z)
+        yaw_z = math.atan2(t3, t4)
+     
+        return yaw_z
 
 #class TopicReciver:
 #	def __init__(self):
@@ -115,7 +146,10 @@ def frenet_callback(msg):
 #     backward_angle = msg.drive.steering_angle
 #     backward_gear = msg.drive.acceleration
 #     backward_brake = msg.drive.jerk
-   
+
+def waypoint_callback(msg):
+	global waypoint
+	waypoint = msg.data
 
 def yolo_callback(msg):
 	global deliveryA, deliveryB, traffic_light, person, car, uturnsign, kidzonesign, parkingsign, stopline
@@ -130,6 +164,15 @@ def yolo_callback(msg):
 	parkingsign = msg.data[7]
 	stopline = msg.data[8]
 
+def odometry_callback(msg):
+	global yaw
+	x = msg.pose.pose.orientation.x
+	y = msg.pose.pose.orientation.y
+	z = msg.pose.pose.orientation.z
+	w = msg.pose.pose.orientation.w
+	yaw = euler_from_quaternion(x, y, z, w)
+
+
 def parking_decision():
 	global parking_flag
 	global back_speed, back_angle
@@ -137,28 +180,33 @@ def parking_decision():
 	global move_mode, frenet_speed, frenet_angle, frenet_gear, backward_speed, backward_angle, backward_gear, backward_brake   
 	global parking_angle, parking_brake, parking_speed, parking_gear
 	if parking_flag == 'backward':
-		if (len(save_speed) > 0) and (len(save_angle) > 0):
-			parking_speed = 10/3.6#save_speed.pop()
-			parking_angle = -save_angle.pop()
-			parking_gear = 2 #backward gear
-			parking_brake = 0
-			#print('parking mode backward!!!')
-			print(save_speed)
-		if (len(save_speed) == 0) or (len(save_angle)==0):
-			parking_speed = 0
+		if waypoint >= :
+			parking_speed = 5/3.6
 			parking_angle = 0
-			parking_gear = 0
-			parking_brake = 200
-			parking_flag == 'end'
+			parking_gear = 2
+			parking_brake = 0
+		else:
+			if abs(yaw - parking_yaw) < 0.1:
+				parking_speed = 5/3.6
+				parking_angle = 0
+				parking_gear = 2
+				parking_brake = 0
+				if waypoint <= 16:
+					parking_flag = 'end'
+			else:
+				parking_speed = 5/3.6
+				parking_angle = 20*np.pi/180
+				parking_gear = 2
+				parking_brake = 0
+				if waypoint <= 16:
+					parking_flag = 'end'
+		print('parking backward')
 	else:
 		parking_speed = frenet_speed
 		parking_angle = frenet_angle
 		parking_gear = frenet_gear
 		parking_brake = 0
-		save_speed.append(frenet_speed) #save_cmd
-		save_angle.append(frenet_angle)
-		print(save_speed)
-		#print('parking mode forward!!!')
+
 	return parking_speed, parking_angle, parking_gear, parking_brake
 
 def traffic_decision():
@@ -207,6 +255,7 @@ def traffic_decision():
 	return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
 if __name__=='__main__':
+	global parking_yaw
 
 	rospy.init_node('core_control')
 	#topic_receiver=TopicReciver()
@@ -214,12 +263,14 @@ if __name__=='__main__':
 	#rospy.Subscriber("/ackermann_cmd_parking_backward",AckermannDriveStamped,parking_callback)
 	rospy.Subscriber("/mode_selector",StringArray,mode_selector_callback,queue_size=10)
 	rospy.Subscriber("/detect_ID", Int32MultiArray, yolo_callback)
-	rospy.Subscriber("/assist_steer",Float64,lanenet_callback)
+	rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
+	rospy.Subscriber("/waypoint", Float64, waypoint_callback)
+	rospy.Subscriber("/odom", Odometry, odometry_callback)
 	cmd=AckermannDriveStamped()
 	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
 	while not rospy.is_shutdown():
 		if car_mode == 'global':
-			if move_mode == 'forward':
+			if move_mode == 'finish':
 				cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = traffic_decision()
 			else:
 				if assist_steer == 0:
@@ -236,6 +287,12 @@ if __name__=='__main__':
 
 		elif car_mode == 'parking':
 			if move_mode == 'forward': # parking forward -> frenet
+				if parking_yaw == 0:
+					parking_yaw = yaw
+					if parking_yaw+np.pi <= np.pi:
+						parking_yaw = parking_yaw + np.pi
+					else:
+						parking_yaw = parking_yaw - np.pi
 				cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = parking_decision()
 			elif move_mode == 'finish':
 				cmd.drive.speed = 0
