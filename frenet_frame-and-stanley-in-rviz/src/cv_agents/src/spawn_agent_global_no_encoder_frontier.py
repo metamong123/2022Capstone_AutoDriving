@@ -520,7 +520,6 @@ if __name__ == "__main__":
 		# prev_ind = link_ind-2
 		print("현재 링크 번호: "+ str(link_ind)+", 링크 방향: "+str(dir))
 
-		mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
 
 		# if my_wp == 270:
 		# 	with open("/home/nsclmds/a_list.text", "wb") as f:
