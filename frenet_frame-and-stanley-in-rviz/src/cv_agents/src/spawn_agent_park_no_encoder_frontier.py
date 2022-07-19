@@ -179,7 +179,12 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 		"quaternion": quat,
 		"ackermann_msg" : c
 	}
- 
+
+def waypoint_topic(my_wp):
+	f=Float64()
+	f.data = my_wp
+	return f
+
 def mode_array(car_mode, move_mode, current_dir, next_dir):
 	m = StringArray()
 	# current_dir=dir_mode[0]
@@ -290,6 +295,7 @@ if __name__ == "__main__":
 	# car_mode_pub=rospy.Publisher("/car_mode", String, queue_size=1)
 	# move_mode_pub=rospy.Publisher("/move_mode", String, queue_size=1)
 	mode_pub=rospy.Publisher("/mode_selector", StringArray, queue_size=1)
+	waypoint_pub = rospy.Publisher("/waypoint", Float64, queue_size=1)
 	# rospy.set_param('move_mode', 'global')
 	start_node_id = args.route
 	route_id_list = rn_id[start_node_id][args.dir]
@@ -525,6 +531,7 @@ if __name__ == "__main__":
 	move_mode='forward'
 	# rospy.set_param('car_mode', move_mode)
 	my_wp[mode] = get_closest_waypoints(state.x, state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
+	waypoint_msg=waypoint_topic(my_wp[mode])
 	prev_v = state.v
 	error_ia = 0
 	r = rospy.Rate(10)
@@ -632,9 +639,11 @@ if __name__ == "__main__":
 		if opt_ind == -1: ## No solution!
 			if mode =='parking':
 				my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]], my_wp[mode])
+				waypoint_msg=waypoint_topic(my_wp[mode])
 			else:
 				my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
 				dir=find_dir(link_dir, link_ind[mode])
+				waypoint_msg=waypoint_topic(my_wp[mode])
 				
 			
 			if (mode == 'global') and (my_wp[mode] >= (link_len[mode][link_ind[mode]])):
@@ -764,9 +773,11 @@ if __name__ == "__main__":
 		# state.v=obj_msg.v
 		if mode =='parking':
 			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]], my_wp[mode])
+			waypoint_msg=waypoint_topic(my_wp[mode])
 		else:
 			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
 			dir=find_dir(link_dir, link_ind[mode])
+			waypoint_msg=waypoint_topic(my_wp[mode])
 
 		if (mode == 'global') and (my_wp[mode] >= (link_len[mode][link_ind[mode]])):
 			if link_ind[mode]==len(link_len[mode]): #마지막 링크일때
@@ -890,5 +901,6 @@ if __name__ == "__main__":
 		cand_frenet_pub.publish(cand_frenet_paths.ma)
 		control_pub.publish(msg)
 		mode_pub.publish(mode_msg)
+		waypoint_pub.publish(waypoint_msg)
 
 		r.sleep()
