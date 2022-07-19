@@ -41,6 +41,10 @@ def find_dir(link_dict, link_ind):
 			if link_ind == j:
 				return i
 
+def find_link(link_len, my_wp):
+    for i in range(len(link_len)-1):
+        if my_wp > link_len[i] and my_wp <= link_len[i+1]:
+            return i+1
 
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
@@ -386,11 +390,13 @@ if __name__ == "__main__":
 	r = rospy.Rate(10)
 	ai = 0
 
-	if my_wp >= (link_len[link_ind]-10):
+	if my_wp >= (link_len[link_ind]):
 		move_mode='finish'
 		print("finish!")
 		fin_wp=[my_wp, link_ind+1]
-		link_ind+=1
+		# link_ind+=1
+
+	link_ind=find_link(link_len, my_wp)
 
 	if fin_wp == [my_wp, link_ind]:
 		move_mode='finish'
@@ -436,16 +442,18 @@ if __name__ == "__main__":
 		if opt_ind == -1: ## No solution!
 			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 			dir=find_dir(link_dir, link_ind)
-			if my_wp >= (link_len[link_ind]-10):
+			if my_wp >= (link_len[link_ind]):
 				if link_ind==len(link_len):
 					move_mode='finish'
 					fin_wp = [my_wp, link_ind]
-					link_ind=len(link_ind)
+					# link_ind=len(link_ind)
 				else:
 					move_mode='finish'
 					print("finish!")
 					fin_wp=[my_wp, link_ind+1]
-					link_ind+=1
+					# link_ind+=1
+
+			link_ind=find_link(link_len, my_wp)
 
 			for i in range(len(stopline_wp)):
 				if (my_wp>=stopline_wp[i]) and (my_wp<=stopline_wp_v2[i]):
@@ -511,7 +519,7 @@ if __name__ == "__main__":
 		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 		dir=find_dir(link_dir, link_ind)
 
-		if my_wp >= (link_len[link_ind]-10):
+		if my_wp >= (link_len[link_ind]):
 			if link_ind==len(link_len):
 				move_mode='finish'
 				fin_wp = [my_wp, link_ind]
@@ -526,6 +534,8 @@ if __name__ == "__main__":
 			if (my_wp>=stopline_wp[i]) and (my_wp<=stopline_wp_v2[i]):
 				move_mode='finish'
 				print("finish!")
+
+		link_ind=find_link(link_len, my_wp)
 
 		if fin_wp == [my_wp, link_ind]:
 				move_mode='finish'

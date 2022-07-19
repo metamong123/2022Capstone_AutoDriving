@@ -41,6 +41,11 @@ def find_dir(link_dict, link_ind):
 			if link_ind == j:
 				return i
 
+def find_link(link_len, my_wp):
+    for i in range(len(link_len)-1):
+        if my_wp > link_len[i] and my_wp <= link_len[i+1]:
+            return i+1
+
 class ParkingPath:
 	def __init__(self):
 		self.x = []
@@ -565,12 +570,14 @@ if __name__ == "__main__":
 	r = rospy.Rate(10)
 	ai = 0
 
-	if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
+	if my_wp[mode] >= (link_len[mode][link_ind[mode]]):
 		# rospy.set_param('move_mode', 'finish')
 		move_mode='finish'
 		print("finish!")
 		fin_wp=[my_wp[mode], link_ind[mode]+1]
-		link_ind[mode]+=1
+		# link_ind[mode]+=1
+
+	link_ind[mode]=find_link(link_len[mode], my_wp[mode])
 
 	if fin_wp == [my_wp[mode], link_ind[mode]]:
 		move_mode='finish'
@@ -665,7 +672,7 @@ if __name__ == "__main__":
 			# DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
 			# path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode], mapy[mode], maps[mode], opt_d, target_speed[mode], DF_SET)
 			path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx[mode], mapy[mode], maps[mode], opt_d, target_speed[mode])
-		
+
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
 			if mode =='parking':
@@ -674,12 +681,12 @@ if __name__ == "__main__":
 				my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
 				dir=find_dir(link_dir, link_ind[mode])
 			
-			if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
+			if my_wp[mode] >= (link_len[mode][link_ind[mode]]):
 				if link_ind[mode]==len(link_len[mode]): #마지막 링크일때
 					# rospy.set_param('move_mode', 'finish')
 					move_mode='finish'
 					fin_wp = [my_wp[mode], link_ind[mode]]
-					link_ind[mode]=len(link_len[mode])
+					# link_ind[mode]=len(link_len[mode])
 				# elif ((mode=='parking') and (link_ind['parking']%2==1)): #parking 후진의 마지막 waypoint
 				# 	move_mode='finish'
 				# 	print("parking finish!")
@@ -690,7 +697,7 @@ if __name__ == "__main__":
 					move_mode='finish'
 					print("finish!")
 					fin_wp=[my_wp[mode], link_ind[mode]+1]
-					link_ind[mode]+=1
+					# link_ind[mode]+=1
 			elif (mode == 'parking') and (link_ind['parking']%2==0) and (my_wp[mode]==parking_stop[park_i]):
 				move_mode='finish'
 				print("finish!")
@@ -708,6 +715,7 @@ if __name__ == "__main__":
 						move_mode='finish'
 						print("finish!")
 				
+			link_ind[mode]=find_link(link_len[mode], my_wp[mode])
 
 			if fin_wp == [my_wp[mode], link_ind[mode]]:
 				move_mode='finish'
@@ -785,8 +793,9 @@ if __name__ == "__main__":
 		else:
 			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
 			dir=find_dir(link_dir, link_ind[mode])
+			
 
-		if my_wp[mode] >= (link_len[mode][link_ind[mode]]-10):
+		if my_wp[mode] >= (link_len[mode][link_ind[mode]]):
 			if link_ind[mode]==len(link_len[mode]): #마지막 링크일때
 				# rospy.set_param('move_mode', 'finish')
 				move_mode='finish'
@@ -820,6 +829,8 @@ if __name__ == "__main__":
 					move_mode='finish'
 					print("finish!")
 
+		link_ind[mode]=find_link(link_len[mode], my_wp[mode])
+  
 		if fin_wp == [my_wp[mode], link_ind[mode]]:
 			move_mode='finish'
 		else:

@@ -40,6 +40,10 @@ def find_dir(link_dict, link_ind):
 			if link_ind == j:
 				return i
 
+def find_link(link_len, my_wp):
+    for i in range(len(link_len)-1):
+        if my_wp > link_len[i] and my_wp <= link_len[i+1]:
+            return i+1
 
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
@@ -347,6 +351,8 @@ if __name__ == "__main__":
  	#state = obj_car
 	v_list.append(state.v)
 	my_wp=0
+	mode='global'
+	move_mode='forward'
 	#my_wp = get_closest_waypoints(state.x, state.y, mapx[:100], mapy[:100],my_wp)
 	my_wp = get_closest_waypoints(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 	prev_v = state.v
@@ -354,8 +360,14 @@ if __name__ == "__main__":
 	r = rospy.Rate(10)
 	ai = 0
 
-	if my_wp >= (link_len[link_ind]-1):
-		link_ind+=1
+
+	if my_wp >= (link_len[link_ind]):
+		move_mode='finish'
+		print("finish!")
+		fin_wp=[my_wp, link_ind+1]
+		# link_ind+=1
+
+	link_ind=find_link(link_len, my_wp)
 
 	prev_ind = link_ind-2
 	# s, d = get_frenet(state.x, state.y, mapx[:100], mapy[:100],my_wp)
