@@ -679,13 +679,13 @@ if __name__ == "__main__":
 				if (link_ind['parking']%2==0):
 					link_ind[mode]+=1
 			elif ((mode=='parking') and (link_ind['parking']%2==1)) and (my_wp[mode]<=19): #parking 후진의 마지막 waypoint
-				move_mode='finish'
+				#move_mode='finish'
 				print("parking finish!")
 				my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
 				fin_wp = [my_wp['global'], link_ind['global']]
 				msg.drive.jerk=200
 				control_pub.publish(msg)
-				rospy.sleep(5)
+				rospy.sleep(1)
 				mode = 'global'
 			# elif (mode == 'parking') and (link_ind['parking']%2==0) and (my_wp[mode]>=23):
 			# 	move_mode='finish'
@@ -810,13 +810,13 @@ if __name__ == "__main__":
 			if (link_ind['parking']%2==0):
 				link_ind[mode]+=1
 		elif ((mode=='parking') and (link_ind['parking']%2==1)) and (my_wp[mode]<=19): #parking 후진의 마지막 waypoint
-			move_mode='finish'
+			#move_mode='finish'
 			print("parking finish!")
 			my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
 			fin_wp = [my_wp['global'], link_ind['global']]
 			msg.drive.jerk=200
 			control_pub.publish(msg)
-			rospy.sleep(5)
+			rospy.sleep(1)
 			mode = 'global'
 
 		link_ind[mode]=find_link(link_len[mode], my_wp[mode])
