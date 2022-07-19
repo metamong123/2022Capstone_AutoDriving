@@ -371,7 +371,7 @@ if __name__ == "__main__":
 	move_mode='forward'
 	#my_wp = get_closest_waypoints(state.x, state.y, mapx[:100], mapy[:100],my_wp)
 	my_wp = get_closest_waypoints(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-	waypoint_topic(my_wp)
+	waypoint_msg=waypoint_topic(my_wp)
 	prev_v = state.v
 	error_ia = 0
 	r = rospy.Rate(10)
@@ -424,7 +424,7 @@ if __name__ == "__main__":
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
 			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-			waypoint_topic(my_wp)
+			waypoint_msg=waypoint_topic(my_wp)
 			dir=find_dir(link_dir, link_ind)
 			if my_wp >= (link_len[link_ind]):
 				if link_ind==len(link_len):
