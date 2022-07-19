@@ -523,12 +523,12 @@ if __name__ == "__main__":
 			if link_ind==len(link_len):
 				move_mode='finish'
 				fin_wp = [my_wp, link_ind]
-				link_ind=len(link_ind)
+				# link_ind=len(link_ind)
 			else:
 				move_mode='finish'
 				print("finish!")
 				fin_wp=[my_wp, link_ind+1]
-				link_ind+=1
+				# link_ind+=1
 
 		for i in range(len(stopline_wp)):
 			if (my_wp>=stopline_wp[i]) and (my_wp<=stopline_wp_v2[i]):

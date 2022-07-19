@@ -16,6 +16,7 @@ from scipy.interpolate import interp1d
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Quaternion
 from object_msgs.msg import Object, ObjectArray
+from rocon_std_msgs.msg import StringArray
 
 import pickle
 import argparse
@@ -184,6 +185,13 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 ## obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, L=1.600, W=1.04)
 # obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
 
+def mode_array(car_mode, move_mode, current_dir, next_dir):
+	m = StringArray()
+	# current_dir=dir_mode[0]
+	# next_dir=dir_mode[1]
+	m.strings=[car_mode, move_mode, current_dir, next_dir]
+	return m
+
 obs_info = []
 obj_msg=Object()
 
@@ -218,6 +226,7 @@ if __name__ == "__main__":
 	a_list=[]
 	v_list=[]
 	steer_list=[]
+	fin_wp = [0,0]
 	parser = argparse.ArgumentParser(description='Spawn a CV agent')
 
 	parser.add_argument("--id", "-i", type=int, help="agent id", default=1)
@@ -246,7 +255,7 @@ if __name__ == "__main__":
 	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
 	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
 	control_pub = rospy.Publisher("/ackermann_cmd", AckermannDriveStamped, queue_size=1)
-
+	mode_pub=rospy.Publisher("/mode_selector", StringArray, queue_size=1)
 	start_node_id = args.route
 	#route_id_list = [start_node_id] + rn_id[start_node_id][args.dir]
 	route_id_list = rn_id[start_node_id][args.dir]
@@ -362,10 +371,15 @@ if __name__ == "__main__":
 
 
 	if my_wp >= (link_len[link_ind]):
-		move_mode='finish'
-		print("finish!")
-		fin_wp=[my_wp, link_ind+1]
-		# link_ind+=1
+		if link_ind==len(link_len):
+			move_mode='finish'
+			fin_wp = [my_wp, link_ind]
+			# link_ind=len(link_ind)
+		else:
+			move_mode='finish'
+			print("finish!")
+			fin_wp=[my_wp, link_ind+1]
+			# link_ind+=1
 
 	link_ind=find_link(link_len, my_wp)
 
@@ -403,11 +417,26 @@ if __name__ == "__main__":
 		if opt_ind == -1: ## No solution!
 			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 			dir=find_dir(link_dir, link_ind)
-			if my_wp >= (link_len[link_ind]-10):
-				if link_ind==42:
-					link_ind=42
+			if my_wp >= (link_len[link_ind]):
+				if link_ind==len(link_len):
+					move_mode='finish'
+					fin_wp = [my_wp, link_ind]
+					# link_ind=len(link_ind)
 				else:
-					link_ind+=1
+					move_mode='finish'
+					print("finish!")
+					fin_wp=[my_wp, link_ind+1]
+					# link_ind+=1
+
+			link_ind=find_link(link_len, my_wp)
+
+			if fin_wp == [my_wp, link_ind]:
+				move_mode='finish'
+			else:
+				move_mode='forward'
+
+			mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
+
 			# prev_ind = link_ind-2
 			print("현재 링크 번호: "+ str(link_ind)+", 링크 방향: "+str(dir))
 
@@ -459,13 +488,29 @@ if __name__ == "__main__":
 		# state.v=obj_msg.v
 		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 		dir=find_dir(link_dir, link_ind)
-		if my_wp >= (link_len[link_ind]-10):
-			if link_ind==40:
-				link_ind=40
+		if my_wp >= (link_len[link_ind]):
+			if link_ind==len(link_len):
+				move_mode='finish'
+				fin_wp = [my_wp, link_ind]
+				# link_ind=len(link_ind)
 			else:
-				link_ind+=1
+				move_mode='finish'
+				print("finish!")
+				fin_wp=[my_wp, link_ind+1]
+
+		link_ind=find_link(link_len, my_wp)
+
+		if fin_wp == [my_wp, link_ind]:
+				move_mode='finish'
+		else:
+			move_mode='forward'
+   
+		mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
+
 		# prev_ind = link_ind-2
 		print("현재 링크 번호: "+ str(link_ind)+", 링크 방향: "+str(dir))
+
+		mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
 
 		# if my_wp == 270:
 		# 	with open("/home/nsclmds/a_list.text", "wb") as f:
@@ -508,6 +553,7 @@ if __name__ == "__main__":
 		opt_frenet_pub.publish(opt_frenet_path.ma)
 		cand_frenet_pub.publish(cand_frenet_paths.ma)
 		control_pub.publish(msg)
+		mode_pub.publish(mode_msg)
 
 		r.sleep()
 	
