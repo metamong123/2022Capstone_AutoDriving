@@ -82,7 +82,6 @@ def pub_detected(count):
 
 
 def BoundingBoxes_callback(data):
-    print(1)
     number = len(data.bounding_boxes)
     for i in range(number):
         class_id = data.bounding_boxes[i].id
@@ -117,7 +116,6 @@ def BoundingBoxes_callback(data):
                 if all(detected_count[i] == 0 for i in range(3,6)):
                     detected_count[17] = 0
             print(str(class_id) + class_name + " - xmin : " + str(xmin) + " ymin : " + str(ymin))
-        print(detected_count)
 
 
 if __name__ == '__main__':
@@ -153,11 +151,12 @@ if __name__ == '__main__':
             sec = int(time.time())
 
 	    #객체가 더이상 없다고 판단할 시간 설정
-            for i in range(3,len(detected_time)):
+            for i in range(6,len(detected_time)):
                 if (sec - detected_time[i] >= 3):
                     detected_count[i] = 0
 
             pub_detected(detected_count)
+            print(detected_count)
 
         except rospy.ROSInterruptException:
             pass
