@@ -124,7 +124,7 @@ def acker_callback(msg):
     global speed, steer, brake, gear
 
     speed = 2
-    steer = 0#-(msg.drive.steering_angle)  # why minus?
+    steer = msg.data*0.005#-(msg.drive.steering_angle)  # why minus?
 
     brake = 0
     gear = 0 #int(msg.drive.acceleration)  
