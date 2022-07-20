@@ -23,3 +23,5 @@ if __name__ == '__main__':
     port = rospy.get_param("~GPS_PORT",port)
     ser = serial.serial_for_url(port,115200, timeout=0)
     imu_pub = rospy.Publisher("/imu_data", Imu, queue_size=10)
+    
+    

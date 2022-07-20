@@ -42,10 +42,12 @@ def find_dir(link_dict, link_ind):
 			if link_ind == j:
 				return i
 
-def find_link(link_len, my_wp):
-    for i in range(len(link_len)-1):
-        if my_wp > link_len[i] and my_wp <= link_len[i+1]:
+def find_link(a, b):
+    for i in range(len(a)-1):
+        if (b > a[i]) and (b <= a[i+1]):
             return i+1
+        elif b < a[0]:
+            return i
 
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi

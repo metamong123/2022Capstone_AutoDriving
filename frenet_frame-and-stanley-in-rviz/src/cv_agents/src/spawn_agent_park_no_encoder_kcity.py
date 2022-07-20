@@ -45,6 +45,8 @@ def find_link(link_len, my_wp):
     for i in range(len(link_len)-1):
         if my_wp > link_len[i] and my_wp <= link_len[i+1]:
             return i+1
+        elif my_wp < link_len[0]:
+            return i
 
 class ParkingPath:
 	def __init__(self):
@@ -583,8 +585,8 @@ if __name__ == "__main__":
 		print("finish!")
 		fin_wp=[my_wp[mode], link_ind[mode]+1]
 		# link_ind[mode]+=1
-
-	link_ind[mode]=find_link(link_len[mode], my_wp[mode])
+	if mode == 'global':
+		link_ind[mode]=find_link(link_len[mode], my_wp[mode])
 
 	if fin_wp == [my_wp[mode], link_ind[mode]]:
 		move_mode='finish'
@@ -687,6 +689,7 @@ if __name__ == "__main__":
 				waypoint_msg=waypoint_topic(my_wp[mode])
 			else:
 				my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
+				link_ind[mode]=find_link(link_len[mode], my_wp[mode])
 				dir=find_dir(link_dir, link_ind[mode])
 				waypoint_msg=waypoint_topic(my_wp[mode])
 			
@@ -723,8 +726,6 @@ if __name__ == "__main__":
 					if my_wp[mode]==stopline_wp[i]:
 						move_mode='finish'
 						print("finish!")
-				
-			link_ind[mode]=find_link(link_len[mode], my_wp[mode])
 
 			if fin_wp == [my_wp[mode], link_ind[mode]]:
 				move_mode='finish'
@@ -802,6 +803,7 @@ if __name__ == "__main__":
 			waypoint_msg=waypoint_topic(my_wp[mode])
 		else:
 			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
+			link_ind[mode]=find_link(link_len[mode], my_wp[mode])
 			dir=find_dir(link_dir, link_ind[mode])
 			waypoint_msg=waypoint_topic(my_wp[mode])
 			
@@ -839,8 +841,6 @@ if __name__ == "__main__":
 				if my_wp[mode]==stopline_wp[i]:
 					move_mode='finish'
 					print("finish!")
-
-		link_ind[mode]=find_link(link_len[mode], my_wp[mode])
   
 		if fin_wp == [my_wp[mode], link_ind[mode]]:
 			move_mode='finish'

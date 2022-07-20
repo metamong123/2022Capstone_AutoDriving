@@ -12,7 +12,7 @@ from nav_msgs.msg import Odometry
 import numpy as np
 
 
-global car_mode, move_mode
+global car_mode, move_mode, parking_yaw
 car_mode = 'default'
 move_mode = 'default'
 parking_flag = 'default'
@@ -178,10 +178,11 @@ def parking_decision():
 	global back_speed, back_angle
 	global save_speed,save_angle
 	global move_mode, frenet_speed, frenet_angle, frenet_gear, backward_speed, backward_angle, backward_gear, backward_brake   
-	global parking_angle, parking_brake, parking_speed, parking_gear
+	global parking_angle, parking_brake, parking_speed, parking_gear, parking_yaw
+ 	
 	if parking_flag == 'backward':
-		if waypoint >= :
-			parking_speed = 5/3.6
+		if waypoint >= 20:
+			parking_speed = 8/3.6
 			parking_angle = 0
 			parking_gear = 2
 			parking_brake = 0
@@ -191,14 +192,14 @@ def parking_decision():
 				parking_angle = 0
 				parking_gear = 2
 				parking_brake = 0
-				if waypoint <= 16:
+				if waypoint <= 12:
 					parking_flag = 'end'
 			else:
 				parking_speed = 5/3.6
-				parking_angle = 20*np.pi/180
+				parking_angle = -20*np.pi/180
 				parking_gear = 2
 				parking_brake = 0
-				if waypoint <= 16:
+				if waypoint <= 12:
 					parking_flag = 'end'
 		print('parking backward')
 	else:
@@ -255,7 +256,6 @@ def traffic_decision():
 	return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
 if __name__=='__main__':
-	global parking_yaw
 
 	rospy.init_node('core_control')
 	#topic_receiver=TopicReciver()

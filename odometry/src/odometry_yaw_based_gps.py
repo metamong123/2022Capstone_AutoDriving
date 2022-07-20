@@ -102,7 +102,7 @@ def callback1(msg):
 
 		yaw = euler_from_quaternion(qx, qy, before_qz, before_qw)
 	
-	print(yaw)
+	#print(yaw)
 
 	rpose.twist.twist.linear.x = msg.twist.twist.linear.x
 	rpose.twist.twist.linear.y = msg.twist.twist.linear.y
@@ -119,7 +119,7 @@ def callback1(msg):
 
 if __name__=='__main__':
 	
-	rospy.init_node('gps_to_vo')
+	rospy.init_node('odometry')
 
 	global rpose, a, b, heading
 	a=0

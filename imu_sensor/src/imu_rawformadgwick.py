@@ -13,7 +13,7 @@ from std_msgs.msg import Float32
 # before using this code, change imu driver
 ###########################################
 
-port = str(rospy.get_param("~imu_port","/dev/ttyUSB0"))
+port = str(rospy.get_param("~imu_port","/dev/ttyUSB5"))
 rpy=[0,0,0]
 w_speed=[0,0,0]
 accel=[0,0,0]
@@ -28,11 +28,6 @@ def euler_to_quaternion(roll,pitch,yaw):
     qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
 
     return [qx, qy, qz, qw]
-
-def imu_error_callback(data):
-    global error_yaw, rpy
-    error_yaw +=-rpy[2] + data.data
-    print(error_yaw)
 
 
 # def pub_tf_transform(roll,pitch,yaw,w_speed,accel):
@@ -56,10 +51,9 @@ def imu_error_callback(data):
 if __name__ == '__main__':
     rospy.init_node("get_imu")
 
-    port = rospy.get_param("~GPS_PORT",port)
+    #port = rospy.get_param("~GPS_PORT",port)
     ser = serial.serial_for_url(port,115200, timeout=0)
 
-    rospy.Subscriber("yaw_error",Float32,imu_error_callback)
     imu_pub = rospy.Publisher("/imu/data_raw", Imu, queue_size=1)
     mag_pub = rospy.Publisher("/imu/mag", MagneticField, queue_size=1)
 
@@ -71,17 +65,18 @@ if __name__ == '__main__':
     mag=MagneticField()
     while not rospy.is_shutdown():
         IMU_message=ser.readline()
-
+        
         if (len(IMU_message)>55):
+            #print(len(IMU_message))
             imu.header.stamp = rospy.Time.now()
             imu.header.frame_id = "imu_link"
             mag.header.stamp = rospy.Time.now()
             mag.header.frame_id = "mag_link"
             data=IMU_message.split(",")
-            #print(data)
+            print(data)
             rpy[0]=round(float(data[1]),3)
             rpy[1]=round(float(data[2]),3)
-            rpy[2]=round(float(data[3]),3)+error_yaw
+            rpy[2]=round(float(data[3]),3)
             #print(rpy[2])
             if (rpy[2] >= 180):
                 rpy[2] = rpy[2] - 2*180
@@ -125,7 +120,7 @@ if __name__ == '__main__':
             mag.magnetic_field.y = float(data[11])
             mag.magnetic_field.z = float(data[12])
             
-            battery=round(float(data[10]),3)
+            #battery=round(float(data[13]),3)
             imu_pub.publish(imu)
             mag_pub.publish(mag)
             #pub_tf_transform(roll,pitch,yaw,w_speed,accel)

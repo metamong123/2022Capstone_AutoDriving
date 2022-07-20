@@ -41,10 +41,12 @@ def find_dir(link_dict, link_ind):
 			if link_ind == j:
 				return i
 
-def find_link(link_len, my_wp):
-    for i in range(len(link_len)-1):
-        if my_wp > link_len[i] and my_wp <= link_len[i+1]:
+def find_link(a, b):
+    for i in range(len(a)-1):
+        if (b > a[i]) and (b <= a[i+1]):
             return i+1
+        elif b < a[0]:
+            return i
 
 class ParkingPath:
 	def __init__(self):
@@ -265,7 +267,7 @@ if __name__ == "__main__":
 	a_list=[]
 	v_list=[]
 	steer_list=[]
-	fin_wp = [0,0]
+	fin_wp = [-1,-1]
 	obs_wp=0
 	parser = argparse.ArgumentParser(description='Spawn a CV agent')
 
@@ -302,44 +304,14 @@ if __name__ == "__main__":
 
 	# nodes={'global':{0:[],1:[],2:[],3:[],4:[],5:[],6:[]},'parking':{0:[],1:[]}}
 	nodes={'global':{},'parking':{}}
+
 	with open(path_map + "/src/frontier/route.pkl", "rb") as f: #global
 		nodes['global']=pickle.load(f)
-	
-	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
-	# 	nodes['global'] = pickle.load(f)
 
-	# nodes['global'][41]={}
-	# nodes['global'][40]={}
-
-	# for i in range(39,16,-1):
-	# 	nodes['global'][i+2]=nodes['global'][i]
-	
-	# nodes['global'][18]={}
-	# nodes['global'][17]={}
-	# nodes['global'][18]={'x':nodes['global'][16]['x'][215:], 'y':nodes['global'][16]['y'][215:], 's':nodes['global'][16]['s'][215:], 'yaw':nodes['global'][16]['yaw'][215:]}
-	# nodes['global'][17]={'x':nodes['global'][16]['x'][165:215], 'y':nodes['global'][16]['y'][165:215], 's':nodes['global'][16]['s'][165:215], 'yaw':nodes['global'][16]['yaw'][165:215]}
-	# nodes['global'][16]={'x':nodes['global'][16]['x'][:165], 'y':nodes['global'][16]['y'][:165], 's':nodes['global'][16]['s'][:165], 'yaw':nodes['global'][16]['yaw'][:165]}
-
-	# for i in range(41,25,-1):
-	# 	nodes['global'][i+1]=nodes['global'][i]
-	# nodes['global'][26]={}
-	# nodes['global'][26]={'x':nodes['global'][25]['x'][45:117], 'y':nodes['global'][25]['y'][45:117], 's':nodes['global'][25]['s'][45:117], 'yaw':nodes['global'][25]['yaw'][45:117]}
-	# nodes['global'][25]={'x':nodes['global'][25]['x'][:45], 'y':nodes['global'][25]['y'][:45], 's':nodes['global'][25]['s'][:45], 'yaw':nodes['global'][25]['yaw'][:45]}
  
-	# for i in range(42,29,-1):
-	# 	nodes['global'][i+2]=nodes['global'][i]
-	# nodes['global'][31]={}
-	# nodes['global'][30]={}
-	# nodes['global'][31]={'x':nodes['global'][29]['x'][117:], 'y':nodes['global'][29]['y'][117:], 's':nodes['global'][29]['s'][117:], 'yaw':nodes['global'][29]['yaw'][117:]}
-	# nodes['global'][30]={'x':nodes['global'][29]['x'][47:117], 'y':nodes['global'][29]['y'][47:117], 's':nodes['global'][29]['s'][47:117], 'yaw':nodes['global'][29]['yaw'][47:117]}
-	# nodes['global'][29]={'x':nodes['global'][29]['x'][:47], 'y':nodes['global'][29]['y'][:47], 's':nodes['global'][29]['s'][:47], 'yaw':nodes['global'][29]['yaw'][:47]} ##node 44개
-
-	# for i in range(44, 32, -1):
-	# 	nodes['global'][i+1]=nodes['global'][i]
-	# nodes['global'][33]={}
-	# nodes['global'][33]={'x':nodes['global'][32]['x'][118:], 'y':nodes['global'][32]['y'][118:], 's':nodes['global'][32]['s'][118:], 'yaw':nodes['global'][32]['yaw'][118:]}
-	# nodes['global'][32]={'x':nodes['global'][32]['x'][:118], 'y':nodes['global'][32]['y'][:118], 's':nodes['global'][32]['s'][:118], 'yaw':nodes['global'][32]['yaw'][:118]} ##node 45
-
+	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/frontier/route.pkl", "rb") as f: #global
+	# 	nodes['global']=pickle.load(f)
+  
 	link_dir={'straight':[0,1,2,3,4,5,6,10,11,12,14,16,18,21,22,23,24,25,29,31,32,37,38,40,41,42,43,44,45],'left':[7,8,26,27,28,30,33,34],'right':[9,13,15,17,19,20,35,36,39]}
 	
 	dir=[]
@@ -360,16 +332,16 @@ if __name__ == "__main__":
 	nodes['global'][0]['s'] = nodes['global'][0]['s'][:300]
 	nodes['global'][0]['yaw'] = nodes['global'][0]['yaw'][:300]
  
-	with open(path_map + "/src/frontier/route_parking1.pkl", "rb") as f: #parking
+	with open(path_map + "/src/smoking/route_parking1.pkl", "rb") as f: #parking
 		nodes['parking']= pickle.load(f)
 	nodes['parking'][1]={}
 	nodes['parking'][1]=nodes['parking'][0]
-	with open(path_map + "/src/frontier/route_parking2.pkl", "rb") as f: #route_
+	with open(path_map + "/src/smoking/route_parking2.pkl", "rb") as f: #route_
 		park_2= pickle.load(f)
 		nodes['parking'][2]=park_2[0]
 	nodes['parking'][3]={}
 	nodes['parking'][3]=nodes['parking'][2]
-	with open(path_map + "/src/frontier/route_parking3.pkl", "rb") as f: #parking
+	with open(path_map + "/src/smoking/route_parking3.pkl", "rb") as f: #parking
 		park_4= pickle.load(f)
 		nodes['parking'][4]=park_4[0]
 	nodes['parking'][5]={}
@@ -391,16 +363,16 @@ if __name__ == "__main__":
 	# nodes['parking'][11]=nodes['parking'][10]
  
  
-	with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking1.pkl", "rb") as f: #parking
-		nodes['parking']= pickle.load(f)
-	nodes['parking'][1]={}
-	nodes['parking'][1]=nodes['parking'][0]
-	with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking2.pkl", "rb") as f: #parking
-		park_2= pickle.load(f)
-		nodes['parking'][2]=park_2[0]
-	nodes['parking'][3]={}
-	nodes['parking'][3]=nodes['parking'][2]
-	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking3.pkl", "rb") as f: #parking
+	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/frontier/route_parking1.pkl", "rb") as f: #parking
+	# 	nodes['parking']= pickle.load(f)
+	# nodes['parking'][1]={}
+	# nodes['parking'][1]=nodes['parking'][0]
+	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/frontier/route_parking2.pkl", "rb") as f: #parking
+	# 	park_2= pickle.load(f)
+	# 	nodes['parking'][2]=park_2[0]
+	# nodes['parking'][3]={}
+	# nodes['parking'][3]=nodes['parking'][2]
+	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/frontier/route_parking3.pkl", "rb") as f: #parking
 	# 	park_4= pickle.load(f)
 	# 	nodes['parking'][4]=park_4[0]
 	# nodes['parking'][5]={}
@@ -513,8 +485,8 @@ if __name__ == "__main__":
 	v=0
 	prev_ind={'global':0,'parking':0}
 	# ind = 10
-	target_speed = {'global':10.0 / 3.6, 'parking': 8.0/3.6}
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
+	target_speed = {'global': 8.0 / 3.6, 'parking': 5.0/3.6}
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=2, dt=0.1)
 	state.x=obj_msg.x
 	state.y=obj_msg.y
 	state.yaw=obj_msg.yaw
@@ -526,6 +498,7 @@ if __name__ == "__main__":
  	#state = obj_car
 	v_list.append(state.v)
 	my_wp={'global':0,'parking':0}
+
 	#my_wp = get_closest_waypoints(state.x, state.y, mapx[:100], mapy[:100],my_wp)
 	mode='global' ### global인지 parking인지 subscribe 한다고 치면..
 	move_mode='forward'
@@ -543,15 +516,16 @@ if __name__ == "__main__":
 		print("finish!")
 		fin_wp=[my_wp[mode], link_ind[mode]+1]
 		# link_ind[mode]+=1
-
-	link_ind[mode]=find_link(link_len[mode], my_wp[mode])
-	
+	if mode == 'global':
+		link_ind[mode]=find_link(link_len[mode], my_wp[mode])
+	print(link_ind[mode])
 	if fin_wp == [my_wp[mode], link_ind[mode]]:
 		move_mode='finish'
 	else:
 		move_mode='forward'
-		
-	mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
+	
+	# print(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))	
+	# mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 
 	# if (fin_wp!=0) and (fin_wp != my_wp[mode])and (mode!='parking'):
 	# 	rospy.set_param('move_mode', 'forward')
@@ -592,7 +566,8 @@ if __name__ == "__main__":
 		# 	rospy.set_param('move_mode', 'forward')
 		# elif (mode=='parking') & ((link_ind[mode]==1)or(link_ind[mode]==3)or(link_ind[mode]==5)or(link_ind[mode]==7)):
 		# 	rospy.set_param('move_mode', 'backward')
-		if (mode == 'global') and ((my_wp[mode] >= 240) and (my_wp[mode] < 245)): ################parking mode 시작 웨이포인트 넣기
+		# if (mode == 'global') and ((my_wp[mode] >= 240) and (my_wp[mode] < 245)): ################parking mode 시작 웨이포인트 넣기
+		if (mode == 'global') and ((my_wp[mode] >= 277) and (my_wp[mode] < 278)):
 			# print("11111!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			prev_park_ind=0
 			for park_i in range(0,5,2):
@@ -615,13 +590,13 @@ if __name__ == "__main__":
 					# state = State(x=mapx['parking'][ind], y=mapy['parking'][ind], yaw=mapyaw['parking'][ind], v=1, dt=0.1)
 					print("choose: "+str(park_i))
 					# move_mode='finish'
-					fin_wp == [my_wp['parking'], link_ind['parking']]
+					# fin_wp == [my_wp['parking'], link_ind['parking']]
 					# rospy.set_param('car_mode', mode)
 					mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 					mode='parking'
 					break
 		if (mode=="parking"):
-			if ((my_wp[mode]>=10) and (my_wp[mode]<20)):
+			if ((my_wp[mode]>=0) and (my_wp[mode]<20)):
 				move_mode='forward'
 		# elif mode == 'parking' and 
 		# 		move_mode='forward'
@@ -642,6 +617,7 @@ if __name__ == "__main__":
 				waypoint_msg=waypoint_topic(my_wp[mode])
 			else:
 				my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
+				link_ind[mode]=find_link(link_len[mode], my_wp[mode])
 				dir=find_dir(link_dir, link_ind[mode])
 				waypoint_msg=waypoint_topic(my_wp[mode])
 				
@@ -671,14 +647,16 @@ if __name__ == "__main__":
 			# 	print("finish!")
 			# 	fin_wp=[my_wp[mode], link_ind[mode]+1]
 			# 	link_ind[mode]+=1
-			elif (mode == 'parking') and (my_wp[mode]>=21):
+			# elif (mode == 'parking') and (my_wp[mode]>=21):
+			elif (mode == 'parking') and (my_wp[mode]>=20):
 				move_mode='finish'
 				print("finish!")
 				mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 				fin_wp=[my_wp[mode], link_ind[mode]+1]
 				if (link_ind['parking']%2==0):
 					link_ind[mode]+=1
-			elif ((mode=='parking') and (link_ind['parking']%2==1)) and (my_wp[mode]<=19): #parking 후진의 마지막 waypoint
+			# elif ((mode=='parking') and (link_ind['parking']%2==1)) and (my_wp[mode]<=19): #parking 후진의 마지막 waypoint
+			elif ((mode=='parking') and (link_ind['parking']%2==1)) and (my_wp[mode]<=11):
 				#move_mode='finish'
 				print("parking finish!")
 				my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
@@ -692,15 +670,15 @@ if __name__ == "__main__":
 			# 	print("finish!")
 			# 	fin_wp=[my_wp[mode], link_ind[mode]+1]
 			# 	link_ind[mode]+=1
-			
-			link_ind[mode]=find_link(link_len[mode], my_wp[mode])
-   
+
 			if fin_wp == [my_wp[mode], link_ind[mode]]:
 				move_mode='finish'
 				mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 			# elif (mode == 'parking') and (fin_wp[0] <= my_wp[mode]):
 			# 	if my_wp[mode] < 10:
 			# 		move_mode='finish'
+			elif (mode=='global') and (link_ind[mode]==0) and (fin_wp != [my_wp[mode], link_ind[mode]]):
+				move_mode='forward'
 			else:
 				move_mode='forward'
 				msg.drive.jerk=0
@@ -776,6 +754,7 @@ if __name__ == "__main__":
 			waypoint_msg=waypoint_topic(my_wp[mode])
 		else:
 			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
+			link_ind[mode]=find_link(link_len[mode], my_wp[mode])
 			dir=find_dir(link_dir, link_ind[mode])
 			waypoint_msg=waypoint_topic(my_wp[mode])
 
@@ -802,14 +781,16 @@ if __name__ == "__main__":
 		# 	print("finish!")
 		# 	fin_wp=[my_wp[mode], link_ind[mode]+1]
 		# 	link_ind[mode]+=1
-		elif (mode == 'parking') and (my_wp[mode]>=21):
+		# elif (mode == 'parking') and (my_wp[mode]>=21):
+		elif (mode == 'parking') and (my_wp[mode]>=22):
 			move_mode='finish'
 			print("finish!")
 			mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 			fin_wp=[my_wp[mode], link_ind[mode]+1]
 			if (link_ind['parking']%2==0):
 				link_ind[mode]+=1
-		elif ((mode=='parking') and (link_ind['parking']%2==1)) and (my_wp[mode]<=19): #parking 후진의 마지막 waypoint
+		# elif ((mode=='parking') and (link_ind['parking']%2==1)) and (my_wp[mode]<=19): #parking 후진의 마지막 waypoint
+		elif ((mode=='parking') and (link_ind['parking']%2==1)) and (my_wp[mode]<=12):
 			#move_mode='finish'
 			print("parking finish!")
 			my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
@@ -818,8 +799,7 @@ if __name__ == "__main__":
 			control_pub.publish(msg)
 			rospy.sleep(1)
 			mode = 'global'
-
-		link_ind[mode]=find_link(link_len[mode], my_wp[mode])
+   
   
 		if (fin_wp == [my_wp[mode], link_ind[mode]]):
 			move_mode='finish'
