@@ -13,7 +13,7 @@ from std_msgs.msg import Float32
 # before using this code, change imu driver
 ###########################################
 
-port = str(rospy.get_param("~imu_port","/dev/ttyUSB5"))
+port = str(rospy.get_param("~imu_port","/dev/ttyUSB1"))
 rpy=[0,0,0]
 w_speed=[0,0,0]
 accel=[0,0,0]
@@ -116,9 +116,9 @@ if __name__ == '__main__':
             #mag[1] = round(float(data[11]),3)
             #mag[2] = round(float(data[12]),3)
                
-            mag.magnetic_field.x = float(data[10])
-            mag.magnetic_field.y = float(data[11])
-            mag.magnetic_field.z = float(data[12])
+            #mag.magnetic_field.x = float(data[10])
+            #mag.magnetic_field.y = float(data[11])
+            #mag.magnetic_field.z = float(data[12])
             
             #battery=round(float(data[13]),3)
             imu_pub.publish(imu)

@@ -270,44 +270,47 @@ if __name__ == "__main__":
 	route_id_list = rn_id[start_node_id][args.dir]
 	#route_id_list = rn_id[start_node_id]['right']+rn_id[5]['left']+rn_id[6]['right']
 
-	with open(path_map + "/src/kcity/route.pkl", "rb") as f:
-		nodes = pickle.load(f)
+	# with open(path_map + "/src/kcity/route.pkl", "rb") as f:
+	# 	nodes = pickle.load(f)
   
-	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
+	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/route_new.pkl", "rb") as f:
 	# 	nodes = pickle.load(f)
 
-	nodes[41]={}
-	nodes[40]={}
-	for i in range(39,16,-1):
-		nodes[i+2]=nodes[i]
+	# nodes[41]={}
+	# nodes[40]={}
+	# for i in range(39,16,-1):
+	# 	nodes[i+2]=nodes[i]
 	
-	nodes[18]={'x':nodes[16]['x'][215:], 'y':nodes[16]['y'][215:], 's':nodes[16]['s'][215:], 'yaw':nodes[16]['yaw'][215:]}
-	nodes[17]={'x':nodes[16]['x'][165:215], 'y':nodes[16]['y'][165:215], 's':nodes[16]['s'][165:215], 'yaw':nodes[16]['yaw'][165:215]}
-	nodes[16]={'x':nodes[16]['x'][:165], 'y':nodes[16]['y'][:165], 's':nodes[16]['s'][:165], 'yaw':nodes[16]['yaw'][:165]}
+	# nodes[18]={'x':nodes[16]['x'][215:], 'y':nodes[16]['y'][215:], 's':nodes[16]['s'][215:], 'yaw':nodes[16]['yaw'][215:]}
+	# nodes[17]={'x':nodes[16]['x'][165:215], 'y':nodes[16]['y'][165:215], 's':nodes[16]['s'][165:215], 'yaw':nodes[16]['yaw'][165:215]}
+	# nodes[16]={'x':nodes[16]['x'][:165], 'y':nodes[16]['y'][:165], 's':nodes[16]['s'][:165], 'yaw':nodes[16]['yaw'][:165]}
 
-	for i in range(41,25,-1):
-		nodes[i+1]=nodes[i]
-	nodes[26]={'x':nodes[25]['x'][45:117], 'y':nodes[25]['y'][45:117], 's':nodes[25]['s'][45:117], 'yaw':nodes[25]['yaw'][45:117]}
-	nodes[25]={'x':nodes[25]['x'][:45], 'y':nodes[25]['y'][:45], 's':nodes[25]['s'][:45], 'yaw':nodes[25]['yaw'][:45]}
+	# for i in range(41,25,-1):
+	# 	nodes[i+1]=nodes[i]
+	# nodes[26]={'x':nodes[25]['x'][45:117], 'y':nodes[25]['y'][45:117], 's':nodes[25]['s'][45:117], 'yaw':nodes[25]['yaw'][45:117]}
+	# nodes[25]={'x':nodes[25]['x'][:45], 'y':nodes[25]['y'][:45], 's':nodes[25]['s'][:45], 'yaw':nodes[25]['yaw'][:45]}
  
-	for i in range(42,29,-1):
-		nodes[i+2]=nodes[i]
+	# for i in range(42,29,-1):
+	# 	nodes[i+2]=nodes[i]
 
-	nodes[31]={'x':nodes[29]['x'][117:], 'y':nodes[29]['y'][117:], 's':nodes[29]['s'][117:], 'yaw':nodes[29]['yaw'][117:]}
-	nodes[30]={'x':nodes[29]['x'][47:117], 'y':nodes[29]['y'][47:117], 's':nodes[29]['s'][47:117], 'yaw':nodes[29]['yaw'][47:117]}
-	nodes[29]={'x':nodes[29]['x'][:47], 'y':nodes[29]['y'][:47], 's':nodes[29]['s'][:47], 'yaw':nodes[29]['yaw'][:47]} ##node 44개
+	# nodes[31]={'x':nodes[29]['x'][117:], 'y':nodes[29]['y'][117:], 's':nodes[29]['s'][117:], 'yaw':nodes[29]['yaw'][117:]}
+	# nodes[30]={'x':nodes[29]['x'][47:117], 'y':nodes[29]['y'][47:117], 's':nodes[29]['s'][47:117], 'yaw':nodes[29]['yaw'][47:117]}
+	# nodes[29]={'x':nodes[29]['x'][:47], 'y':nodes[29]['y'][:47], 's':nodes[29]['s'][:47], 'yaw':nodes[29]['yaw'][:47]} ##node 44개
 
-	for i in range(44,32,-1):
-		nodes[i+1]=nodes[i]
+	# for i in range(44,32,-1):
+	# 	nodes[i+1]=nodes[i]
 
-	nodes[33]={'x':nodes[32]['x'][118:], 'y':nodes[32]['y'][118:], 's':nodes[32]['s'][118:], 'yaw':nodes[32]['yaw'][118:]}
-	nodes[32]={'x':nodes[32]['x'][:118], 'y':nodes[32]['y'][:118], 's':nodes[32]['s'][:118], 'yaw':nodes[32]['yaw'][:118]} ##node 45
+	# nodes[33]={'x':nodes[32]['x'][118:], 'y':nodes[32]['y'][118:], 's':nodes[32]['s'][118:], 'yaw':nodes[32]['yaw'][118:]}
+	# nodes[32]={'x':nodes[32]['x'][:118], 'y':nodes[32]['y'][:118], 's':nodes[32]['s'][:118], 'yaw':nodes[32]['yaw'][:118]} ##node 45
 
-	link_i=-1
-	link_len=[]
-	for i in range(len(nodes)):
-		link_i+=len(nodes[i]["x"])
-		link_len.append(link_i)
+	# link_i=-1
+	# link_len=[]
+	# for i in range(len(nodes)):
+	# 	link_i+=len(nodes[i]["x"])
+	# 	link_len.append(link_i)
+
+	with open(path_map + "/src/kcity/route.pkl", "rb") as f:
+		nodes = pickle.load(f)
  
 	link_dir={'straight':[0,1,2,3,4,5,6,10,11,12,14,16,18,21,22,23,24,25,29,31,32,37,38,40,41,42,43,44,45,46],'left':[7,8,26,27,28,30,33,34],'right':[9,13,15,17,19,20,35,36,39]}
 	dir=[]
@@ -329,8 +332,9 @@ if __name__ == "__main__":
 	# link_dir={'straight':[1,2,4,7,9,11,13,15,16,17,19,21,23,25,26,28,29],'left':[3,6,10,18,20,22,25],'right':[0,5,8,12,14,24,27,30]}
 	
 	stopline_wp=[]
-	stopline_wp=[248, 337, 443,721,937,1318,1514,1789,2143,2260,2475,2740,2836]
+	# stopline_wp=[248, 337, 443,721,937,1318,1514,1789,2143,2260,2475,2740,2836]
 	stopline_wp_v2=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846]
+	stopline_wp=[sw-15 for sw in stopline_wp_v2]
 
 	lane_width={}
 	error_icte=0
@@ -393,7 +397,10 @@ if __name__ == "__main__":
 	mode='global' ### global인지 parking인지 subscribe 한다고 치면..
 	move_mode='forward'
 	#my_wp = get_closest_waypoints(state.x, state.y, mapx[:100], mapy[:100],my_wp)
-	my_wp = get_closest_waypoints(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
+	
+	my_wp = get_closest_waypoints(state.x, state.y, mapx, mapy)
+	link_ind=find_link(link_len, my_wp)
+	
 	waypoint_msg=waypoint_topic(my_wp)
 	prev_v = state.v
 	error_ia = 0
@@ -406,8 +413,6 @@ if __name__ == "__main__":
 		fin_wp=[my_wp, link_ind+1]
 		# link_ind+=1
 
-	link_ind=find_link(link_len, my_wp)
-
 	if fin_wp == [my_wp, link_ind]:
 		move_mode='finish'
 	else:
@@ -418,7 +423,7 @@ if __name__ == "__main__":
 	prev_ind = link_ind-2
 	# s, d = get_frenet(state.x, state.y, mapx[:100], mapy[:100],my_wp)
 	# x, y, road_yaw = get_cartesian(s, d, mapx[:100], mapy[:100],maps[:100])
-	s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
+	s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]])
 	x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
 	
 	yawi = state.yaw - road_yaw
@@ -450,7 +455,8 @@ if __name__ == "__main__":
 		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed)
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
-			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
+			link_ind=find_link(link_len, my_wp)
+			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]])
 			waypoint_msg=waypoint_topic(my_wp)
 			dir=find_dir(link_dir, link_ind)
 			if my_wp >= (link_len[link_ind]):
@@ -464,14 +470,11 @@ if __name__ == "__main__":
 					fin_wp=[my_wp, link_ind+1]
 					# link_ind+=1
 
-			link_ind=find_link(link_len, my_wp)
-
 			for i in range(len(stopline_wp)):
 				if (my_wp>=stopline_wp[i]) and (my_wp<=stopline_wp_v2[i]):
 					move_mode='finish'
 					print("finish!")
 					
-			link_ind=find_link(link_len, my_wp)
 
 			if fin_wp == [my_wp, link_ind]:
 				move_mode='finish'
@@ -483,7 +486,7 @@ if __name__ == "__main__":
 			# prev_ind = link_ind-2
 			print("현재 링크 번호: "+ str(link_ind)+", 링크 방향: "+str(dir))
 
-			s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
+			s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]])
 			x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
 			steer = road_yaw - state.yaw
 			a = 0
@@ -529,7 +532,8 @@ if __name__ == "__main__":
 		state.y=obj_msg.y
 		state.yaw=obj_msg.yaw
 		# state.v=obj_msg.v
-		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
+		link_ind=find_link(link_len, my_wp)
+		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]])
 		waypoint_msg=waypoint_topic(my_wp)
 		dir=find_dir(link_dir, link_ind)
 
@@ -549,7 +553,7 @@ if __name__ == "__main__":
 				move_mode='finish'
 				print("finish!")
 
-		link_ind=find_link(link_len, my_wp)
+		
 
 		if fin_wp == [my_wp, link_ind]:
 				move_mode='finish'
@@ -568,7 +572,7 @@ if __name__ == "__main__":
 		# 	with open("/home/nsclmds/steer_list.text", "wb") as f:
 		# 		pickle.dump(steer_list, f)
     
-		s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
+		s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]])
 		x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
 		yaw_diff = state.yaw - road_yaw
 

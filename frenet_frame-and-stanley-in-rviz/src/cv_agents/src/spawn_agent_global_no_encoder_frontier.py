@@ -277,32 +277,32 @@ if __name__ == "__main__":
 	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:
 	# 	nodes = pickle.load(f)
 
-	nodes[41]={}
-	nodes[40]={}
-	for i in range(39,16,-1):
-		nodes[i+2]=nodes[i]
+	# nodes[41]={}
+	# nodes[40]={}
+	# for i in range(39,16,-1):
+	# 	nodes[i+2]=nodes[i]
 	
-	nodes[18]={'x':nodes[16]['x'][215:], 'y':nodes[16]['y'][215:], 's':nodes[16]['s'][215:], 'yaw':nodes[16]['yaw'][215:]}
-	nodes[17]={'x':nodes[16]['x'][165:215], 'y':nodes[16]['y'][165:215], 's':nodes[16]['s'][165:215], 'yaw':nodes[16]['yaw'][165:215]}
-	nodes[16]={'x':nodes[16]['x'][:165], 'y':nodes[16]['y'][:165], 's':nodes[16]['s'][:165], 'yaw':nodes[16]['yaw'][:165]}
+	# nodes[18]={'x':nodes[16]['x'][215:], 'y':nodes[16]['y'][215:], 's':nodes[16]['s'][215:], 'yaw':nodes[16]['yaw'][215:]}
+	# nodes[17]={'x':nodes[16]['x'][165:215], 'y':nodes[16]['y'][165:215], 's':nodes[16]['s'][165:215], 'yaw':nodes[16]['yaw'][165:215]}
+	# nodes[16]={'x':nodes[16]['x'][:165], 'y':nodes[16]['y'][:165], 's':nodes[16]['s'][:165], 'yaw':nodes[16]['yaw'][:165]}
 
-	for i in range(41,25,-1):
-		nodes[i+1]=nodes[i]
-	nodes[26]={'x':nodes[25]['x'][45:117], 'y':nodes[25]['y'][45:117], 's':nodes[25]['s'][45:117], 'yaw':nodes[25]['yaw'][45:117]}
-	nodes[25]={'x':nodes[25]['x'][:45], 'y':nodes[25]['y'][:45], 's':nodes[25]['s'][:45], 'yaw':nodes[25]['yaw'][:45]}
+	# for i in range(41,25,-1):
+	# 	nodes[i+1]=nodes[i]
+	# nodes[26]={'x':nodes[25]['x'][45:117], 'y':nodes[25]['y'][45:117], 's':nodes[25]['s'][45:117], 'yaw':nodes[25]['yaw'][45:117]}
+	# nodes[25]={'x':nodes[25]['x'][:45], 'y':nodes[25]['y'][:45], 's':nodes[25]['s'][:45], 'yaw':nodes[25]['yaw'][:45]}
  
-	for i in range(42,29,-1):
-		nodes[i+2]=nodes[i]
+	# for i in range(42,29,-1):
+	# 	nodes[i+2]=nodes[i]
 
-	nodes[31]={'x':nodes[29]['x'][117:], 'y':nodes[29]['y'][117:], 's':nodes[29]['s'][117:], 'yaw':nodes[29]['yaw'][117:]}
-	nodes[30]={'x':nodes[29]['x'][47:117], 'y':nodes[29]['y'][47:117], 's':nodes[29]['s'][47:117], 'yaw':nodes[29]['yaw'][47:117]}
-	nodes[29]={'x':nodes[29]['x'][:47], 'y':nodes[29]['y'][:47], 's':nodes[29]['s'][:47], 'yaw':nodes[29]['yaw'][:47]} ##node 44개
+	# nodes[31]={'x':nodes[29]['x'][117:], 'y':nodes[29]['y'][117:], 's':nodes[29]['s'][117:], 'yaw':nodes[29]['yaw'][117:]}
+	# nodes[30]={'x':nodes[29]['x'][47:117], 'y':nodes[29]['y'][47:117], 's':nodes[29]['s'][47:117], 'yaw':nodes[29]['yaw'][47:117]}
+	# nodes[29]={'x':nodes[29]['x'][:47], 'y':nodes[29]['y'][:47], 's':nodes[29]['s'][:47], 'yaw':nodes[29]['yaw'][:47]} ##node 44개
 
-	for i in range(44,32,-1):
-		nodes[i+1]=nodes[i]
+	# for i in range(44,32,-1):
+	# 	nodes[i+1]=nodes[i]
 
-	nodes[33]={'x':nodes[32]['x'][118:], 'y':nodes[32]['y'][118:], 's':nodes[32]['s'][118:], 'yaw':nodes[32]['yaw'][118:]}
-	nodes[32]={'x':nodes[32]['x'][:118], 'y':nodes[32]['y'][:118], 's':nodes[32]['s'][:118], 'yaw':nodes[32]['yaw'][:118]} ##node 45
+	# nodes[33]={'x':nodes[32]['x'][118:], 'y':nodes[32]['y'][118:], 's':nodes[32]['s'][118:], 'yaw':nodes[32]['yaw'][118:]}
+	# nodes[32]={'x':nodes[32]['x'][:118], 'y':nodes[32]['y'][:118], 's':nodes[32]['s'][:118], 'yaw':nodes[32]['yaw'][:118]} ##node 45
 
 	link_i=-1
 	link_len=[]
