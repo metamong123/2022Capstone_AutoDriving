@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 
-# python 3.6 으로 실행할것
+# python 3.7 으로 실행할것
 
 import pickle
 import numpy as np
@@ -74,7 +74,7 @@ waypoints=interpolate_waypoints(data_x,data_y,space=0.5)
 wayp_dict[0]={'x':waypoints['x'],'y':waypoints['y'],'s':waypoints['s'],'yaw':waypoints['yaw']}
 
 
-with open('/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/smoking/route_parking3.pkl', 'wb') as handle:
+with open('/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/frontier/route.pkl', 'wb') as handle:
   pickle.dump(wayp_dict,handle, protocol=0)
   
 # with open('route.pkl', "rb") as f:

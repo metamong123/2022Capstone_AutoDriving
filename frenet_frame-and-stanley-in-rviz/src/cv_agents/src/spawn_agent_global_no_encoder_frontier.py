@@ -271,7 +271,7 @@ if __name__ == "__main__":
 	route_id_list = rn_id[start_node_id][args.dir]
 	#route_id_list = rn_id[start_node_id]['right']+rn_id[5]['left']+rn_id[6]['right']
 
-	with open(path_map + "/src/global_route.pkl", "rb") as f:
+	with open(path_map + "/src/frontier/route.pkl", "rb") as f:
 		nodes = pickle.load(f)
   
 	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/route.pkl", "rb") as f:

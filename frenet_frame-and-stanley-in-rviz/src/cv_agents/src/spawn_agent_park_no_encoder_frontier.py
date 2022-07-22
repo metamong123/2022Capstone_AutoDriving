@@ -22,7 +22,8 @@ from rocon_std_msgs.msg import StringArray
 import pickle
 import argparse
 
-from frenet import *
+# from frenet import *
+from frenet_find_wp_from_link import *
 from stanley_pid import *
 
 rospack = rospkg.RosPack()
@@ -311,26 +312,26 @@ if __name__ == "__main__":
  
 	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/frontier/route.pkl", "rb") as f: #global
 	# 	nodes['global']=pickle.load(f)
-  
+	park_to_glo=0
 	link_dir={'straight':[0,1,2,3,4,5,6,10,11,12,14,16,18,21,22,23,24,25,29,31,32,37,38,40,41,42,43,44,45],'left':[7,8,26,27,28,30,33,34],'right':[9,13,15,17,19,20,35,36,39]}
 	
 	dir=[]
 	# nodes['global'][6]={}
-	nodes['global'][4]={'x':nodes['global'][0]['x'][600:], 'y':nodes['global'][0]['y'][600:], 's':nodes['global'][0]['s'][600:], 'yaw':nodes['global'][0]['yaw'][600:]}
-	# nodes['global'][5]={}
-	nodes['global'][3]={'x':nodes['global'][0]['x'][500:600], 'y':nodes['global'][0]['y'][500:600], 's':nodes['global'][0]['s'][500:600], 'yaw':nodes['global'][0]['yaw'][500:600]}
-	# nodes['global'][4]={}
-	nodes['global'][2]={'x':nodes['global'][0]['x'][400:500], 'y':nodes['global'][0]['y'][400:500], 's':nodes['global'][0]['s'][400:500], 'yaw':nodes['global'][0]['yaw'][400:500]}
-	# nodes['global'][3]={}
-	nodes['global'][1]={'x':nodes['global'][0]['x'][300:400], 'y':nodes['global'][0]['y'][300:400], 's':nodes['global'][0]['s'][300:400], 'yaw':nodes['global'][0]['yaw'][300:400]}
-	# # nodes['global'][2]={}
-	# nodes['global'][2]={'x':nodes['global'][0]['x'][200:300], 'y':nodes['global'][0]['y'][200:300], 's':nodes['global'][0]['s'][200:300], 'yaw':nodes['global'][0]['yaw'][200:300]}
-	# # nodes['global'][1]={}
-	# nodes['global'][1]={'x':nodes['global'][0]['x'][100:200], 'y':nodes['global'][0]['y'][100:200], 's':nodes['global'][0]['s'][100:200], 'yaw':nodes['global'][0]['yaw'][100:200]}
-	nodes['global'][0]['x'] = nodes['global'][0]['x'][:300]
-	nodes['global'][0]['y'] = nodes['global'][0]['y'][:300]
-	nodes['global'][0]['s'] = nodes['global'][0]['s'][:300]
-	nodes['global'][0]['yaw'] = nodes['global'][0]['yaw'][:300]
+	# nodes['global'][4]={'x':nodes['global'][0]['x'][600:], 'y':nodes['global'][0]['y'][600:], 's':nodes['global'][0]['s'][600:], 'yaw':nodes['global'][0]['yaw'][600:]}
+	# # nodes['global'][5]={}
+	# nodes['global'][3]={'x':nodes['global'][0]['x'][500:600], 'y':nodes['global'][0]['y'][500:600], 's':nodes['global'][0]['s'][500:600], 'yaw':nodes['global'][0]['yaw'][500:600]}
+	# # nodes['global'][4]={}
+	# nodes['global'][2]={'x':nodes['global'][0]['x'][400:500], 'y':nodes['global'][0]['y'][400:500], 's':nodes['global'][0]['s'][400:500], 'yaw':nodes['global'][0]['yaw'][400:500]}
+	# # nodes['global'][3]={}
+	# nodes['global'][1]={'x':nodes['global'][0]['x'][300:400], 'y':nodes['global'][0]['y'][300:400], 's':nodes['global'][0]['s'][300:400], 'yaw':nodes['global'][0]['yaw'][300:400]}
+	# # # nodes['global'][2]={}
+	# # nodes['global'][2]={'x':nodes['global'][0]['x'][200:300], 'y':nodes['global'][0]['y'][200:300], 's':nodes['global'][0]['s'][200:300], 'yaw':nodes['global'][0]['yaw'][200:300]}
+	# # # nodes['global'][1]={}
+	# # nodes['global'][1]={'x':nodes['global'][0]['x'][100:200], 'y':nodes['global'][0]['y'][100:200], 's':nodes['global'][0]['s'][100:200], 'yaw':nodes['global'][0]['yaw'][100:200]}
+	# nodes['global'][0]['x'] = nodes['global'][0]['x'][:300]
+	# nodes['global'][0]['y'] = nodes['global'][0]['y'][:300]
+	# nodes['global'][0]['s'] = nodes['global'][0]['s'][:300]
+	# nodes['global'][0]['yaw'] = nodes['global'][0]['yaw'][:300]
  
 	with open(path_map + "/src/smoking/route_parking1.pkl", "rb") as f: #parking
 		nodes['parking']= pickle.load(f)
@@ -515,9 +516,9 @@ if __name__ == "__main__":
 		move_mode='finish'
 		print("finish!")
 		fin_wp=[my_wp[mode], link_ind[mode]+1]
-		# link_ind[mode]+=1
-	if mode == 'global':
-		link_ind[mode]=find_link(link_len[mode], my_wp[mode])
+		link_ind[mode]+=1
+	# if mode == 'global':
+	# 	link_ind[mode]=find_link(link_len[mode], my_wp[mode])
 	print(link_ind[mode])
 	if fin_wp == [my_wp[mode], link_ind[mode]]:
 		move_mode='finish'
@@ -617,7 +618,7 @@ if __name__ == "__main__":
 				waypoint_msg=waypoint_topic(my_wp[mode])
 			else:
 				my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
-				link_ind[mode]=find_link(link_len[mode], my_wp[mode])
+				# link_ind[mode]=find_link(link_len[mode], my_wp[mode])
 				dir=find_dir(link_dir, link_ind[mode])
 				waypoint_msg=waypoint_topic(my_wp[mode])
 				
@@ -629,7 +630,7 @@ if __name__ == "__main__":
 					move_mode='finish'
 					mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 					fin_wp = [my_wp[mode], link_ind[mode]]
-					# link_ind[mode]=len(link_len[mode])
+					link_ind[mode]=len(link_len[mode])
 				# elif ((mode=='parking') and (link_ind['parking']%2==1)): #parking 후진의 마지막 waypoint
 				# 	move_mode='finish'
 				# 	print("parking finish!")
@@ -641,7 +642,7 @@ if __name__ == "__main__":
 					mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 					print("finish!")
 					fin_wp=[my_wp[mode], link_ind[mode]+1]
-					# link_ind[mode]+=1
+					link_ind[mode]+=1
 			# elif (mode == 'parking') and (link_ind['parking']%2==0) and (my_wp[mode]>=21):
 			# 	move_mode='finish'
 			# 	print("finish!")
@@ -660,16 +661,23 @@ if __name__ == "__main__":
 				#move_mode='finish'
 				print("parking finish!")
 				my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
-				fin_wp = [my_wp['global'], link_ind['global']]
-				msg.drive.jerk=200
-				control_pub.publish(msg)
-				rospy.sleep(1)
+				park_to_glo=1
+				# fin_wp = [my_wp['global'], link_ind['global']]
+				# msg.drive.jerk=200
+				# control_pub.publish(msg)
+				# rospy.sleep(1)
 				mode = 'global'
 			# elif (mode == 'parking') and (link_ind['parking']%2==0) and (my_wp[mode]>=23):
 			# 	move_mode='finish'
 			# 	print("finish!")
 			# 	fin_wp=[my_wp[mode], link_ind[mode]+1]
 			# 	link_ind[mode]+=1
+
+			if park_to_glo==1:
+				msg.drive.jerk=200
+				control_pub.publish(msg)
+				rospy.sleep(1)
+				park_to_glo=0
 
 			if fin_wp == [my_wp[mode], link_ind[mode]]:
 				move_mode='finish'
@@ -754,7 +762,7 @@ if __name__ == "__main__":
 			waypoint_msg=waypoint_topic(my_wp[mode])
 		else:
 			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][:link_len[mode][link_ind[mode]]], mapy[mode][:link_len[mode][link_ind[mode]]],my_wp[mode])
-			link_ind[mode]=find_link(link_len[mode], my_wp[mode])
+			# link_ind[mode]=find_link(link_len[mode], my_wp[mode])
 			dir=find_dir(link_dir, link_ind[mode])
 			waypoint_msg=waypoint_topic(my_wp[mode])
 
@@ -763,7 +771,7 @@ if __name__ == "__main__":
 				# rospy.set_param('move_mode', 'finish')
 				move_mode='finish'
 				fin_wp = [my_wp[mode], link_ind[mode]]
-				# link_ind[mode]=len(link_len[mode])
+				link_ind[mode]=len(link_len[mode])
 			# elif ((mode=='parking') and (link_ind['parking']%2==1)): #parking 후진의 마지막 waypoint
 			# 	move_mode='finish'
 			# 	print("parking finish!")
@@ -775,7 +783,7 @@ if __name__ == "__main__":
 				print("finish!")
 				mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 				fin_wp=[my_wp[mode], link_ind[mode]+1]
-				# link_ind[mode]+=1
+				link_ind[mode]+=1
 		# elif (mode == 'parking') and (link_ind['parking']%2==0) and (my_wp[mode]>=21):
 		# 	move_mode='finish'
 		# 	print("finish!")
@@ -794,12 +802,18 @@ if __name__ == "__main__":
 			#move_mode='finish'
 			print("parking finish!")
 			my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
-			fin_wp = [my_wp['global'], link_ind['global']]
+			park_to_glo=1
+			# fin_wp = [my_wp['global'], link_ind['global']]
+			# msg.drive.jerk=200
+			# control_pub.publish(msg)
+			# rospy.sleep(1)
+			mode = 'global'
+
+		if park_to_glo==1:
 			msg.drive.jerk=200
 			control_pub.publish(msg)
 			rospy.sleep(1)
-			mode = 'global'
-   
+			park_to_glo=0
   
 		if (fin_wp == [my_wp[mode], link_ind[mode]]):
 			move_mode='finish'

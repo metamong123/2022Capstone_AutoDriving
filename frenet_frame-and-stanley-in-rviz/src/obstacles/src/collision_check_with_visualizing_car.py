@@ -24,7 +24,7 @@ class collision_check_marker():
 
         #Car, Obstacle Array Subscriber
         self.sub_car = rospy.Subscriber('/objects/car_1', Object, self.callback_car)
-        self.sub_obstacle = rospy.Subscriber('obstacles', ObjectArray, self.callback_obstacle)
+        self.sub_obstacle = rospy.Subscriber('/obstacles', ObjectArray, self.callback_obstacle)
         
         #self.car_marker_pub = rospy.Publisher("/objects/marker/car_1", Marker, queue_size=1)
         self.obstacle_marker_pub = rospy.Publisher("/objects/marker/obstacles", MarkerArray, queue_size=1)

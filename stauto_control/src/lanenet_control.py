@@ -124,7 +124,7 @@ def acker_callback(msg):
     global speed, steer, brake, gear
 
     speed = 2
-    steer = msg.data*0.005 #-(msg.drive.steering_angle)  # why minus?
+    steer = msg.data*0.01 #-(msg.drive.steering_angle)  # why minus?
 
     brake = 0
     gear = 0 #int(msg.drive.acceleration)  
@@ -140,7 +140,7 @@ if __name__ == '__main__':
 
     rate = rospy.Rate(10)
     
-    port = str(rospy.get_param("~robot_port","/dev/ttyUSB2"))
+    port = str(rospy.get_param("~robot_port","/dev/ttyUSB3"))
 
     ser = serial.serial_for_url(port, baudrate=115200, timeout=1)
 

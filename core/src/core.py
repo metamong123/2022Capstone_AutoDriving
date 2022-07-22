@@ -181,27 +181,29 @@ def parking_decision():
 	global parking_angle, parking_brake, parking_speed, parking_gear, parking_yaw
  	
 	if parking_flag == 'backward':
-		if waypoint >= 20:
-			parking_speed = 8/3.6
+		# if waypoint >= 20:
+		# 	parking_speed = 8/3.6
+		# 	parking_angle = 0
+		# 	parking_gear = 2
+		# 	parking_brake = 0
+		# else:
+		if abs(yaw - parking_yaw) < 0.1:
+			parking_speed = 5/3.6
 			parking_angle = 0
 			parking_gear = 2
 			parking_brake = 0
+			if waypoint <= 14:
+				parking_flag = 'end'
+			print('straight')
 		else:
-			if abs(yaw - parking_yaw) < 0.1:
-				parking_speed = 5/3.6
-				parking_angle = 0
-				parking_gear = 2
-				parking_brake = 0
-				if waypoint <= 12:
-					parking_flag = 'end'
-			else:
-				parking_speed = 5/3.6
-				parking_angle = -20*np.pi/180
-				parking_gear = 2
-				parking_brake = 0
-				if waypoint <= 12:
-					parking_flag = 'end'
-		print('parking backward')
+			parking_speed = 8/3.6
+			parking_angle = -20*np.pi/180
+			parking_gear = 2
+			parking_brake = 0
+			if waypoint <= 14:
+				parking_flag = 'end'
+			print('angle')
+		#print('parking backward')
 	else:
 		parking_speed = frenet_speed
 		parking_angle = frenet_angle
