@@ -3,7 +3,7 @@
 <launch>
   
   <!-- Use YOLOv4 -->
-  <arg name="image" default="/video/sign" />
+  <arg name="image" default="usb_cam/image_raw" />
 
   <!-- Console launch prefix -->
   <arg name="launch_prefix" default=""/>
@@ -13,24 +13,21 @@
   <arg name="yolo_config_path"  default="$(find darknet_ros)/yolo_network_config/cfg"/>
 
   <!-- ROS and network parameter files -->
-  <arg name="ros_param_file_1"     default="$(find darknet_ros)/config/test/ros_sign.yaml"/>
+  <arg name="ros_param_file_1"     default="$(find darknet_ros)/config/ros_1.yaml"/>
   <arg name="network_param_file_1" default="$(find darknet_ros)/config/yolo_ver4.yaml"/>
 
   <!-- Load parameters -->
-  <rosparam command="load" ns="darknet_ros" file="$(arg ros_param_file_1)"/>
-  <rosparam command="load" ns="darknet_ros" file="$(arg network_param_file_1)"/>
+  <rosparam command="load" ns="camera1/darknet_ros" file="$(arg ros_param_file_1)"/>
+  <rosparam command="load" ns="camera1/darknet_ros" file="$(arg network_param_file_1)"/>
 
   <!-- Start darknet and ros wrapper -->
-  <node pkg="darknet_ros" type="darknet_ros" name="darknet_ros" output="screen" launch-prefix="$(arg launch_prefix)">
+  <node ns="camera1" pkg="darknet_ros" type="darknet_ros" name="darknet_ros" output="screen" launch-prefix="$(arg launch_prefix)">
     <param name="weights_path"          value="$(arg yolo_weights_path)" />
     <param name="config_path"           value="$(arg yolo_config_path)" />
-    <remap from="/video/sign"  to="$(arg image)" />
+    <remap from="/usb_cam/image_raw"  to="$(arg image)" />
   </node>
 
  <!--<node name="republish" type="republish" pkg="image_transport" output="screen" 	args="compressed in:=/front_camera/image_raw raw out:=/camera/image_raw" /> -->
 
-<!-- send class -->
-  <node pkg="darknet_ros" type="test.py" name="obj_ID" output="screen"> 
-  </node>
 
 </launch>
