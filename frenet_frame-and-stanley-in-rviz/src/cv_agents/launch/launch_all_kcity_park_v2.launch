@@ -1,0 +1,18 @@
+<launch>
+
+	<node name="map_visualizer" pkg="map_server" type="map_visualizer_kcity_v2.py" />
+
+	<node name="parking_car" pkg="obstacles" type="parking_car.py" />
+	<node name="collision_check" pkg="obstacles" type="collision_check_with_visualizing_car.py" />
+	<node name="state" pkg="update" type="state.py"/>
+	<!-- node name="rosbag_play" pkg="rosbag" type="play" output="screen" required="true" args="- -clock /home/nsclmds/catkin_ws/src/frenet_frame-and-stanley-in-rviz/src/update/src/2022-03-18-18-00-35.bag" / -->
+	<!--node name="rosbag_play" pkg="rosbag" type="play" output="screen" required="true" args="- -clock /home/nsclmds/catkin_ws/src/frenet_frame-and-stanley-in-rviz/src/update/src/2022-04-27-20-31-30.bag - -topics /clicked_point /clock /diagnostics /gps/fix /initialpose /move_base_simple/goal /odom /rosout /rosout_agg /tf /tf_static /ublox_gps/fix_velocity /ublox_gps/monhw /ublox_gps/navclock /ublox_gps/navposecef /ublox_gps/navpvt /ublox_gps/navrelposned /ublox_gps/navsat /ublox_gps/navstatus /ublox_gps/rtcm /ublox_gps/rxmrtcm" /-->
+	<!--node name="rosbag_play" pkg="rosbag" type="play" required="true" args="- -clock /home/nsclmds/catkin_ws/src/frenet_frame-and-stanley-in-rviz/src/update/src/2022-05-04-18-49-45.bag - -topics /clicked_point /clock /diagnostics /gps/fix /initialpose /move_base_simple/goal /odom /rosout /rosout_agg /tf /tf_static /ublox_gps/fix_velocity /ublox_gps/monhw /ublox_gps/navclock /ublox_gps/navposecef /ublox_gps/navpvt /ublox_gps/navrelposned /ublox_gps/navsat /ublox_gps/navstatus /ublox_gps/rtcm /ublox_gps/rxmrtcm" /-->
+
+
+	<node name="spawn_agents" pkg="cv_agents" type="spawn_agent_park_no_encoder_kcity_v2.py" output="screen" />
+	
+	<node type="rviz" name="rviz" pkg="rviz" args="-d /home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/cv_agents/rviz/kcity.rviz" />
+	<!--node type="rviz" name="rviz" pkg="rviz" args="-d /home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/cv_agents/rviz/kcity.rviz" /-->
+	
+</launch>

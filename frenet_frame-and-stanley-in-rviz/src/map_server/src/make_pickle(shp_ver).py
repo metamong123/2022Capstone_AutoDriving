@@ -40,42 +40,89 @@ def interpolate_waypoints(wx, wy, space=0.5):
     "s": ss
   }
 
-df=gpd.read_file('/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/smoking/smoking3.shp' )
+df=[0,0,0,0,0,0]
+df[0]=gpd.read_file('/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking_3_version/set3/parking1.shp' )
+df[1]=gpd.read_file('/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking_3_version/set3/parking2.shp' )
+df[2]=gpd.read_file('/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking_3_version/set3/parking3.shp' )
+df[3]=gpd.read_file('/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking_3_version/set3/parking4.shp' )
+df[4]=gpd.read_file('/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking_3_version/set3/parking5.shp' )
+df[5]=gpd.read_file('/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/parking_3_version/set3/parking6.shp' )
 
-# 좌표 변환이 필요한 경우 주석 삭제
-df.to_crs(epsg=5179)
+for j in range(len(df)):
+  # 좌표 변환이 필요한 경우 주석 삭제
+  df[j].to_crs(epsg=5179)
 
-coor_dict={}
-for i in range(len(df)):
-  ty=(df.type == 'Polygon')
-  if ty[0]==1:
-    data=df['geometry'][i].exterior.xy
-  else:
-    data=df['geometry'][i].xy
-  # data[0].reverse()
-  # data[1].reverse()
-  coor_dict[i]={'x':data[0], 'y':data[1]}
-coor_dict
-# coor_dict[-1]=coor_dict[len(coor_dict)-1]
-# del(coor_dict[len(coor_dict)-2])
+  coor_dict={}
+  for i in range(len(df[j])):
+    ty=(df[j].type == 'Polygon')
+    if ty[0]==1:
+      data=df[j]['geometry'][i].exterior.xy
+    else:
+      data=df[j]['geometry'][i].xy
+    # data[0].reverse()
+    # data[1].reverse()
+    coor_dict[i]={'x':data[0], 'y':data[1]}
+  # coor_dict
+  # coor_dict[-1]=coor_dict[len(coor_dict)-1]
+  # del(coor_dict[len(coor_dict)-2])
 
-wayp_dict={}
-data_x=[]
-data_y=[]
-for i in range(len(coor_dict)):
-  data_x.append(coor_dict[i]['x'][0])
-  data_y.append(coor_dict[i]['y'][0])
+  wayp_dict={}
+  data_x=[]
+  data_y=[]
+  for i in range(len(coor_dict)):
+    data_x.append(coor_dict[i]['x'][0])
+    data_y.append(coor_dict[i]['y'][0])
+  # for i in range(len(coor_dict)):
+    # data_x.append(coor_dict[i-1]['x'][0])
+    # data_y.append(coor_dict[i-1]['y'][0])
+  # data_x=np.concatenate(data_x)
+  # data_y=np.concatenate(data_y)
+  waypoints=interpolate_waypoints(data_x,data_y,space=0.5)
+  wayp_dict[0]={'x':waypoints['x'],'y':waypoints['y'],'s':waypoints['s'],'yaw':waypoints['yaw']}
+
+
+  with open('/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/parking_v3_'+str(j)+'.pkl', 'wb') as handle:
+    pickle.dump(wayp_dict,handle, protocol=0)
+  
+# with open('route.pkl', "rb") as f:
+# 	waypoints = pickle.load(f)
+
+# df=gpd.read_file('/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/delivery/delivery_out.shp' )
+
+# # 좌표 변환이 필요한 경우 주석 삭제
+# df.to_crs(epsg=5179)
+
+# coor_dict={}
+# for i in range(len(df)):
+#   ty=(df.type == 'Polygon')
+#   if ty[0]==1:
+#     data=df['geometry'][i].exterior.xy
+#   else:
+#     data=df['geometry'][i].xy
+#   # data[0].reverse()
+#   # data[1].reverse()
+#   coor_dict[i]={'x':data[0], 'y':data[1]}
+# coor_dict
+# # coor_dict[-1]=coor_dict[len(coor_dict)-1]
+# # del(coor_dict[len(coor_dict)-2])
+
+# wayp_dict={}
+# data_x=[]
+# data_y=[]
 # for i in range(len(coor_dict)):
-  # data_x.append(coor_dict[i-1]['x'][0])
-  # data_y.append(coor_dict[i-1]['y'][0])
-# data_x=np.concatenate(data_x)
-# data_y=np.concatenate(data_y)
-waypoints=interpolate_waypoints(data_x,data_y,space=0.5)
-wayp_dict[0]={'x':waypoints['x'],'y':waypoints['y'],'s':waypoints['s'],'yaw':waypoints['yaw']}
+#   data_x.append(coor_dict[i]['x'][0])
+#   data_y.append(coor_dict[i]['y'][0])
+# # for i in range(len(coor_dict)):
+#   # data_x.append(coor_dict[i-1]['x'][0])
+#   # data_y.append(coor_dict[i-1]['y'][0])
+# # data_x=np.concatenate(data_x)
+# # data_y=np.concatenate(data_y)
+# waypoints=interpolate_waypoints(data_x,data_y,space=0.5)
+# wayp_dict[0]={'x':waypoints['x'],'y':waypoints['y'],'s':waypoints['s'],'yaw':waypoints['yaw']}
 
 
-with open('/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/frontier/route.pkl', 'wb') as handle:
-  pickle.dump(wayp_dict,handle, protocol=0)
+# with open('/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/del_to_global.pkl', 'wb') as handle:
+#   pickle.dump(wayp_dict,handle, protocol=0)
   
 # with open('route.pkl', "rb") as f:
 # 	waypoints = pickle.load(f)

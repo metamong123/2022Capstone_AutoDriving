@@ -316,15 +316,18 @@ if __name__ == "__main__":
 	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/global_no_del.pkl", "rb") as f:
 	# 	nodes['global'] = pickle.load(f)
 
+	link_dir={'straight':[0,1,2,3,4,7,8,9,11,12,14,16,20,22,23,24,25],'left':[6,10,13,15,17],'right':[5,18,19,21]}
+	dir=[]
+
 	node_wp_num=[]
-	node_wp_num=[0,150,200,400,600,700,800,1150,1200,1250,1300,1500,1550,1580,1620,1680,1850,1950,2100,2564]
+	node_wp_num=[0,103,191,278,389,511,564,654,706,860,984,1081,1150,1179,1200,1270,1340,1500,1560,1620,1700,1820,2011,2094,2214,2563]
 
 	for i in reversed(range(len(node_wp_num)-1)):
 		nodes['global'][i]={'x':nodes['global'][0]['x'][node_wp_num[i]:node_wp_num[i+1]], 'y':nodes['global'][0]['y'][node_wp_num[i]:node_wp_num[i+1]], 's':nodes['global'][0]['s'][node_wp_num[i]:node_wp_num[i+1]], 'yaw':nodes['global'][0]['yaw'][node_wp_num[i]:node_wp_num[i+1]]}
 	
 	# link_dir={'straight':[0,1,2,3,4,5,6,10,11,12,14,16,18,21,22,23,24,25,29,31,32,37,38,40,41,42,43,44,45],'left':[7,8,26,27,28,30,33,34],'right':[9,13,15,17,19,20,35,36,39]}
-	link_dir={'straight':[0,1,2,4,6,8,10,12,15,17,18,19],'left':[3,7,9,11,16],'right':[5,13,14]}
-	dir=[]
+	# link_dir={'straight':[0,1,2,4,6,8,10,12,15,17,18,19],'left':[3,7,9,11,16],'right':[5,13,14]}
+	# dir=[]
 
 	lane_width={}
 	

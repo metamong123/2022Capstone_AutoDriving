@@ -270,26 +270,28 @@ if __name__ == "__main__":
 	route_id_list = rn_id[start_node_id][args.dir]
 	#route_id_list = rn_id[start_node_id]['right']+rn_id[5]['left']+rn_id[6]['right']
 
-	with open(path_map + "/src/kcity/global_no_del.pkl", "rb") as f:
+	with open(path_map + "/src/kcity/route.pkl", "rb") as f:
 		nodes = pickle.load(f)
   
 	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/global_no_del.pkl", "rb") as f:
 	# 	nodes = pickle.load(f)
  
 	# link_dir={'straight':[0,1,2,3,4,5,6,10,11,12,14,16,18,21,22,23,24,25,29,31,32,37,38,40,41,42,43,44,45,46],'left':[7,8,26,27,28,30,33,34],'right':[9,13,15,17,19,20,35,36,39]}
-	link_dir={'straight':[0,1,2,4,6,8,10,12,15,17,18,19],'left':[3,7,9,11,16],'right':[5,13,14]}
+	link_dir={'straight':[0,1,2,3,4,7,8,9,11,12,14,16,20,22,23,24,25],'left':[6,10,13,15,17],'right':[5,18,19,21]}
 	dir=[]
 
 	node_wp_num=[]
-	node_wp_num=[0,150,200,400,600,700,800,1150,1200,1250,1300,1500,1550,1580,1620,1680,1850,1950,2100,2564]
+	node_wp_num=[0,103,191,278,389,511,564,654,706,860,984,1081,1150,1179,1200,1270,1340,1500,1560,1620,1700,1820,2011,2094,2214,2563]
 
 	for i in reversed(range(len(node_wp_num)-1)):
 		nodes[i]={'x':nodes[0]['x'][node_wp_num[i]:node_wp_num[i+1]], 'y':nodes[0]['y'][node_wp_num[i]:node_wp_num[i+1]], 's':nodes[0]['s'][node_wp_num[i]:node_wp_num[i+1]], 'yaw':nodes[0]['yaw'][node_wp_num[i]:node_wp_num[i+1]]}
 
 	stopline_wp=[]
 	# stopline_wp=[248, 337, 443,721,937,1318,1514,1789,2143,2260,2475,2740,2836]
-	stopline_wp_v2=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846]
+	# stopline_wp_v2=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846]
+	stopline_wp_v2=[273,382,354,867,1140,1494,1597,1821,2089,2183]
 	stopline_wp=[sw-15 for sw in stopline_wp_v2]
+
 
 	lane_width={}
 	error_icte=0
