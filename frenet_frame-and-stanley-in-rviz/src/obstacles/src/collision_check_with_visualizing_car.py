@@ -69,14 +69,16 @@ class collision_check_marker():
         m.scale.z = 1.645
 
         if is_collide:
+            # red
             m.color.r = 192 / 255.0
             m.color.g = 57 / 255.0
             m.color.b = 43 / 255.0
             m.color.a = 0.97
         else:
-            m.color.r = 93 / 255.0
-            m.color.g = 122 / 255.0
-            m.color.b = 177 / 255.0
+            # yellow
+            m.color.r = 255 / 255.0
+            m.color.g = 204 / 255.0
+            m.color.b = 102 / 255.0
             m.color.a = 0.97
 
         return m
