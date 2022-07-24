@@ -410,7 +410,10 @@ if __name__ == "__main__":
 	while not rospy.is_shutdown():
 		# generate acceleration ai, and steering di
 		# YOUR CODE HERE
-		
+		if (mode=='global') and (my_wp>=kidzon[0]) and (my_wp<=kidzon[1]):
+			mode='kid'
+		elif (mode=='kid') and my_wp >=kidzon[1]:
+			mode='global'
 		# LANE_WIDTH=find_dir(lane_width, link_ind[mode])
 		# DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
 		# path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed[mode],DF_SET)	
