@@ -183,17 +183,22 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 		"ackermann_msg" : c
 	}
 
-def waypoint_topic(my_wp):
-	f=Float64()
-	f.data = my_wp
-	return f
-
 def mode_array(car_mode, move_mode, current_dir, next_dir):
 	m = StringArray()
 	# current_dir=dir_mode[0]
 	# next_dir=dir_mode[1]
 	m.strings=[car_mode, move_mode, current_dir, next_dir]
 	return m
+
+def waypoint_topic(my_wp):
+	f=Float64()
+	f.data = my_wp
+	return f
+
+def lane_width_msg(lane_width):
+    l = Float64()
+    l.data=lane_width
+    return l
 
 #obs_init1 = Object(x=1, y=11, yaw=1, L=4, W=5)
 #obs_init2 = Object(x=3, y=33, yaw=1, L=3, W=3)

@@ -271,7 +271,7 @@ if __name__ == "__main__":
 	a_list=[]
 	v_list=[]
 	steer_list=[]
-	fin_wp = [0,0]
+	fin_wp = [-1,-1]
 	obs_wp=0
 	parser = argparse.ArgumentParser(description='Spawn a CV agent')
 
@@ -314,6 +314,7 @@ if __name__ == "__main__":
 	
 	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/route.pkl", "rb") as f:
 	# 	nodes['global'] = pickle.load(f)
+	park_to_glo=0
 
 	link_dir={'straight':[0,1,2,3,4,7,8,9,11,12,14,16,20,22,23,24,25],'left':[6,10,13,15,17],'right':[5,18,19,21]}
 	dir=[]
@@ -415,7 +416,7 @@ if __name__ == "__main__":
 	stopline_wp=[]
 	# stopline_wp=[248, 337, 443,721,937,1318,1514,1789,2143,2260,2475,2740,2836]
 	# stopline_wp_v2=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846]
-	stopline_wp_v2=[273,382,354,867,1140,1494,1597,1821,2089,2183]
+	stopline_wp_v2=[0,273,386,654,867,1140,1494,1597,1821,2089,2183,3000]
 	stopline_wp=[sw-15 for sw in stopline_wp_v2]
 
 

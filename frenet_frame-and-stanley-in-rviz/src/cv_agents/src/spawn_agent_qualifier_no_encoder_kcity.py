@@ -246,6 +246,7 @@ if __name__ == "__main__":
 	a_list=[]
 	v_list=[]
 	steer_list=[]
+	fin_wp = [-1,-1]
 	parser = argparse.ArgumentParser(description='Spawn a CV agent')
 
 	parser.add_argument("--id", "-i", type=int, help="agent id", default=1)
@@ -274,6 +275,7 @@ if __name__ == "__main__":
 	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
 	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
 	control_pub = rospy.Publisher("/ackermann_cmd", AckermannDriveStamped, queue_size=1)
+	waypoint_pub = rospy.Publisher("/waypoint", Float64, queue_size=1)
 	mode_pub=rospy.Publisher("/mode_selector", StringArray, queue_size=1)
 	start_node_id = args.route
 	#route_id_list = [start_node_id] + rn_id[start_node_id][args.dir]
@@ -282,8 +284,9 @@ if __name__ == "__main__":
 	
 	with open(path_map + "/src/kcity/qualifier.pkl", "rb") as f:
 		nodes = pickle.load(f)
-	with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/qualifier.pkl", "rb") as f:
-		nodes = pickle.load(f)
+  
+	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/qualifier.pkl", "rb") as f:
+	# 	nodes = pickle.load(f)
 	node_wp_num=[]
 	node_wp_num=[0,50,130,220,260,300,330,390,470,530,560,620,660,700,750,780,830,880,980,1000]
 
@@ -347,7 +350,7 @@ if __name__ == "__main__":
 	prev_ind=0
 	# ind = 10
 
-	target_speed = {'global':10.0 / 3.6, 'kid': 5.0/3.6}
+	target_speed = {'global':10.0/3.6, 'kid': 5.0/3.6}
 	# state=State(x=nodes[0]['x'][0],y=nodes[0]['y'][0],yaw=nodes[0]['yaw'][0],v=1,dt=0.1)
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 	state.x=obj_msg.x
@@ -363,6 +366,9 @@ if __name__ == "__main__":
 	move_mode='forward'
 	#my_wp = get_closest_waypoints(state.x, state.y, mapx[:100], mapy[:100])
 	my_wp = get_closest_waypoints(state.x, state.y, mapx, mapy)
+	link_ind=find_link(link_len, my_wp)
+
+	waypoint_msg=waypoint_topic(my_wp)
 	prev_v = state.v
 	error_ia = 0
 	r = rospy.Rate(10)
@@ -374,7 +380,7 @@ if __name__ == "__main__":
 	# 	# fin_wp=[my_wp, link_ind+1]
 	# 	link_ind+=1
 
-	link_ind=find_link(link_len, my_wp)
+	
 
 	# if fin_wp == [my_wp, link_ind]:
 	# 	move_mode='finish'
@@ -426,6 +432,10 @@ if __name__ == "__main__":
 		if opt_ind == -1: ## No solution!
 			my_wp = get_closest_waypoints(state.x,state.y, mapx, mapy)
 			link_ind=find_link(link_len, my_wp)
+
+			waypoint_msg=waypoint_topic(my_wp)
+			dir=find_dir(link_dir, link_ind)
+   
 			mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
 			# dir=find_dir(link_dir, link_ind)
 			# if my_wp >= (link_len[link_ind]):
@@ -459,9 +469,9 @@ if __name__ == "__main__":
 		else:
 			## PID control
 
-			error_pa = target_speed - state.v
+			error_pa = target_speed[mode] - state.v
 			error_da = state.v - prev_v
-			error_ia += target_speed - state.v
+			error_ia += target_speed[mode] - state.v
 			kp_a = 0.5
 			kd_a = 0.7
 			ki_a = 0.01
@@ -498,6 +508,9 @@ if __name__ == "__main__":
 		state.yaw=obj_msg.yaw
 		# state.v=obj_msg.v
 		my_wp = get_closest_waypoints(state.x,state.y, mapx, mapy)
+		link_ind=find_link(link_len, my_wp)
+		waypoint_msg=waypoint_topic(my_wp)
+		dir=find_dir(link_dir, link_ind)
 		# dir=find_dir(link_dir, link_ind)
 
 		# if my_wp >= (link_len[link_ind]):
@@ -511,7 +524,6 @@ if __name__ == "__main__":
 		# 		# fin_wp=[my_wp, link_ind+1]
 		# 		# link_ind+=1
 
-		link_ind=find_link(link_len, my_wp)
 		mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
 			
 		# if fin_wp == [my_wp, link_ind]:
@@ -538,7 +550,7 @@ if __name__ == "__main__":
 		si = s
 		si_d = state.v * math.cos(yaw_diff)
 		si_dd = ai * math.cos(yaw_diff)
-		sf_d = target_speed
+		sf_d = target_speed[mode]
 		sf_dd = 0
 		
 		di = d
