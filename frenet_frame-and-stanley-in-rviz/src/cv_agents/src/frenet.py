@@ -235,7 +235,8 @@ class QuarticPolynomial:
 
 		A = np.array([[3*T**2, 4*T**3], [6*T, 12*T**2]])
 		b = np.array([vf - self.a1 - 2*self.a2*T, af - 2*self.a2])
-
+		print(type(vf), type(self.a1), type(self.a2), float(type(T)), type(af))
+		# , dtype(self.a1), dtype(2*self.a2*T), dtype(af), dtype(2*self.a2
 		x = np.linalg.solve(A, b)
 
 		self.a3 = x[0]

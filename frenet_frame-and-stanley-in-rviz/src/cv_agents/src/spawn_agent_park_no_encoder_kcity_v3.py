@@ -552,10 +552,10 @@ if __name__ == "__main__":
 	if mode == 'global':
 		link_ind[mode]=find_link(link_len[mode], my_wp[mode])
 
-	if fin_wp == [my_wp[mode], link_ind[mode]]:
-		move_mode='finish'
-	else:
-		move_mode='forward'
+	# if fin_wp == [my_wp[mode], link_ind[mode]]:
+	# 	move_mode='finish'
+	# else:
+	# 	move_mode='forward'
 		
 	mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 	# lane_msg=lane_width_msg(find_dir(lane_width, link_ind[mode]))
@@ -631,7 +631,7 @@ if __name__ == "__main__":
 					mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 					break
 		if (mode=="parking"):
-			if (link_ind[mode]%2==0) and ((my_wp[mode]>=10) and (my_wp[mode]<parking_stop[park_i])):
+			if (link_ind[mode]%2==0) and ((my_wp[mode]>=0) and (my_wp[mode]<parking_stop[park_i])):
 				move_mode='forward'
 				# mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 				# rospy.set_param('move_mode', 'forward')
@@ -691,10 +691,10 @@ if __name__ == "__main__":
 						move_mode='finish'
 						print("finish!")
 
-			if fin_wp == [my_wp[mode], link_ind[mode]]:
-				move_mode='finish'
-			else:
-				move_mode='forward'
+			# if fin_wp == [my_wp[mode], link_ind[mode]]:
+			# 	move_mode='finish'
+			# else:
+			# 	move_mode='forward'
 
 			mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 
@@ -806,10 +806,10 @@ if __name__ == "__main__":
 					move_mode='finish'
 					print("finish!")
   
-		if fin_wp == [my_wp[mode], link_ind[mode]]:
-			move_mode='finish'
-		else:
-			move_mode='forward'
+		# if fin_wp == [my_wp[mode], link_ind[mode]]:
+		# 	move_mode='finish'
+		# else:
+		# 	move_mode='forward'
 
 		mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 		# lane_msg=lane_width_msg(find_dir(lane_width, link_ind[mode]))

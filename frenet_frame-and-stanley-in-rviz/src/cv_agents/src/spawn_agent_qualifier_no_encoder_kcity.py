@@ -17,6 +17,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Quaternion
 from object_msgs.msg import Object, ObjectArray
 from rocon_std_msgs.msg import StringArray
+from std_msgs.msg import Float64
 
 import pickle
 import argparse
@@ -33,7 +34,7 @@ rn_id = dict()
 
 # rn_id[5] = {'right': [0, 1, 2, 3, 4, 5, 6]}  # ego route
 # rn_id[5] = {'right': [i for i in range(46)]}
-rn_id[5] = {'right': [0]}
+rn_id[5] = {'right': [i for i in range(20)]}
 
 def find_dir(link_dict, link_ind):
 	for i in link_dict.keys():
@@ -279,9 +280,10 @@ if __name__ == "__main__":
 	route_id_list = rn_id[start_node_id][args.dir]
 	#route_id_list = rn_id[start_node_id]['right']+rn_id[5]['left']+rn_id[6]['right']
 	
-	with open(path_map + "/src/kcity/qualifier_qgis.pkl", "rb") as f:
+	with open(path_map + "/src/kcity/qualifier.pkl", "rb") as f:
 		nodes = pickle.load(f)
-
+	with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/qualifier.pkl", "rb") as f:
+		nodes = pickle.load(f)
 	node_wp_num=[]
 	node_wp_num=[0,50,130,220,260,300,330,390,470,530,560,620,660,700,750,780,830,880,980,1000]
 
@@ -344,7 +346,9 @@ if __name__ == "__main__":
 	v=0
 	prev_ind=0
 	# ind = 10
+
 	target_speed = {'global':10.0 / 3.6, 'kid': 5.0/3.6}
+	# state=State(x=nodes[0]['x'][0],y=nodes[0]['y'][0],yaw=nodes[0]['yaw'][0],v=1,dt=0.1)
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 	state.x=obj_msg.x
 	state.y=obj_msg.y
@@ -389,7 +393,7 @@ if __name__ == "__main__":
 	si = s
 	si_d = state.v * math.cos(yawi)
 	si_dd = ai * math.cos(yawi)
-	sf_d = target_speed
+	sf_d = target_speed[mode]
 	sf_dd = 0
 
 	di = d
@@ -422,7 +426,7 @@ if __name__ == "__main__":
 		if opt_ind == -1: ## No solution!
 			my_wp = get_closest_waypoints(state.x,state.y, mapx, mapy)
 			link_ind=find_link(link_len, my_wp)
-			mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
+			mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
 			# dir=find_dir(link_dir, link_ind)
 			# if my_wp >= (link_len[link_ind]):
 			# 	if link_ind==len(link_len[link_ind]):
@@ -508,7 +512,7 @@ if __name__ == "__main__":
 		# 		# link_ind+=1
 
 		link_ind=find_link(link_len, my_wp)
-		mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
+		mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
 			
 		# if fin_wp == [my_wp, link_ind]:
 		# 		move_mode='finish'
