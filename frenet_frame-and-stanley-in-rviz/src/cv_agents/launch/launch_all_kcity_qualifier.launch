@@ -12,7 +12,7 @@
 
 	<node name="spawn_agents" pkg="cv_agents" type="spawn_agent_qualifier_no_encoder_kcity.py" output="screen" />
 	
-	<node type="rviz" name="rviz" pkg="rviz" args="-d /home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/cv_agents/rviz/kcity.rviz" />
+	<node type="rviz" name="rviz" pkg="rviz" args="-d /home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/cv_agents/rviz/kcity.rviz" />
 	<!--node type="rviz" name="rviz" pkg="rviz" args="-d /home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/cv_agents/rviz/kcity.rviz" /-->
 	
 </launch>

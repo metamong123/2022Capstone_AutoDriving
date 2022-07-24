@@ -22,7 +22,7 @@ from std_msgs.msg import Float64
 import pickle
 import argparse
 
-from frenet_find_wp_from_link import *
+from frenet import *
 from stanley_pid import *
 
 rospack = rospkg.RosPack()
@@ -83,6 +83,22 @@ def interpolate_waypoints(wx, wy, space=0.5):
 		"s": ss
 	}
 
+def mode_array(car_mode, move_mode, current_dir, next_dir):
+	m = StringArray()
+	# current_dir=dir_mode[0]
+	# next_dir=dir_mode[1]
+	m.strings=[car_mode, move_mode, current_dir, next_dir]
+	return m
+
+def waypoint_topic(my_wp):
+	f=Float64()
+	f.data = my_wp
+	return f
+
+def lane_width_msg(lane_width):
+    l = Float64()
+    l.data=lane_width
+    return l
 
 class State:
 
@@ -196,23 +212,6 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 # 	m.strings=[car_mode, move_mode, current_dir, next_dir]
 # 	return m
 
-def mode_array(car_mode, move_mode, current_dir, next_dir):
-	m = StringArray()
-	# current_dir=dir_mode[0]
-	# next_dir=dir_mode[1]
-	m.strings=[car_mode, move_mode, current_dir, next_dir]
-	return m
-
-def waypoint_topic(my_wp):
-	f=Float64()
-	f.data = my_wp
-	return f
-
-def lane_width_msg(lane_width):
-    l = Float64()
-    l.data=lane_width
-    return l
-
 obs_info = []
 obj_msg=Object()
 
@@ -282,13 +281,12 @@ if __name__ == "__main__":
 	#route_id_list = [start_node_id] + rn_id[start_node_id][args.dir]
 	route_id_list = rn_id[start_node_id][args.dir]
 	#route_id_list = rn_id[start_node_id]['right']+rn_id[5]['left']+rn_id[6]['right']
-
+	
 	with open(path_map + "/src/kcity/qualifier.pkl", "rb") as f:
 		nodes = pickle.load(f)
-
-	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/qualifier.pkl", "rb") as f:
+  
+	# with open("/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/qualifier.pkl", "rb") as f:
 	# 	nodes = pickle.load(f)
- 
 	node_wp_num=[]
 	node_wp_num=[0,50,130,220,260,300,330,390,470,530,560,620,660,700,750,780,830,880,980,1000]
 
@@ -298,17 +296,19 @@ if __name__ == "__main__":
 	link_dir={'straight':[0,1,2,4,6,7,9,10,11,13,15,17,18,19],'left':[],'right':[3,5,8,12,14,16]}
 	dir=[]
 
+	lane_width={}
+
 	kidzon=[]
 	kidzon=[100,200]
-
-	
+	# with open("/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/qualifier_qgis.pkl", "rb") as f:
+	# 	nodes = pickle.load(f)
  
 	error_icte=0
 	prev_cte =0
 	cte = 0
 	link_i=-1
 	link_len=[]
-	for i in nodes.keys():
+	for i in range(len(nodes.keys())):
 		link_i+=len(nodes[i]["x"])
 		link_len.append(link_i)
   
@@ -316,14 +316,14 @@ if __name__ == "__main__":
 	# 	link_i+=len(nodes[i]["x"])
 	# 	link_len.append(link_i)
 
-	lane_width={}
+
 	link_ind=0
 
 	wx = []
 	wy = []
 	wyaw = []
 
-	for _id in nodes.keys():
+	for _id in range(len(nodes.keys())):
 		wx.append(nodes[_id]["x"][1:])
 		wy.append(nodes[_id]["y"][1:])
 		wyaw.append(nodes[_id]["yaw"][1:])
@@ -349,7 +349,9 @@ if __name__ == "__main__":
 	v=0
 	prev_ind=0
 	# ind = 10
+
 	target_speed = {'global':10.0/3.6, 'kid': 5.0/3.6}
+	# state=State(x=nodes[0]['x'][0],y=nodes[0]['y'][0],yaw=nodes[0]['yaw'][0],v=1,dt=0.1)
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 	state.x=obj_msg.x
 	state.y=obj_msg.y
@@ -362,18 +364,23 @@ if __name__ == "__main__":
 	my_wp=0
 	mode='global' ### global인지 parking인지 subscribe 한다고 치면..
 	move_mode='forward'
-	#my_wp = get_closest_waypoints(state.x, state.y, mapx[:100], mapy[:100],my_wp)
-	my_wp = get_closest_waypoints(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
+	#my_wp = get_closest_waypoints(state.x, state.y, mapx[:100], mapy[:100])
+	my_wp = get_closest_waypoints(state.x, state.y, mapx, mapy)
+	link_ind=find_link(link_len, my_wp)
+
+	waypoint_msg=waypoint_topic(my_wp)
 	prev_v = state.v
 	error_ia = 0
 	r = rospy.Rate(10)
 	ai = 0
 
-	if my_wp >= (link_len[link_ind]-10):
-		# move_mode='finish'
-		# print("finish!")
-		# fin_wp=[my_wp, link_ind+1]
-		link_ind+=1
+	# if my_wp >= (link_len[link_ind]-10):
+	# 	# move_mode='finish'
+	# 	# print("finish!")
+	# 	# fin_wp=[my_wp, link_ind+1]
+	# 	link_ind+=1
+
+	
 
 	# if fin_wp == [my_wp, link_ind]:
 	# 	move_mode='finish'
@@ -381,12 +388,12 @@ if __name__ == "__main__":
 	# 	move_mode='forward'
   
 	mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
-
+	
 	prev_ind = link_ind-2
-	# s, d = get_frenet(state.x, state.y, mapx[:100], mapy[:100],my_wp)
+	# s, d = get_frenet(state.x, state.y, mapx[:100], mapy[:100])
 	# x, y, road_yaw = get_cartesian(s, d, mapx[:100], mapy[:100],maps[:100])
-	s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-	x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
+	s, d = get_frenet(state.x, state.y, mapx, mapy)
+	x, y, road_yaw = get_cartesian(s, d, mapx, mapy,maps)
 	
 	yawi = state.yaw - road_yaw
 	si = s
@@ -413,39 +420,49 @@ if __name__ == "__main__":
 		
 		# LANE_WIDTH=find_dir(lane_width, link_ind[mode])
 		# DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
-		# path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed[mode],DF_SET)	
+		# path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed,DF_SET)	
+		
+		if (mode=='global') and (my_wp>=kidzon[0]) and (my_wp<=kidzon[1]):
+			mode='kid'
+		elif (mode=='kid') and my_wp >=kidzon[1]:
+			mode='global'
+		
 		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed[mode])
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
-			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
+			my_wp = get_closest_waypoints(state.x,state.y, mapx, mapy)
+			link_ind=find_link(link_len, my_wp)
+
+			waypoint_msg=waypoint_topic(my_wp)
+			dir=find_dir(link_dir, link_ind)
+   
+			mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
 			# dir=find_dir(link_dir, link_ind)
-			if my_wp >= (link_len[link_ind]-10):
-				if link_ind==len(link_len[link_ind]):
-					# move_mode='finish'
-					# fin_wp = [my_wp, link_ind]
-					link_ind=len(link_ind)
-				else:
-					# move_mode='finish'
-					# print("finish!")
-					# fin_wp=[my_wp, link_ind+1]
-					link_ind+=1
+			# if my_wp >= (link_len[link_ind]):
+			# 	if link_ind==len(link_len[link_ind]):
+			# 		# move_mode='finish'
+			# 		# fin_wp = [my_wp, link_ind]
+			# 		link_ind=len(link_ind)
+			# 	else:
+			# 		# move_mode='finish'
+			# 		# print("finish!")
+			# 		# fin_wp=[my_wp, link_ind+1]
+			# 		link_ind+=1
      
+			
 			# if fin_wp == [my_wp, link_ind]:
 			# 	move_mode='finish'
 			# else:
 			# 	move_mode='forward'
 
 			# mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
-			waypoint_msg=waypoint_topic(my_wp)
-			dir=find_dir(link_dir, link_ind)
-   
-			mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
+
 			# prev_ind = link_ind-2
 			print("현재 링크 번호: "+ str(link_ind))
 			# print("현재 링크 번호: "+ str(link_ind)+", 링크 방향: "+str(dir))
 
-			s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-			x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
+			s, d = get_frenet(state.x, state.y, mapx, mapy)
+			x, y, road_yaw = get_cartesian(s, d, mapx, mapy,maps)
 			steer = road_yaw - state.yaw
 			a = 0
 			opt_d = prev_opt_d
@@ -490,27 +507,30 @@ if __name__ == "__main__":
 		state.y=obj_msg.y
 		state.yaw=obj_msg.yaw
 		# state.v=obj_msg.v
-		my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-		# dir=find_dir(link_dir, link_ind)
-
-		if my_wp >= (link_len[link_ind]-10):
-			if link_ind==len(link_len[link_ind]):
-				# move_mode='finish'
-				# fin_wp = [my_wp, link_ind]
-				link_ind=len(link_ind)
-			else:
-				# move_mode='finish'
-				# print("finish!")
-				# fin_wp=[my_wp, link_ind+1]
-				link_ind+=1
+		my_wp = get_closest_waypoints(state.x,state.y, mapx, mapy)
+		link_ind=find_link(link_len, my_wp)
 		waypoint_msg=waypoint_topic(my_wp)
 		dir=find_dir(link_dir, link_ind)
+		# dir=find_dir(link_dir, link_ind)
+
+		# if my_wp >= (link_len[link_ind]):
+		# 	if link_ind==len(link_len[link_ind]):
+		# 		# move_mode='finish'
+		# 		# fin_wp = [my_wp, link_ind]
+		# 		# link_ind=len(link_ind)
+		# 	else:
+		# 		# move_mode='finish'
+		# 		# print("finish!")
+		# 		# fin_wp=[my_wp, link_ind+1]
+		# 		# link_ind+=1
+
+		mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
+			
 		# if fin_wp == [my_wp, link_ind]:
 		# 		move_mode='finish'
 		# else:
 		# 	move_mode='forward'
-		mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
-		
+    
 		# print("현재 링크 번호: "+ str(link_ind)+", 링크 방향: "+str(dir))
 		print("현재 링크 번호: "+ str(link_ind))
 		# mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
@@ -523,8 +543,8 @@ if __name__ == "__main__":
 		# 	with open("/home/nsclmds/steer_list.text", "wb") as f:
 		# 		pickle.dump(steer_list, f)
     
-		s, d = get_frenet(state.x, state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
-		x, y, road_yaw = get_cartesian(s, d, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],maps[:link_len[link_ind]])
+		s, d = get_frenet(state.x, state.y, mapx, mapy)
+		x, y, road_yaw = get_cartesian(s, d, mapx, mapy,maps)
 		yaw_diff = state.yaw - road_yaw
 
 		si = s
