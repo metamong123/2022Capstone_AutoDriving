@@ -128,14 +128,14 @@ def yolo_callback(msg):
 	global deliveryA, deliveryB, traffic_light, person, car, uturnsign, kidzonesign, parkingsign, stopline
 	deliveryA = msg.data[0]
 	deliveryB = msg.data[1]
-	traffic_light = msg.data[2]
+	traffic_light = msg.data[4]
 	#print(traffic_light)
 	person = msg.data[3]
-	car = msg.data[4]
+	car = msg.data[2]
 	uturnsign = msg.data[5]
 	kidzonesign = msg.data[6]
-	parkingsign = msg.data[7]
-	stopline = msg.data[8]
+	#parkingsign = msg.data[7]
+	stopline = msg.data[7]
 
 def odometry_callback(msg):
 	global yaw
@@ -240,7 +240,7 @@ if __name__=='__main__':
 							cmd.drive.acceleration = frenet_gear
 							cmd.drive.jerk = 0
 					else:
-						cmd.drive.speed = frenet_speed
+						cmd.drive.speed = frenet_speed/3*2
 						cmd.drive.steering_angle = frenet_angle
 						cmd.drive.acceleration = frenet_gear
 						cmd.drive.jerk = 0

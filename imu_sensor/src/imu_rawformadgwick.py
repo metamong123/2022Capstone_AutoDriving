@@ -13,7 +13,7 @@ from std_msgs.msg import Float32
 # before using this code, change imu driver
 ###########################################
 
-port = str(rospy.get_param("~imu_port","/dev/ttyUSB1"))
+port = str(rospy.get_param("~imu_port","/dev/ttyUSB3"))
 rpy=[0,0,0]
 w_speed=[0,0,0]
 accel=[0,0,0]

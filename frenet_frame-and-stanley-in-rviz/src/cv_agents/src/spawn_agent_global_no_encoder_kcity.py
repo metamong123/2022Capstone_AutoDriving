@@ -290,7 +290,7 @@ if __name__ == "__main__":
 	# stopline_wp=[248, 337, 443,721,937,1318,1514,1789,2143,2260,2475,2740,2836]
 	# stopline_wp_v2=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846]
 	stopline_wp_v2=[0,273,386,654,867,1140,1494,1597,1821,2089,2183,3000]
-	stopline_wp=[sw-15 for sw in stopline_wp_v2]
+	stopline_wp=[sw-14 for sw in stopline_wp_v2]
 
 
 	lane_width={}
@@ -340,7 +340,7 @@ if __name__ == "__main__":
 	v=0
 	prev_ind=0
 	# ind = 10
-	target_speed = 8.0 / 3.6
+	target_speed = 12.0 / 3.6
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 	state.x=obj_msg.x
 	state.y=obj_msg.y

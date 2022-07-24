@@ -187,7 +187,7 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 # playground long
 # obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
 ## obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, L=1.600, W=1.04)
-# obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
+obj_msg = Object(x=935554.856924, y=1915886.76564, yaw=1.2871297862692013, L=4.475, W=1.85)
 
 # def mode_array(car_mode, move_mode, current_dir, next_dir):
 # 	m = StringArray()
@@ -275,7 +275,7 @@ if __name__ == "__main__":
 	#object_pub = rospy.Publisher("/objects/car_" + str(id), Object, queue_size=1)
 	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
 	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
-	control_pub = rospy.Publisher("/ackermann_cmd", AckermannDriveStamped, queue_size=1)
+	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
 	waypoint_pub = rospy.Publisher("/waypoint", Float64, queue_size=1)
 	mode_pub=rospy.Publisher("/mode_selector", StringArray, queue_size=1)
 	start_node_id = args.route
