@@ -97,14 +97,14 @@ def yolo_callback(msg):
 	global deliveryA, deliveryB, traffic_light, person, car, uturnsign, kidzonesign, parkingsign, stopline
 	deliveryA = msg.data[0]
 	deliveryB = msg.data[1]
-	traffic_light = msg.data[2]
+	traffic_light = msg.data[4]
 	#print(traffic_light)
 	person = msg.data[3]
-	car = msg.data[4]
+	car = msg.data[2]
 	uturnsign = msg.data[5]
 	kidzonesign = msg.data[6]
-	parkingsign = msg.data[7]
-	stopline = msg.data[8]
+	#parkingsign = msg.data[7]
+	stopline = msg.data[7]
 
 def odometry_callback(msg):
 	global yaw
@@ -160,7 +160,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 100
+			traffic_brake = 50
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
@@ -180,7 +180,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 100
+			traffic_brake = 50
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
@@ -199,7 +199,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 100
+			traffic_brake = 50
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2

@@ -208,7 +208,7 @@ def lane_width_msg(lane_width):
 # playground long
 # obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
 
-obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, v=1,L=1.600, W=1.04)
+obj_msg = Object(x=935525.892611, y=1915824.02573, yaw=1.2871297862692013, v=1,L=1.600, W=1.04)
 
 # obj_msg = Object(x=962620.042756, y=1959328.22085, yaw=1.2871297862692013, L=4.475, W=1.85)
 
@@ -472,7 +472,7 @@ if __name__ == "__main__":
 				wyaw[i].append(nodes[i][_id]["yaw"][1:])
 		if i == 'parking':
 			# for j in range(0, 11, 2):
-			for j in range(0, 7, 2):
+			for j in range(0, 11, 2):
 				wx[i][j] = np.concatenate(wx[i][j])
 				wy[i][j] = np.concatenate(wy[i][j])
 				wyaw[i][j] = np.concatenate(wyaw[i][j])
@@ -492,7 +492,7 @@ if __name__ == "__main__":
 	for i in nodes:
 		if i == 'parking':
 			# for j in range(0, 11, 2):
-			for j in range(0, 7, 2):
+			for j in range(0, 11, 2):
 				waypoints[i][j] = interpolate_waypoints(wx[i][j], wy[i][j], space=0.5)
 		else:
 			waypoints[i] = interpolate_waypoints(wx[i], wy[i], space=0.5)
@@ -654,10 +654,10 @@ if __name__ == "__main__":
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
 			if mode =='parking':
-				my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]], my_wp[mode])
+				my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]])
 				waypoint_msg=waypoint_topic(my_wp[mode])
 			else:
-				my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode], mapy[mode],my_wp[mode])
+				my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode], mapy[mode])
 				link_ind[mode]=find_link(link_len[mode], my_wp[mode])
 				dir=find_dir(link_dir, link_ind[mode])
 				waypoint_msg=waypoint_topic(my_wp[mode])
@@ -687,7 +687,7 @@ if __name__ == "__main__":
 			elif ((mode=='parking') and (link_ind['parking']%2==1)) and (my_wp[mode]<=park_to_global[park_i]): #parking 후진의 마지막 waypoint
 				# move_mode='finish'
 				# print("parking finish!")
-				my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]],my_wp['global'])
+				my_wp['global'] = get_closest_waypoints(state.x,state.y, mapx['global'][:link_len['global'][link_ind['global']]], mapy['global'][:link_len['global'][link_ind['global']]])
 				# fin_wp = [my_wp['global'], link_ind['global']]
 				mode = 'global'
 			elif ((mode=='global')):
@@ -712,7 +712,7 @@ if __name__ == "__main__":
 			# 	fin_wp=0
     
 			if mode == 'parking':
-				s, d = get_frenet(state.x, state.y, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]],my_wp[mode])
+				s, d = get_frenet(state.x, state.y, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]])
 				x, y, road_yaw = get_cartesian(s, d, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]],maps[mode][park_i][:link_len[mode][park_i]])
 			else:
 				s, d = get_frenet(state.x, state.y, mapx[mode], mapy[mode])
@@ -768,10 +768,10 @@ if __name__ == "__main__":
 		state.yaw=obj_msg.yaw
 		# state.v=obj_msg.v
 		if mode =='parking':
-			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]], my_wp[mode])
+			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode][park_i][:link_len[mode][park_i]], mapy[mode][park_i][:link_len[mode][park_i]])
 			waypoint_msg=waypoint_topic(my_wp[mode])
 		else:
-			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode], mapy[mode],my_wp[mode])
+			my_wp[mode] = get_closest_waypoints(state.x,state.y, mapx[mode], mapy[mode])
 			link_ind[mode]=find_link(link_len[mode], my_wp[mode])
 			dir=find_dir(link_dir, link_ind[mode])
 			waypoint_msg=waypoint_topic(my_wp[mode])

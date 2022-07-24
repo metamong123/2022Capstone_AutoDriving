@@ -281,7 +281,7 @@ if __name__ == "__main__":
 	dir=[]
 
 	node_wp_num=[]
-	node_wp_num=[0,103,191,278,389,511,564,654,706,860,984,1081,1150,1179,1200,1270,1340,1500,1560,1620,1700,1820,2011,2094,2214,2563]
+	node_wp_num=[0,103,191,278,390,511,564,654,706,860,984,1081,1150,1179,1200,1270,1340,1500,1560,1620,1700,1820,2011,2094,2214,2563]
 
 	for i in reversed(range(len(node_wp_num)-1)):
 		nodes[i]={'x':nodes[0]['x'][node_wp_num[i]:node_wp_num[i+1]], 'y':nodes[0]['y'][node_wp_num[i]:node_wp_num[i+1]], 's':nodes[0]['s'][node_wp_num[i]:node_wp_num[i+1]], 'yaw':nodes[0]['yaw'][node_wp_num[i]:node_wp_num[i+1]]}
@@ -289,7 +289,7 @@ if __name__ == "__main__":
 	stopline_wp=[]
 	# stopline_wp=[248, 337, 443,721,937,1318,1514,1789,2143,2260,2475,2740,2836]
 	# stopline_wp_v2=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846]
-	stopline_wp_v2=[273,382,354,867,1140,1494,1597,1821,2089,2183]
+	stopline_wp_v2=[0,273,386,354,867,1140,1494,1597,1821,2089,2183,3000]
 	stopline_wp=[sw-15 for sw in stopline_wp_v2]
 
 
@@ -370,10 +370,10 @@ if __name__ == "__main__":
 	# 	fin_wp=[my_wp, link_ind+1]
 	# 	# link_ind+=1
 
-	if fin_wp == [my_wp, link_ind]:
-		move_mode='finish'
-	else:
-		move_mode='forward'
+	# if fin_wp == [my_wp, link_ind]:
+	# 	move_mode='finish'
+	# else:
+	# 	move_mode='forward'
   
 	mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
 
@@ -413,7 +413,6 @@ if __name__ == "__main__":
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
 			my_wp = get_closest_waypoints(state.x,state.y, mapx, mapy)
-			
 			link_ind=find_link(link_len, my_wp)
 
 			waypoint_msg=waypoint_topic(my_wp)
@@ -430,15 +429,22 @@ if __name__ == "__main__":
 			# 		# link_ind+=1
 
 			for i in range(len(stopline_wp)):
-				if (my_wp>=stopline_wp[i]) and (my_wp<=stopline_wp_v2[i]):
-					move_mode='finish'
-					print("finish!")
+				if i >=1:
+					if stopline_wp_v2[i-1]<=my_wp and my_wp<=stopline_wp_v2[i]:
+						if (my_wp>=stopline_wp[i]) and (my_wp<=stopline_wp_v2[i]):
+							print(my_wp, stopline_wp_v2[i-1],stopline_wp[i], stopline_wp_v2[i])
+							move_mode='finish'
+							print(move_mode)
+							mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
+						else:
+							print(my_wp, stopline_wp_v2[i-1],stopline_wp[i], stopline_wp_v2[i])
+							move_mode='forward'
 
 
-			if fin_wp == [my_wp, link_ind]:
-				move_mode='finish'
-			else:
-				move_mode='forward'
+			# if fin_wp == [my_wp, link_ind]:
+			# 	move_mode='finish'
+			# else:
+			# 	move_mode='forward'
 
 			mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
 
@@ -508,21 +514,31 @@ if __name__ == "__main__":
 		# 		# link_ind+=1
 
 		for i in range(len(stopline_wp)):
-			if (my_wp>=stopline_wp[i]) and (my_wp<=stopline_wp_v2[i]):
-				move_mode='finish'
-				print("finish!")
+			if i >=1:
+				if stopline_wp_v2[i-1]<=my_wp and my_wp<=stopline_wp_v2[i]:
+					if (my_wp>=stopline_wp[i]) and (my_wp<=stopline_wp_v2[i]):
+						print(my_wp, stopline_wp_v2[i-1],stopline_wp[i], stopline_wp_v2[i])
+						move_mode='finish'
+						print(move_mode)
+						mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
+					else:
+						print(my_wp, stopline_wp_v2[i-1],stopline_wp[i], stopline_wp_v2[i])
+						move_mode='forward'
+			# elif (my_wp) <= stopline_wp[i]:
+			# 	move_mode='fordwar'
+			# elif my_wp > stopline_wp
 
 		
 
-		if fin_wp == [my_wp, link_ind]:
-				move_mode='finish'
-		else:
-			move_mode='forward'
+		# if fin_wp == [my_wp, link_ind]:
+		# 		move_mode='finish'
+		# else:
+		# 	move_mode='forward'
     
 		print("현재 링크 번호: "+ str(link_ind)+", 링크 방향: "+str(dir))
 
 		mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind), find_dir(link_dir, (link_ind+1)))
-
+		print(move_mode)
 		# if my_wp == 270:
 		# 	with open("/home/nsclmds/a_list.text", "wb") as f:
 		# 		pickle.dump(a_list, f)

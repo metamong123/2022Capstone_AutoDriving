@@ -33,7 +33,7 @@ class YoloPub():
         self.id_to_queue_list = [self.queue_list[i] for i in range(len(self.class_map)) for _ in range(len(self.class_map[i]))]
 
         self.id_pub = rospy.Publisher('/detect_ID', Int32MultiArray, queue_size=10)
-        self.boundingbox_sub = rospy.Subscriber('/camera1/darknet_ros/bounding_boxes', BoundingBoxes, self.BoundingBoxes_callback)
+        self.boundingbox_sub = rospy.Subscriber('/camera2/darknet_ros/bounding_boxes', BoundingBoxes, self.BoundingBoxes_callback)
 
 
     def deliveryB_vote(self, queue):

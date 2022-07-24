@@ -82,12 +82,43 @@ def frenet_callback(msg):
     frenet_angle = msg.drive.steering_angle  
     frenet_gear = 0
 
-# def parking_callback(msg):
-#     global backward_speed, backward_angle, backward_gear, backward_brake
-#     backward_speed = msg.drive.speed
-#     backward_angle = msg.drive.steering_angle
-#     backward_gear = msg.drive.acceleration
-#     backward_brake = msg.drive.jerk
+def parking_decision():
+	global parking_flag
+	global back_speed, back_angle
+	global save_speed,save_angle
+	global move_mode, frenet_speed, frenet_angle, frenet_gear, backward_speed, backward_angle, backward_gear, backward_brake   
+	global parking_angle, parking_brake, parking_speed, parking_gear, parking_yaw
+ 	
+	if parking_flag == 'backward':
+		if waypoint >= 18: # hyperparameter
+			parking_speed = 8/3.6
+			parking_angle = 0
+			parking_gear = 2
+			parking_brake = 0
+		else:
+			if abs(yaw - parking_yaw) < 5: # hyperparameter(degree)
+				parking_speed = 0
+				parking_angle = 0
+				parking_gear = 0
+				parking_brake = 100
+				print('parking end')
+				final_cmd_Pub.publish(cmd)
+				rospy.sleep(2)
+				parking_flag = 'end'
+			else:
+				parking_speed = 8/3.6
+				parking_angle = -20*np.pi/180
+				parking_gear = 2
+				parking_brake = 0
+	
+	else:
+		parking_speed = frenet_speed
+		parking_angle = frenet_angle
+		parking_gear = frenet_gear
+		parking_brake = 0
+
+	return parking_speed, parking_angle, parking_gear, parking_brake
+
 
 def waypoint_callback(msg):
 	global waypoint
