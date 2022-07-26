@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     if parsed_args.detector.lower() == "lanenet":
         from detectors.lanenet_detector import LanenetLaneDetector
-        detector = LanenetLaneDetector(y_range=[150, 256])
+        detector = LanenetLaneDetector(y_range=[200, 256])
     else:
         from detectors.scnn_detector import SCNNDetector
         detector = SCNNDetector(y_range=[100, 288])

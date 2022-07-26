@@ -697,8 +697,6 @@ if __name__ == "__main__":
 
 			mode_msg=mode_array(mode, move_mode, find_dir(link_dir, link_ind[mode]), find_dir(link_dir, (link_ind[mode]+1)))
 
-			prev_ind = link_ind[mode]-2
-			# rospy.set_param('dir_mode', [dir, find_dir(link_dir, (link_ind[mode]+1))])
 			# rospy.set_param('dir_mode', [dir, find_dir(link_dir, (link_ind[mode]+1))])
 			print("현재 링크 번호: "+ str(link_ind[mode])+", mode: "+str(mode)+", 링크 방향: "+str(dir))
 			# if (fin_wp!=0) and (fin_wp != my_wp[mode]) and (mode!='parking'):
@@ -816,13 +814,11 @@ if __name__ == "__main__":
 		# if (fin_wp!=0) and (fin_wp != my_wp[mode]) and (mode!='parking'):
 		# 	rospy.set_param('move_mode', 'forward')
 		# 	fin_wp=0
-		# prev_ind = link_ind[mode]-2
 
-		# rospy.set_param('dir_mode', [dir, find_dir(link_dir, (link_ind[mode]+1))])
 		# rospy.set_param('dir_mode', [dir, find_dir(link_dir, (link_ind[mode]+1))])
 		print("현재 링크 번호: "+ str(link_ind[mode])+", mode: "+str(mode)+", 링크 방향: "+str(dir))
 
-		# if my_wp[mode] == 270:
+		# if my_wp[mode] == 1200:
 		# 	with open("/home/nsclmds/a_list.text", "wb") as f:
 		# 		pickle.dump(a_list, f)
 		# 	with open("/home/nsclmds/v_list.text", "wb") as f:
@@ -852,32 +848,6 @@ if __name__ == "__main__":
 		df_d = 0
 		df_dd = 0
 
-		# if (mode == 'global') and ((my_wp >= 240) and (my_wp < 250)): ################parking mode 시작 웨이포인트 넣기
-		# 	mode='parking'
-		# 	rospy.set_param('car_mode', mode)
-			# for park_i in range(0, 11, 2):
-			# 	if collision_check([mapx[mode][:link_len[mode][park_i]], mapy[mode][:link_len[mode][park_i]],mapyaw[mode][:link_len[mode][park_i]]],obs_info,0,0,0)==False:
-			# 		link_ind[mode]==park_i
-			# 		break
-			# print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
-		# elif (mode=='parking') and (link_ind[mode]==0) and (my_wp==10): ################parking curve 시작 웨이포인트 넣기
-		# 	rospy.set_param('move_mode', 'forward')
-		# elif (mode=='parking') and (link_ind[mode]==1):
-		# 	rospy.set_param('move_mode', 'backward')
-		# vehicle state --> topic msg
-		# msg = get_ros_msg(state.x, state.y, state.yaw, state.v, a, steer, id=id)
-		# msg = state.get_ros_msg(a, steer, id=id)
-
-		# send tf
-		#tf_broadcaster.sendTransform(
-		#	(state.x, state.y, 1.5),
-		#	msg["quaternion"],
-		#	rospy.Time.now(),
-		#	"/car_" + str(id), "/map"
-		#)
-
-		# publish vehicle state in ros msg
-		# object_pub.publish(msg["object_msg"])
 		opt_frenet_pub.publish(opt_frenet_path.ma)
 		cand_frenet_pub.publish(cand_frenet_paths.ma)
 		control_pub.publish(msg)

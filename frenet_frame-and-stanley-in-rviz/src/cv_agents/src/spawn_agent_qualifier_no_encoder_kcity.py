@@ -187,7 +187,7 @@ def get_ros_msg(x, y, yaw, v, a, steer, id):
 # playground long
 # obj_msg = Object(x=962689.2030317801, y=1959006.1865985924, yaw=1.2871297862692013, L=4.475, W=1.85)
 ## obj_msg = Object(x=962587.11409, y=1959260.09207, yaw=1.2871297862692013, L=1.600, W=1.04)
-obj_msg = Object(x=935554.856924, y=1915886.76564, yaw=1.2871297862692013, L=4.475, W=1.85)
+obj_msg = Object(x=935549.684158, y=1915877.34159, yaw=1.2871297862692013, L=4.475, W=1.85)
 
 # def mode_array(car_mode, move_mode, current_dir, next_dir):
 # 	m = StringArray()
@@ -423,7 +423,7 @@ if __name__ == "__main__":
 			my_wp = get_closest_waypoints(state.x,state.y, mapx[:link_len[link_ind]], mapy[:link_len[link_ind]],my_wp)
 			# dir=find_dir(link_dir, link_ind)
 			if my_wp >= (link_len[link_ind]-10):
-				if link_ind==len(link_len[link_ind]):
+				if link_ind==len(link_len):
 					# move_mode='finish'
 					# fin_wp = [my_wp, link_ind]
 					link_ind=len(link_ind)
@@ -497,7 +497,7 @@ if __name__ == "__main__":
 		# dir=find_dir(link_dir, link_ind)
 
 		if my_wp >= (link_len[link_ind]-10):
-			if link_ind==len(link_len[link_ind]):
+			if link_ind==len(link_len):
 				# move_mode='finish'
 				# fin_wp = [my_wp, link_ind]
 				link_ind=len(link_ind)

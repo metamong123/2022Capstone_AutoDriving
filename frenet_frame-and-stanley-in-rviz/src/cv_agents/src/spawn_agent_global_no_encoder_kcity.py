@@ -234,6 +234,7 @@ if __name__ == "__main__":
 	a_list=[]
 	v_list=[]
 	steer_list=[]
+	time_list=[]
 	fin_wp = [-1,-1]
 	parser = argparse.ArgumentParser(description='Spawn a CV agent')
 
@@ -360,6 +361,7 @@ if __name__ == "__main__":
 	
 	waypoint_msg=waypoint_topic(my_wp)
 	prev_v = state.v
+	# prev_cte = 
 	error_ia = 0
 	r = rospy.Rate(10)
 	ai = 0
@@ -409,6 +411,7 @@ if __name__ == "__main__":
 		# LANE_WIDTH=find_dir(lane_width, link_ind[mode])
 		# DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
 		# path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed,DF_SET)	
+		t1=rospy.Time.now()
 		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed)
 		# update state with acc, delta
 		if opt_ind == -1: ## No solution!
@@ -582,6 +585,11 @@ if __name__ == "__main__":
 		control_pub.publish(msg)
 		mode_pub.publish(mode_msg)
 		waypoint_pub.publish(waypoint_msg)
-
+		t2=(rospy.Time.now()-t1).to_sec()*1000
+		print(t2)
+		time_list.append(t2)
+		if my_wp == 2000:
+			with open("/home/mds/time_list.csv", "wb") as f:
+				pickle.dump(time_list, f)
 		r.sleep()
 	

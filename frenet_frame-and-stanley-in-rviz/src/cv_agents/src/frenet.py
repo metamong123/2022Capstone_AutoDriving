@@ -8,7 +8,7 @@ import sys
 import math
 from numpy import *
 from matplotlib import *
-
+import rospy
 import rospkg
 rospack = rospkg.RosPack()
 path = rospack.get_path("obstacles")
@@ -235,8 +235,6 @@ class QuarticPolynomial:
 
 		A = np.array([[3*T**2, 4*T**3], [6*T, 12*T**2]])
 		b = np.array([vf - self.a1 - 2*self.a2*T, af - 2*self.a2])
-		# print(type(vf), type(self.a1), type(self.a2), float(type(T)), type(af))
-		# , dtype(self.a1), dtype(2*self.a2*T), dtype(af), dtype(2*self.a2
 		x = np.linalg.solve(A, b)
 
 		self.a3 = x[0]
@@ -434,6 +432,7 @@ def check_path(fplist, obs_info, mapx, mapy, maps):
 
 # def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed, DF_SET):
 def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed):
+	# t1=rospy.Time.now()
     # fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed,DF_SET)
 	fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed)
 	fplist = calc_global_paths(fplist, mapx, mapy, maps)
@@ -455,5 +454,5 @@ def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d,
 	except NameError:
 		print(" No solution ! ")
 		_opt_ind = -1
-
+	# print((rospy.Time.now()-t1).to_sec()*1000)
 	return fplist, _opt_ind

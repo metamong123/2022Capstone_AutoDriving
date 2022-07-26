@@ -102,7 +102,7 @@ class YoloPub():
         # append new bounding boxes data
         for bounding_box in data.bounding_boxes:
             if bounding_box.probability >= self.threshold:
-                if bounding_box.id in (1, 2, 3): # (B1, B2, B3)
+                if bounding_box.id in (3,4,5): # (B1, B2, B3)
                     self.id_to_queue_list[bounding_box.id].append(bounding_box.xmin)
                 else:
                     self.id_to_queue_list[bounding_box.id].append(bounding_box.id)

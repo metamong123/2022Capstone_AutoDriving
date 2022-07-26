@@ -5,10 +5,6 @@ dt = 0.1
 
 # k =0.5
 kp = 0.5 # control gain
-# ki=0.01
-# kd=0.5
-# ki = 0.01
-# kd = 0.7
 ki=0
 kd=0
 
@@ -34,13 +30,13 @@ def normalize_angle(angle):
 def stanley_control(x, y, yaw, v, map_xs, map_ys, map_yaws, L, error_icte, prev_cte):
 	# find nearest point
 	global kp, ki, kd
-	kp = 0.3 # control gain
-	# ki=0.01
-	# kd=0.5
-	# ki = 0.01
-	# kd = 0.7
-	ki=0
-	kd=0.9
+	# kp = 0.3 # control gain
+	# # ki=0.01
+	# # kd=0.5
+	# # ki = 0.01
+	# # kd = 0.7
+	# ki=0
+	# kd=0.9
 	error_dcte=0
 	min_dist = 1e9
 	min_index = 0
@@ -77,9 +73,10 @@ def stanley_control(x, y, yaw, v, map_xs, map_ys, map_yaws, L, error_icte, prev_
 	# cte_term = np.arctan2(kp*cte + ki*error_icte+ kd*error_dcte , (2.78+v)) # cross track error
 	# cte_term = np.arctan2(kp*cte + ki*error_icte+ kd*error_dcte , (4.17+v)) # cross track error
 	# cte_term = np.arctan2((kp*cte + ki*error_icte+ kd*error_dcte) , (10+v)) # cross track error
+	print(cte, error_dcte, error_icte)
 	cte_term = np.arctan2(kp*cte + ki*error_icte+ kd*error_dcte , v)
 	w_yaw = 0.9
-	w_cte = 0.65
+	w_cte = 0.8
 	# w_cte = 1
 	# k =0.5
 	# steering
