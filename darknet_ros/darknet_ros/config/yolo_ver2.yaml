@@ -1,9 +1,9 @@
 yolo_model:
 
   config_file:
-    name: yolo_ver2.cfg
+    name: yolo_ver5.cfg
   weight_file:
-    name: yolo_ver2.weights
+    name: yolo_ver5.weights
   threshold:
     value: 0.3
   detection_classes:
@@ -23,4 +23,4 @@ yolo_model:
       - car
       - uturn
       - kidzone
-      - parking
+      - stopline
