@@ -14,9 +14,9 @@
 
   <!-- ROS and network parameter files -->
   <arg name="ros_param_file_1"     default="$(find darknet_ros)/config/ros_1.yaml"/>
-  <arg name="network_param_file_1" default="$(find darknet_ros)/config/yolo_ver2.yaml"/>
+  <arg name="network_param_file_1" default="$(find darknet_ros)/config/yolo_ver5.yaml"/>
   <arg name="ros_param_file_2"     default="$(find darknet_ros)/config/ros_2.yaml"/>
-  <arg name="network_param_file_2" default="$(find darknet_ros)/config/yolov4.yaml"/>
+  <arg name="network_param_file_2" default="$(find darknet_ros)/config/yolo_ver5.yaml"/>
 
   <!-- Load parameters -->
   <rosparam command="load" ns="camera1/darknet_ros" file="$(arg ros_param_file_1)"/>
@@ -37,9 +37,5 @@
   </node>
 
  <!--<node name="republish" type="republish" pkg="image_transport" output="screen" 	args="compressed in:=/front_camera/image_raw raw out:=/camera/image_raw" /> -->
-
-<!-- send class -->
-  <node ns="camera1" pkg="darknet_ros" type="identify.py" name="obj_ID" output="screen"> 
-  </node>
 
 </launch>
