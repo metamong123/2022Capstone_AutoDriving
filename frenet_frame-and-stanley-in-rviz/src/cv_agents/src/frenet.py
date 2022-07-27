@@ -8,6 +8,7 @@ import sys
 import math
 from numpy import *
 from matplotlib import *
+from scipy.interpolate import interp1d
 
 import rospkg
 rospack = rospkg.RosPack()
@@ -89,7 +90,6 @@ K_LON = 1.0 # weight for longitudinal direction (종방향을 위한 웨이트)
 
 # lateral planning 시 terminal position condition 후보  (양 차선 중앙), default len(DF_SET) = 2
 DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
-
 
 def next_waypoint(x, y, mapx, mapy, prev_wp):
 	closest_wp = get_closest_waypoints(x, y, mapx, mapy, prev_wp)
