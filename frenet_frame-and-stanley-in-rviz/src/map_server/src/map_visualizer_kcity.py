@@ -75,61 +75,16 @@ if __name__ == "__main__":
 
 	# TODO: AS CONFIGURATION FILE
 	link_file = path + "/src/kcity/route.pkl"
-	global_file = path + "/src/kcity/global.pkl"
-	parking1_v3_file = path + "/src/kcity/parking2.pkl"
-	parking2_v3_file = path + "/src/kcity/parking1_v3.pkl"
-	parking3_v3_file = path + "/src/kcity/parking2_v3.pkl"
-	parking4_v3_file = path + "/src/kcity/parking3_v3.pkl"
-	parking5_v3_file = path + "/src/kcity/parking4_v3.pkl"
-	parking6_v3_file = path + "/src/kcity/parking5_v3.pkl"
-	parking1_v1_file = path + "/src/kcity/parking1.pkl"
-	parking2_v1_file = path + "/src/kcity/parking2.pkl"
-	parking3_v1_file = path + "/src/kcity/parking3.pkl"
-	parking4_v1_file = path + "/src/kcity/parking4.pkl"
-	parking5_v1_file = path + "/src/kcity/parking5.pkl"
-	# parking6_file = path + "/src/kcity/parking6_v2.pkl"
+	delivery_file =  path + "/src/kcity/delivery.pkl"
 
 	link_cv = Converter(link_file, 2000, r=255/255.0, g=236/255.0, b=139/255.0, a=0.8, scale=0.5)
-	global_cv=Converter(global_file, 2000, r=255/255.0, g=0/255.0, b=139/255.0, a=0.8, scale=0.5)
-	# parking1_v1_cv = Converter(parking1_v1_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	# parking2_v1_cv = Converter(parking2_v1_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	# parking3_v1_cv = Converter(parking3_v1_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	# parking4_v1_cv = Converter(parking4_v1_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	# parking5_v1_cv = Converter(parking5_v1_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	parking1_v3_cv = Converter(parking1_v3_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	parking2_v3_cv = Converter(parking2_v3_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	parking3_v3_cv = Converter(parking3_v3_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	parking4_v3_cv = Converter(parking4_v3_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	parking5_v3_cv = Converter(parking5_v3_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	parking6_v3_cv = Converter(parking6_v3_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-
+	delivery_cv = Converter(delivery_file, 2000, r=255/255.0, g=0/255.0, b=139/255.0, a=0.8, scale=0.5)
+	
 	link_pub = rospy.Publisher("/rviz/lane_links", MarkerArray, queue_size=1.2, latch=True)
-	global_pub = rospy.Publisher("/rviz/global_links", MarkerArray, queue_size=1.2, latch=True)
-	# parking_link1_v1_pub = rospy.Publisher("/rviz/parking_link_1_v1", MarkerArray, queue_size=1, latch=True)
-	# parking_link2_v1_pub = rospy.Publisher("/rviz/parking_link_2_v1", MarkerArray, queue_size=1, latch=True)
-	# parking_link3_v1_pub = rospy.Publisher("/rviz/parking_link_3_v1", MarkerArray, queue_size=1, latch=True)
-	# parking_link4_v1_pub = rospy.Publisher("/rviz/parking_link_4_v1", MarkerArray, queue_size=1, latch=True)
-	# parking_link5_v1_pub = rospy.Publisher("/rviz/parking_link_5_v1", MarkerArray, queue_size=1, latch=True)
-	parking_link1_v3_pub = rospy.Publisher("/rviz/parking_link_1", MarkerArray, queue_size=1, latch=True)
-	parking_link2_v3_pub = rospy.Publisher("/rviz/parking_link_2", MarkerArray, queue_size=1, latch=True)
-	parking_link3_v3_pub = rospy.Publisher("/rviz/parking_link_3", MarkerArray, queue_size=1, latch=True)
-	parking_link4_v3_pub = rospy.Publisher("/rviz/parking_link_4", MarkerArray, queue_size=1, latch=True)
-	parking_link5_v3_pub = rospy.Publisher("/rviz/parking_link_5", MarkerArray, queue_size=1, latch=True)
-	parking_link6_v3_pub = rospy.Publisher("/rviz/parking_link_6", MarkerArray, queue_size=1, latch=True)
-
+	delivery_pub = rospy.Publisher("/rviz/delivery_link", MarkerArray, queue_size=1.2, latch=True)
+	
 	rospy.sleep(1)
 	while not rospy.is_shutdown():
 		link_pub.publish(link_cv.ma)
-		global_pub.publish(global_cv.ma)
-		# parking_link1_v1_pub.publish(parking1_v1_cv.ma)
-		# parking_link2_v1_pub.publish(parking2_v1_cv.ma)
-		# parking_link3_v1_pub.publish(parking3_v1_cv.ma)
-		# parking_link4_v1_pub.publish(parking4_v1_cv.ma)
-		# parking_link5_v1_pub.publish(parking5_v1_cv.ma)
-		parking_link1_v3_pub.publish(parking1_v3_cv.ma)
-		parking_link2_v3_pub.publish(parking2_v3_cv.ma)
-		parking_link3_v3_pub.publish(parking3_v3_cv.ma)
-		parking_link4_v3_pub.publish(parking4_v3_cv.ma)
-		parking_link5_v3_pub.publish(parking5_v3_cv.ma)
-		parking_link6_v3_pub.publish(parking6_v3_cv.ma)
+		delivery_pub.publish(delivery_cv.ma)
 		rospy.sleep(1)

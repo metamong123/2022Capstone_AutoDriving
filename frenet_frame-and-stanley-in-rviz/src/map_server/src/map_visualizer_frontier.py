@@ -75,10 +75,10 @@ if __name__ == "__main__":
 
 	# TODO: AS CONFIGURATION FILE
 	link_file = path + "/src/frontier/route.pkl"
-	parking1_file = path + "/src/frontier/route_parking1.pkl"
-	parking2_file = path + "/src/frontier/route_parking2.pkl"
-	parking3_file = path + "/src/frontier/route_parking3.pkl"
-	# parking4_file = path + "/src/frontier/route_parking4.pkl"
+	parking1_file = path + "/src/smoking/route_parking1.pkl"
+	parking2_file = path + "/src/smoking/route_parking2.pkl"
+	parking3_file = path + "/src/smoking/route_parking3.pkl"
+	# parking4_file = path + "/src/smoking/route_parking4.pkl"
 
 	link_cv = Converter(link_file, 2000, r=255/255.0, g=236/255.0, b=139/255.0, a=0.8, scale=0.5)
 	parking1_cv = Converter(parking1_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
