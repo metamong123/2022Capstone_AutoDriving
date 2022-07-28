@@ -3,11 +3,19 @@
 
 import rospy
 import rospkg
+import sys
 import numpy as np
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Point
 import pickle
 
+rospack = rospkg.RosPack()
+path_frenet=rospack.get_path("cv_agents")
+sys.path.append(path_frenet+"/src/path/")
+
+from global_path import *
+
+use_map=kcity()
 
 class Converter(object):
 	def __init__(self, file_=None, waypoints=None, start_id=0, r=255/255.0, g=255/255.0, b=255/255.0, a= 0.5, scale=0.1):
@@ -70,21 +78,37 @@ class Converter(object):
 
 if __name__ == "__main__":
 	rospy.init_node("map_rviz_visualizer")
-	rospack = rospkg.RosPack()
 	path = rospack.get_path("map_server")
 
 	# TODO: AS CONFIGURATION FILE
-	link_file = path + "/src/kcity/route.pkl"
-	delivery_file =  path + "/src/kcity/delivery.pkl"
+	global_file = use_map.global_route
 
-	link_cv = Converter(link_file, 2000, r=255/255.0, g=236/255.0, b=139/255.0, a=0.8, scale=0.5)
-	delivery_cv = Converter(delivery_file, 2000, r=255/255.0, g=0/255.0, b=139/255.0, a=0.8, scale=0.5)
+	for i in range(use_map.parking_map_num):
+		globals()["parking_file_{}".format(i)]=use_map.parking_route[i]
 	
-	link_pub = rospy.Publisher("/rviz/lane_links", MarkerArray, queue_size=1.2, latch=True)
-	delivery_pub = rospy.Publisher("/rviz/delivery_link", MarkerArray, queue_size=1.2, latch=True)
+	for i in range(use_map.delivery_map_num):
+		globals()["delivery_file_{}".format(i)]=use_map.delivery_route[i]
+
+	global_cv = Converter(global_file, 2000, r=255/255.0, g=236/255.0, b=139/255.0, a=0.8, scale=0.5)
+
+	for i in range(use_map.parking_map_num):
+		globals()["parking_cv_{}".format(i)]=globals()["parking_file_{}".format(i)]
+	for i in range(use_map.delivery_map_num):
+		globals()["delivery_cv_{}".format(i)]=globals()["delivery_file_{}".format(i)]
+
+	global_pub = rospy.Publisher("/rviz/global_links", MarkerArray, queue_size=1.2, latch=True)
 	
+	for i in range(use_map.parking_map_num):
+		globals()["parking_pub_{}".format(i)]=rospy.Publisher(globals()["/rviz/parking_link_{}"].format(i), MarkerArray, queue_size=1.2, latch=True)
+	for i in range(use_map.delivery_map_num):
+		globals()["delivery_pub_{}".format(i)]=rospy.Publisher(globals()["/rviz/delivery_link_{}"].format(i), MarkerArray, queue_size=1.2, latch=True)
+
 	rospy.sleep(1)
 	while not rospy.is_shutdown():
-		link_pub.publish(link_cv.ma)
-		delivery_pub.publish(delivery_cv.ma)
+		global_pub.publish(global_cv.ma)
+		for i in range(use_map.parking_map_num):
+			globals()["parking_pub_{}".format(i)].publish(globals()["parking_cv_{}".format(i)].ma)
+		for i in range(use_map.delivery_map_num):
+			globals()["delivery_pub_{}".format(i)].publish(globals()["delivery_cv_{}".format(i)].ma)
+
 		rospy.sleep(1)

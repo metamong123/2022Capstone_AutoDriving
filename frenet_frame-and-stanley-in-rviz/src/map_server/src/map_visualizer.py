@@ -3,11 +3,19 @@
 
 import rospy
 import rospkg
+import sys
 import numpy as np
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Point
 import pickle
 
+rospack = rospkg.RosPack()
+path_frenet=rospack.get_path("cv_agents")
+sys.path.append(path_frenet+"/src/path/")
+
+from global_path import *
+
+use_map=kcity()
 
 class Converter(object):
 	def __init__(self, file_=None, waypoints=None, start_id=0, r=255/255.0, g=255/255.0, b=255/255.0, a= 0.5, scale=0.1):
@@ -67,45 +75,49 @@ class Converter(object):
 		self.ma = ma
 		
 
-
 if __name__ == "__main__":
 	rospy.init_node("map_rviz_visualizer")
-	rospack = rospkg.RosPack()
 	path = rospack.get_path("map_server")
 
 	# TODO: AS CONFIGURATION FILE
-	link_file = path + "/src/route.pkl"
-	parking1_file = path + "/src/parking1.pkl"
-	parking2_file = path + "/src/parking2.pkl"
-	parking3_file = path + "/src/parking3.pkl"
-	parking4_file = path + "/src/parking4.pkl"
-	parking5_file = path + "/src/parking5.pkl"
-	parking6_file = path + "/src/parking6.pkl"
+	global_file = use_map.global_route
 
-	link_cv = Converter(link_file, 2000, r=255/255.0, g=236/255.0, b=139/255.0, a=0.8, scale=0.5)
-	parking1_cv = Converter(parking1_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	parking2_cv = Converter(parking2_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	parking3_cv = Converter(parking3_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	parking4_cv = Converter(parking4_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	parking5_cv = Converter(parking5_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
-	parking6_cv = Converter(parking6_file, 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=1.2, scale=1.2)
+	if not use_map.parking_map_num==0:
+		for i in range(use_map.parking_map_num):
+			globals()["parking_file_{}".format(i)]=use_map.parking_route[i]
+	
+	if not use_map.delivery_map_num==0:
+		for i in range(use_map.delivery_map_num):
+			globals()["delivery_file_{}".format(i)]=use_map.delivery_route[i]
 
+	global_cv = Converter(global_file, 2000, r=255/255.0, g=236/255.0, b=139/255.0, a=0.8, scale=0.5)
 
-	link_pub = rospy.Publisher("/rviz/lane_links", MarkerArray, queue_size=1.2, latch=True)
-	parking_link1_pub = rospy.Publisher("/rviz/parking_link_1", MarkerArray, queue_size=1, latch=True)
-	parking_link2_pub = rospy.Publisher("/rviz/parking_link_2", MarkerArray, queue_size=1, latch=True)
-	parking_link3_pub = rospy.Publisher("/rviz/parking_link_3", MarkerArray, queue_size=1, latch=True)
-	parking_link4_pub = rospy.Publisher("/rviz/parking_link_4", MarkerArray, queue_size=1, latch=True)
-	parking_link5_pub = rospy.Publisher("/rviz/parking_link_5", MarkerArray, queue_size=1, latch=True)
-	parking_link6_pub = rospy.Publisher("/rviz/parking_link_6", MarkerArray, queue_size=1, latch=True)
+	if not use_map.parking_map_num==0:
+		for i in range(use_map.parking_map_num):
+			globals()["parking_cv_{}".format(i)]=Converter(globals()["parking_file_{}".format(i)], 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=0.8, scale=0.5)
+	if not use_map.delivery_map_num==0:
+		for i in range(use_map.delivery_map_num):
+			globals()["delivery_cv_{}".format(i)]=Converter(globals()["delivery_file_{}".format(i)], 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=0.8, scale=0.5)
+
+	global_pub = rospy.Publisher("/rviz/global_links", MarkerArray, queue_size=1.2, latch=True)
+	
+	if not use_map.parking_map_num==0:
+		for i in range(use_map.parking_map_num):
+			parking_topic="/rviz/parking_link_"+str(i)
+			globals()["parking_pub_{}".format(i)]=rospy.Publisher(parking_topic, MarkerArray, queue_size=1.2, latch=True)
+	if not use_map.delivery_map_num==0:
+		for i in range(use_map.delivery_map_num):
+			delivery_topic="/rviz/delivery_link_"+str(i)
+			globals()["delivery_pub_{}".format(i)]=rospy.Publisher(delivery_topic, MarkerArray, queue_size=1.2, latch=True)
 
 	rospy.sleep(1)
 	while not rospy.is_shutdown():
-		link_pub.publish(link_cv.ma)
-		parking_link1_pub.publish(parking1_cv.ma)
-		parking_link2_pub.publish(parking2_cv.ma)
-		parking_link3_pub.publish(parking3_cv.ma)
-		parking_link4_pub.publish(parking4_cv.ma)
-		parking_link5_pub.publish(parking5_cv.ma)
-		parking_link6_pub.publish(parking6_cv.ma)
+		global_pub.publish(global_cv.ma)
+		if not use_map.parking_map_num==0:
+			for i in range(use_map.parking_map_num):
+				globals()["parking_pub_{}".format(i)].publish(globals()["parking_cv_{}".format(i)].ma)
+		if not use_map.delivery_map_num==0:
+			for i in range(use_map.delivery_map_num):
+				globals()["delivery_pub_{}".format(i)].publish(globals()["delivery_cv_{}".format(i)].ma)
+		
 		rospy.sleep(1)

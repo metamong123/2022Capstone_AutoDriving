@@ -49,23 +49,27 @@ class Path:
 		self.nodes['global']={}
 		self.nodes['parking']={}
 		# self.nodes['delivery']={}
+		self.global_route=pc_route #global pkl파일 경로
 		with open(pc_route, 'rb') as f:
 			self.nodes['global']=pickle.load(f)
+		self.parking_route=[] #parking pkl파일 경로
+		self.delivery_route=[] #delivery pkl파일 경로
 		self.w={}
-		self.parking_map_num=0
-		self.delivery_map_num=0
+		self.parking_map_num=0 # 주차 구역 수
+		self.delivery_map_num=0 # 배달 구역 수
 		self.waypoints={}
 		self.link_len={}
 		self.link_dir={'straight':[],'left':[],'right':[]}
 		self.target_speed={}
-		self.stopline_start_list=[]
-		self.stopline_finish_list=[]
-		self.low_speed_start_list=[]
-		self.low_speed_finish_list=[]
-		self.glo_to_park_start=0
-		self.glo_to_park_finish=0
-		self.parking_stop=[]
-		self.park_to_glo=[]
+		self.stopline_start_list=[] #stopline range 시작점
+		self.stopline_finish_list=[] #stopline camera 인식 마지노선
+		# 예선 구간의 경우에는 저속 관련 변수를 int로 사용해야할 수도 있음
+		self.low_speed_start_list=[] #curve, 어린이 보호 구역 등 저속 range 시작점
+		self.low_speed_finish_list=[] # 저속 range 끝 점
+		self.glo_to_park_start=0 # global->parking 시작 waypoint
+		self.glo_to_park_finish=0 # global->parking 시작 waypoint range 설정
+		self.parking_stop=[] # 주차 구역마다 주차 정지 waypoint 설정
+		self.park_to_glo=[] # parking->global 변경 waypoint 지점
 		self.lane_width={} # example lane_width={'3.3':[0],'3.8':[1],'4.1':[2], '6.6':[3]...}
 	def set_other_mode(self, mode='parking', pc_route=path_map+"/src/frontier/parking_route.pkl", link=None):
 
@@ -202,21 +206,19 @@ def kcity():
 	kcity=Path(path_map + "/src/kcity/route.pkl")
 	kcity.set_link([0,100,300,500,720,750,775,800,950,1000,1025,1060,1230,1280,1320,1360,1500,1600,1780,1820,1900,1960,2140,2190,2250,2300,2480,2550,2600,2750,3180])
 	kcity.set_dir([0,1,2,3,4,7,8,9,11,12,14,16,20,22,23,24,25],[6,10,13,15,17],[5,18,19,21])    
-	kcity.stopline_start_list,kcity.stopline_finish_list=kcity.set_waypoint_range(waypoint_finish_list=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846])
+	# kcity.stopline_start_list,kcity.stopline_finish_list=kcity.set_waypoint_range(waypoint_finish_list=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846])
 	kcity.parking_map_num=6
 	park_ver="v1"
 	for i in range(kcity.parking_map_num):
 		park_route=path_map+"/src/kcity/parking_"+park_ver+"_"+str(i)+".pkl"
+		kcity.parking_route.append(park_route)
 		kcity.set_other_mode(mode='parking', pc_route=park_route,link=2*i)
-	kcity.glo_to_park_start=15
-	kcity.glo_to_park_finish=18
-	kcity.parking_stop=[]
-	kcity.park_to_glo=[]
+	# kcity.glo_to_park_start=15
+	# kcity.glo_to_park_finish=18
+	# kcity.parking_stop=[]
+	# kcity.park_to_glo=[]
 	# kcity.low_speed_start_list,kcity.low_speed_finish_list=kcity.set_waypoint_range(waypoint_finish_list=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846])
-	kcity.target_speed={'high':20/3.6,'low':10/3.6}
+	kcity.target_speed={'global':20/3.6,'parking':10/3.6}
 	# kcity.lane_width={'3.3':[0],'3.8':[1],'4.1':[2], '6.6':[3]...}
 	kcity.set_map()
 	return kcity
-
-if 16 > [15]:
-	print("1")

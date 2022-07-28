@@ -454,11 +454,13 @@ if __name__ == "__main__":
 			kd_a = 0.0
 			ki_a = 0.0
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
+	
 			prev_cte = cte
 			error_icte += cte
 			# steering angle pid control
 			steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, WB, error_icte, prev_cte)
 			# steer, _ = stanley_control(state.x, state.y, state.yaw, state.v, path[opt_ind].x, path[opt_ind].y, path[opt_ind].yaw, WB)
+
 			
 			ways = []
 			for p in path:

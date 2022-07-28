@@ -1,16 +1,14 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 
-from re import X
-from tkinter import Y
 import rospy
 import math
 import rospkg
 import sys
 from ackermann_msgs.msg import AckermannDriveStamped
 
-from object_msgs.msg import Object, Pose2DArray
-from std_msgs.msg import Float64, Int32MultiArray
+from object_msgs.msg import Object
+from std_msgs.msg import Float64, Int32MultiArray,Float64MultiArray
 from rocon_std_msgs.msg import StringArray
 
 from frenet import *
@@ -62,31 +60,33 @@ class State:
 
 		return c
 
-def callback_state(self, msg):
+def callback_state(msg):
 	global obj_msg
 	obj_msg=msg
 
+opt_ind=-1
 path_x=[]
 path_y=[]
 path_yaw=[]
-def callback_path(self, msg):
+def callback_path(msg):
 	global path_x,path_y,path_yaw,opt_ind
-	path_x=msg.poses.x
-	path_y=msg.poses.y
-	path_yaw=msg.poses.yaw
-	opt_ind=msg.ind
+	opt_ind=msg.data[0]
+	path_x=msg.data[1]
+	path_y=msg.data[2]
+	path_yaw=msg.data[3]
+	
 
 mode='global'
-def callback_mode(self, msg):
+def callback_mode(msg):
 	global mode
 	mode = msg.strings[0]
 
 link_ind=0
-def callback_link_ind(self, msg):
+def callback_link_ind(msg):
 	global link_ind
 	link_ind=msg.data[1]
 
-def acceleration(self, ai):
+def acceleration(ai):
 	a=Float64()
 	a.data=ai
 
@@ -97,11 +97,13 @@ obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][
 if __name__ == "__main__":
 	WB = 1.04
 
+	rospy.init_node("control")
+
 	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
 	accel_pub=rospy.Publisher("/ackermann_cmd_frenet", Float64, queue_size=1)
-
 	state_sub = rospy.Subscriber("/objects/car_1", Object, callback_state, queue_size=1)
-	path_sub= rospy.Subscriber("/optimal_frenet_path", Pose2DArray, callback_path, queue_size=1)
+	
+	path_sub= rospy.Subscriber("/optimal_frenet_path", Float64MultiArray, callback_path, queue_size=1)
 	mode_sub= rospy.Subscriber("/mode_selector", StringArray, callback_mode, queue_size=1)
 	link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_link_ind, queue_size=1)
 
