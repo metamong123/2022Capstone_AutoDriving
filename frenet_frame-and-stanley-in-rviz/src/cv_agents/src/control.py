@@ -92,7 +92,9 @@ if __name__ == "__main__":
 	path_sub= rospy.Subscriber("/optimal_frenet_path", PathArray, callback_path, queue_size=10)
 	mode_sub= rospy.Subscriber("/mode_selector", StringArray, callback_mode, queue_size=1)
 	link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_link_ind, queue_size=1)
-
+	
+	accel_msg = Float64()
+	
 	s=0
 	d=0
 	x=0
@@ -137,7 +139,7 @@ if __name__ == "__main__":
 			
 			steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw, WB, error_icte, prev_cte)
 
-		accel_msg=acceleration(a)
+		accel_msg.data = a
 		# state.update(a, steer)
 		
 		msg = state.get_ros_msg(a, steer, id=id)
