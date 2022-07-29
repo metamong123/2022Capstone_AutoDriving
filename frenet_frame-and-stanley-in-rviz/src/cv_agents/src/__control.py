@@ -1,16 +1,11 @@
-#!/usr/bin/python
-#-*- coding: utf-8 -*-
-
-from re import X
-from tkinter import Y
 import rospy
 import math
 import rospkg
 import sys
 from ackermann_msgs.msg import AckermannDriveStamped
 
-from object_msgs.msg import Object, Pose2DArray
-from std_msgs.msg import Float64, Int32MultiArray
+from object_msgs.msg import Object, PathArray
+from std_msgs.msg import Float64, Int32MultiArray,Float64MultiArray
 from rocon_std_msgs.msg import StringArray
 
 from frenet import *
@@ -19,7 +14,7 @@ from stanley_pid import *
 rospack = rospkg.RosPack()
 path_frenet=rospack.get_path("cv_agents")
 sys.path.append(path_frenet+"/src/path/")
-from global_path import *
+from path_map import *
 
 
 def pi_2_pi(angle):
@@ -37,18 +32,6 @@ class State:
 		self.dt = dt
 		self.WB = WB
 
-	def update(self, a, delta):
-		dt = self.dt
-		WB = self.WB
-
-		self.x += self.v * math.cos(self.yaw) * dt
-		self.y += self.v * math.sin(self.yaw) * dt
-		self.yaw += self.v / WB * math.tan(delta) * dt
-		self.yaw = pi_2_pi(self.yaw)
-		self.v += a * dt
-		self.rear_x = self.x - ((WB / 2) * math.cos(self.yaw))
-		self.rear_y = self.y - ((WB / 2) * math.sin(self.yaw))
-
 	def get_ros_msg(self, a, steer, id):
 		dt = self.dt
 		v = self.v
@@ -62,31 +45,31 @@ class State:
 
 		return c
 
-def callback_state(self, msg):
+def callback_state(msg):
 	global obj_msg
 	obj_msg=msg
 
 path_x=[]
 path_y=[]
 path_yaw=[]
-def callback_path(self, msg):
-	global path_x,path_y,path_yaw,opt_ind
-	path_x=msg.poses.x
-	path_y=msg.poses.y
-	path_yaw=msg.poses.yaw
-	opt_ind=msg.ind
+def callback_path(msg):
+	global path_x,path_y,path_yaw
+	path_x=msg.x.data
+	path_y=msg.y.data
+	path_yaw=msg.yaw.data
+	
 
 mode='global'
-def callback_mode(self, msg):
+def callback_mode(msg):
 	global mode
 	mode = msg.strings[0]
 
 link_ind=0
-def callback_link_ind(self, msg):
+def callback_link_ind(msg):
 	global link_ind
 	link_ind=msg.data[1]
 
-def acceleration(self, ai):
+def acceleration(ai):
 	a=Float64()
 	a.data=ai
 
@@ -97,20 +80,24 @@ obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][
 if __name__ == "__main__":
 	WB = 1.04
 
-	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
-	accel_pub=rospy.Publisher("/ackermann_cmd_frenet", Float64, queue_size=1)
+	rospy.init_node("control")
 
+	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
+	accel_pub=rospy.Publisher("/acceleration", Float64, queue_size=1)
 	state_sub = rospy.Subscriber("/objects/car_1", Object, callback_state, queue_size=1)
-	path_sub= rospy.Subscriber("/optimal_frenet_path", Pose2DArray, callback_path, queue_size=1)
+
+	path_sub= rospy.Subscriber("/optimal_frenet_path", PathArray, callback_path, queue_size=10)
 	mode_sub= rospy.Subscriber("/mode_selector", StringArray, callback_mode, queue_size=1)
 	link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_link_ind, queue_size=1)
-
+	
+	accel_msg = Float64()
+	
 	s=0
 	d=0
 	x=0
 	y=0
 	road_yaw=0
-
+	no_solution =[]
 	error_icte=0
 	prev_cte =0
 	cte = 0
@@ -125,7 +112,7 @@ if __name__ == "__main__":
 
 	while not rospy.is_shutdown():
 
-		if opt_ind == -1: ## No solution
+		if not path_x: ## No solution
 			if mode == 'global':
 				s, d = get_frenet(state.x, state.y, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],my_wp[mode])
 				x, y, road_yaw = get_cartesian(s, d, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],use_map.waypoints[mode]['s'][:use_map.link_len[mode][link_ind]])
@@ -137,7 +124,6 @@ if __name__ == "__main__":
 			a = 0
 		else:
 			## PID control
-
 			error_pa = use_map.target_speed[mode] - state.v
 			error_da = state.v - prev_v
 			error_ia += use_map.target_speed[mode] - state.v
@@ -150,8 +136,8 @@ if __name__ == "__main__":
 			
 			steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw, WB, error_icte, prev_cte)
 
-		accel_msg=acceleration(a)
-		state.update(a, steer)
+		accel_msg.data = a
+		# state.update(a, steer)
 		
 		msg = state.get_ros_msg(a, steer, id=id)
 		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer) + ",a = "+str(a))

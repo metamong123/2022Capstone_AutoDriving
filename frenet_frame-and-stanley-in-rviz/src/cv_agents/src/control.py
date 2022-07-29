@@ -17,7 +17,7 @@ from stanley_pid import *
 rospack = rospkg.RosPack()
 path_frenet=rospack.get_path("cv_agents")
 sys.path.append(path_frenet+"/src/path/")
-from global_path import *
+from path_map import *
 
 
 def pi_2_pi(angle):
@@ -68,13 +68,20 @@ def callback_mode(msg):
 	mode = msg.strings[0]
 
 link_ind=0
-def callback_link_ind(msg):
-	global link_ind
+def callback_wp_link_ind(msg):
+	global link_ind, my_wp[mode]
+	my_wp=msg.data[0]
 	link_ind=msg.data[1]
+
+delivery_ind=0
+def callback_delivery_ind(msg):
+	global delivery_ind
+	delivery_ind=msg.data
 
 def acceleration(ai):
 	a=Float64()
 	a.data=ai
+
 
 use_map=kcity()
 start_index=link_ind
@@ -91,10 +98,15 @@ if __name__ == "__main__":
 
 	path_sub= rospy.Subscriber("/optimal_frenet_path", PathArray, callback_path, queue_size=10)
 	mode_sub= rospy.Subscriber("/mode_selector", StringArray, callback_mode, queue_size=1)
+<<<<<<< Updated upstream
 	link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_link_ind, queue_size=1)
 	
 	accel_msg = Float64()
 	
+=======
+	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
+
+>>>>>>> Stashed changes
 	s=0
 	d=0
 	x=0
@@ -104,9 +116,10 @@ if __name__ == "__main__":
 	error_icte=0
 	prev_cte =0
 	cte = 0
+	park_ind=0
 
 	v=0
-	my_wp={'global':0, 'parking':0,'delivery':0}
+
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 	prev_v = state.v
 	error_ia = 0
@@ -115,14 +128,45 @@ if __name__ == "__main__":
 
 	while not rospy.is_shutdown():
 
+		if mode == 'parking':
+			for park_i in range(use_map.parking_map_num):
+				
+				fp=MakingPath()
+				fp.x=use_map.parking_path[park_i][0]
+				fp.y=use_map.parking_path[park_i][1]
+				fp.yaw=use_map.parking_path[park_i][2]
+				print("부딪힘: "+str(collision_check(fp,obs_info,0,0,0)))
+
+				if collision_check(fp,obs_info,0,0,0)==False:
+					link_ind['parking']=park_i
+					parking_ind=park_i
+					print("choose: "+str(park_i))
+					break
+
+			if collision_check(fp,obs_info,0,0,0)==True:
+				for park_i in range(parking_ind,use_map.parking_map_num,1):
+					fp_1=MakingPath()
+					fp_1.x=use_map.waypoints['parking'][park_i]['x'][:use_map.link_len['parking'][park_i]]
+					fp_1.y=use_map.waypoints['parking'][park_i]['y'][:use_map.link_len['parking'][park_i]]
+					fp_1.yaw=use_map.waypoints['parking'][park_i]['yaw'][:use_map.link_len['parking'][park_i]]
+					print("부딪힘: "+str(collision_check(fp_1,obs_info,0,0,0)))
+
+					if collision_check(fp_1,obs_info,0,0,0)==False:
+						link_ind['parking']=park_i
+						parking_ind=park_i
+						print("choose: "+str(park_i))
+						fp=fp_1
+						break
+
 		if not path_x: ## No solution
 			if mode == 'global':
-				s, d = get_frenet(state.x, state.y, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],my_wp[mode])
+				s, d = get_frenet(state.x, state.y, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],my_wp)
 				x, y, road_yaw = get_cartesian(s, d, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],use_map.waypoints[mode]['s'][:use_map.link_len[mode][link_ind]])
+			# else:
+			# 	s, d = get_frenet(state.x, state.y, use_map.waypoints[mode][link_ind]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode][link_ind]['y'][:use_map.link_len[mode][link_ind]],my_wp[mode])
+			# 	x, y, road_yaw = get_cartesian(s, d, use_map.waypoints[mode][link_ind]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode][link_ind]['y'][:use_map.link_len[mode][link_ind]],use_map.waypoints[mode][link_ind]['s'][:use_map.link_len[mode][link_ind]])
 			else:
-				s, d = get_frenet(state.x, state.y, use_map.waypoints[mode][link_ind]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode][link_ind]['y'][:use_map.link_len[mode][link_ind]],my_wp[mode])
-				x, y, road_yaw = get_cartesian(s, d, use_map.waypoints[mode][link_ind]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode][link_ind]['y'][:use_map.link_len[mode][link_ind]],use_map.waypoints[mode][link_ind]['s'][:use_map.link_len[mode][link_ind]])
-
+				road_yaw=0
 			steer = road_yaw - state.yaw
 			a = 0
 		else:
@@ -137,9 +181,20 @@ if __name__ == "__main__":
 			prev_cte = cte
 			error_icte += cte
 			
+<<<<<<< Updated upstream
 			steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw, WB, error_icte, prev_cte)
 
 		accel_msg.data = a
+=======
+			if mode == 'global':
+				steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw, WB, error_icte, prev_cte)
+			elif mode == 'parking':
+				steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, use_map.parking_path[park_ind][0],use_map.parking_path[park_ind][1],use_map.parking_path[park_ind][1], WB, error_icte, prev_cte)
+			elif mode == 'delivery':
+				steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, use_map.delivery_path[delivery_ind][0],use_map.delivery_path[delivery_ind][1],use_map.delivery_path[delivery_ind][1], WB, error_icte, prev_cte)
+		
+		accel_msg=acceleration(a)
+>>>>>>> Stashed changes
 		# state.update(a, steer)
 		
 		msg = state.get_ros_msg(a, steer, id=id)

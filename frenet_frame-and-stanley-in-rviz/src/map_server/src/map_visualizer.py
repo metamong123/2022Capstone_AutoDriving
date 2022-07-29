@@ -13,7 +13,7 @@ rospack = rospkg.RosPack()
 path_frenet=rospack.get_path("cv_agents")
 sys.path.append(path_frenet+"/src/path/")
 
-from global_path import *
+from path_map import *
 
 use_map=kcity()
 

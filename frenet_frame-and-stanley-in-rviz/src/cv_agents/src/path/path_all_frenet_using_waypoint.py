@@ -22,12 +22,12 @@ from std_msgs.msg import Float64, Int32MultiArray, Float64MultiArray, MultiArray
 from rocon_std_msgs.msg import StringArray
 
 from frenet import *
-from global_path import *
+from path_map import *
 
 ## 초기화 지점
 use_map=kcity()
 mode='global'
-start_index=0
+start_index=25
 obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=0,v=0,L=1.600,W=1.04)
 
 def pi_2_pi(angle):
@@ -171,6 +171,25 @@ if __name__ == "__main__":
 					mode_msg=mode_array(mode, find_dir(use_map.link_dir, link_ind[mode]), find_dir(use_map.link_dir, (link_ind[mode]+1)))
 					mode='parking'
 					break
+
+			if collision_check(ways,obs_info,0,0,0)==True:
+				for park_i in range(parking_ind ,use_map.parking_map_num*2,2):
+					ways = []
+					way = {
+						"x" : use_map.waypoints['parking'][park_i]['x'][:use_map.link_len['parking'][park_i]],
+						"y" : use_map.waypoints['parking'][park_i]['y'][:use_map.link_len['parking'][park_i]],
+						"yaw":use_map.waypoints['parking'][park_i]['yaw'][:use_map.link_len['parking'][park_i]]
+					}	
+					ways.append(way)
+
+					print("부딪힘: "+str(collision_check(fp,obs_info,0,0,0)))
+
+					if collision_check(ways,obs_info,0,0,0)==False:
+						link_ind['parking']=park_i
+						parking_ind=park_i
+						print("choose: "+str(park_i))
+						mode_msg=direction_array(find_dir(use_map.link_dir, link_ind[mode]), find_dir(use_map.link_dir, (link_ind[mode]+1)))
+						break
 
 		if mode == 'global':
 			path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints[mode]['x'], use_map.waypoints[mode]['y'],use_map.waypoints[mode]['s'], opt_d, use_map.target_speed[mode])

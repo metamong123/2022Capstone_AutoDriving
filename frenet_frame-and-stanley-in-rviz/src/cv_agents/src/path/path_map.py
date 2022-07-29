@@ -13,6 +13,12 @@ path_frenet=rospack.get_path("cv_agents")
 sys.path.append(path_frenet+"/src/")
 sys.path.append(path_map + "/src/")
 
+class MakingPath:
+	def __init__(self):
+		self.x = []
+		self.y = []
+		self.yaw = []
+
 def interpolate_waypoints(wx, wy, space=0.5):
 	_s = 0
 	s = [0]
@@ -54,6 +60,8 @@ class Path:
 			self.nodes['global']=pickle.load(f)
 		self.parking_route=[] #parking pkl파일 경로
 		self.delivery_route=[] #delivery pkl파일 경로
+		self.parking_path={}
+		self.delivery_path={}
 		self.w={}
 		self.parking_map_num=0 # 주차 구역 수
 		self.delivery_map_num=0 # 배달 구역 수
@@ -193,6 +201,23 @@ class Path:
 				else:
 					link_i+=len(self.nodes[i][j]["x"])
 					self.link_len[i].append(link_i)
+	def make_path(self, mode, map_num):
+		path={}
+		if mode == 'parking':
+			for link_ind in range(0,map_num*2,2):
+				way=MakingPath()
+				way.x=self.waypoints[mode][link_ind]['x'][:self.link_len[mode][link_ind]]
+				way.y=self.waypoints[mode][link_ind]['y'][:self.link_len[mode][link_ind]]
+				way.yaw=self.waypoints[mode][link_ind]['yaw'][:self.link_len[mode][link_ind]]
+				path[link_ind/2]=[way.x, way.y, way.yaw]
+		else:
+			for link_ind in range(map_num):
+				way=MakingPath()
+				way.x=self.waypoints[mode][link_ind]['x'][:self.link_len[mode][link_ind]]
+				way.y=self.waypoints[mode][link_ind]['y'][:self.link_len[mode][link_ind]]
+				way.yaw=self.waypoints[mode][link_ind]['yaw'][:self.link_len[mode][link_ind]]
+				path[link_ind]=[way.x, way.y, way.yaw]
+		return path
 
 
 def frontier():
@@ -205,7 +230,7 @@ def frontier():
 def kcity():
 	kcity=Path(path_map + "/src/kcity/route.pkl")
 	kcity.set_link([0,100,300,500,720,750,775,800,950,1000,1025,1060,1230,1280,1320,1360,1500,1600,1780,1820,1900,1960,2140,2190,2250,2300,2480,2550,2600,2750,3180])
-	kcity.set_dir([0,1,2,3,4,7,8,9,11,12,14,16,20,22,23,24,25],[6,10,13,15,17],[5,18,19,21])    
+	kcity.set_dir([0,1,2,3,4,7,8,9,11,12,14,16,20,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37],[6,10,13,15,17],[5,18,19,21])    
 	# kcity.stopline_start_list,kcity.stopline_finish_list=kcity.set_waypoint_range(waypoint_finish_list=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846])
 	kcity.parking_map_num=6
 	park_ver="v1"
@@ -221,4 +246,6 @@ def kcity():
 	kcity.target_speed={'global':20/3.6,'parking':10/3.6}
 	# kcity.lane_width={'3.3':[0],'3.8':[1],'4.1':[2], '6.6':[3]...}
 	kcity.set_map()
+	kcity.parking_path=kcity.make_path('parking',kcity.parking_map_num)
+	kcity.delivery_path=kcity.make_path('delivery',kcity.delivery_map_num)
 	return kcity
