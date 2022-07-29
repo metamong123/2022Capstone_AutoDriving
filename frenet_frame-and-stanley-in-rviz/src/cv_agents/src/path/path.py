@@ -17,8 +17,8 @@ sys.path.append(path_frenet+"/src/path/")
 from map_visualizer import Converter
 
 from visualization_msgs.msg import MarkerArray
-from object_msgs.msg import Object, ObjectArray
-from std_msgs.msg import Float64, Int32MultiArray, Float64MultiArray
+from object_msgs.msg import Object, ObjectArray, PathArray
+from std_msgs.msg import Float64, Int32MultiArray, Float64MultiArray, MultiArrayDimension
 from rocon_std_msgs.msg import StringArray
 
 from frenet import *
@@ -50,7 +50,7 @@ class TopicReciver:
 	def __init__(self):
 		self.obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, self.callback_obstacle, queue_size=1)
 		self.state_sub = rospy.Subscriber("/objects/car_1", Object, self.callback2, queue_size=1)
-		self.accel_sub = rospy.Subscriber("/accelerartion", Float64, self.callback3, queue_size=1)
+		self.accel_sub = rospy.Subscriber("/acceleration", Float64, self.callback3, queue_size=1)
 	def check_all_connections(self):
 		return (self.obstacle_sub.get_num_connections()+self.state_sub.get_num_connections()+self.accel_sub.get_num_connections())==3
 	def callback_obstacle(self, msg):
@@ -80,10 +80,17 @@ def find_dir(link_dict, link_ind):
 			if link_ind == j:
 				return i
 
-def path_array(opt_ind,x, y, yaw):
-	p=Float64MultiArray()
-	p.data=[opt_ind,x,y,yaw]
+def path_array(x, y, yaw):
+	p=PathArray()
+	p.x.data= x
+	p.y.data= y
+	p.yaw.data = yaw
 	return p
+
+def optimal_ind(opt_ind):
+	i=Float64()
+	i.data=opt_ind
+	return i
 
 def my_state_array(wp, ind):
 	m = Int32MultiArray()
@@ -100,11 +107,12 @@ if __name__ == "__main__":
 	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
 	waypoint_pub = rospy.Publisher("/waypoint", Int32MultiArray, queue_size=1)
 	mode_pub=rospy.Publisher("/mode_selector", StringArray, queue_size=1)
-	path_pub=rospy.Publisher("/optimal_frenet_path", Float64MultiArray, queue_size=1)
+	path_pub=rospy.Publisher("/optimal_frenet_path", PathArray, queue_size=10)
 
 	my_wp={'global':0, 'parking':0,'delivery':0}
 	link_ind={}
 	link_ind[mode]=start_index
+	opt_ind=0
 	
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 	my_wp[mode]=get_closest_waypoints(state.x, state.y, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind[mode]]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind[mode]]],my_wp[mode])
@@ -115,6 +123,9 @@ if __name__ == "__main__":
 		my_wp[mode] = get_closest_waypoints(state.x, state.y, use_map.waypoints[mode][link_ind[mode]]['x'][:use_map.link_len[mode][link_ind[mode]]], use_map.waypoints[mode][link_ind[mode]]['y'][:use_map.link_len[mode][link_ind[mode]]],my_wp[mode])
 
 	mode_msg=mode_array(mode, find_dir(use_map.link_dir, link_ind[mode]), find_dir(use_map.link_dir, (link_ind[mode]+1)))
+
+	path_msg=path_array([-1],[-1],[-1])
+	opt_msg=optimal_ind(opt_ind)
 
 	print("현재 링크 번호: "+ str(link_ind[mode])+", mode: "+str(mode)+", 링크 방향: "+str(find_dir(use_map.link_dir, link_ind[mode])))
 
@@ -168,15 +179,19 @@ if __name__ == "__main__":
 		if mode == 'global':
 			path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints[mode]['x'], use_map.waypoints[mode]['y'],use_map.waypoints[mode]['s'], opt_d, use_map.target_speed[mode])
 			if opt_ind == -1:
-				path_msg=path_array(opt_ind,-1,-1,-1)
+				path_msg=path_array([-1],[-1],[-1])
+				opt_msg=optimal_ind(opt_ind)
 			else:
-				path_msg = path_array(opt_ind, path[opt_ind].x,path[opt_ind].y,path[opt_ind].yaw)
+				path_msg = path_array(path[opt_ind].x,path[opt_ind].y,path[opt_ind].yaw)
+				opt_msg=optimal_ind(opt_ind)
 		else:
 			path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints[mode][link_ind[mode]]['x'][:use_map.link_len[mode][link_ind[mode]]], use_map.waypoints[mode][link_ind[mode]]['y'][:use_map.link_len[mode][link_ind[mode]]],use_map.waypoints[mode][link_ind[mode]]['s'][:use_map.link_len[mode][link_ind[mode]]], opt_d, use_map.target_speed[mode])
 			if opt_ind == -1:
-				path_msg=path_array(opt_ind,-1,-1,-1)
+				path_msg=path_array([-1],[-1],[-1])
+				opt_msg=optimal_ind(opt_ind)
 			else:
-				path_msg = path_array(opt_ind, path[opt_ind].x,path[opt_ind].y,path[opt_ind].yaw)
+				path_msg = path_array(path[opt_ind].x,path[opt_ind].y,path[opt_ind].yaw)
+				opt_msg=optimal_ind(opt_ind)
 
 		if opt_ind == -1: ## No solution!
 			print("No solution!")
@@ -271,5 +286,3 @@ if __name__ == "__main__":
 		mode_pub.publish(mode_msg)
 		waypoint_pub.publish(waypoint_msg)
 		path_pub.publish(path_msg)
-
-		

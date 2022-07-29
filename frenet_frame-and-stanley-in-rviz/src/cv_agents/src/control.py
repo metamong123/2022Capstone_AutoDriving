@@ -7,7 +7,7 @@ import rospkg
 import sys
 from ackermann_msgs.msg import AckermannDriveStamped
 
-from object_msgs.msg import Object
+from object_msgs.msg import Object, PathArray
 from std_msgs.msg import Float64, Int32MultiArray,Float64MultiArray
 from rocon_std_msgs.msg import StringArray
 
@@ -70,10 +70,13 @@ path_y=[]
 path_yaw=[]
 def callback_path(msg):
 	global path_x,path_y,path_yaw,opt_ind
-	opt_ind=msg.data[0]
-	path_x=msg.data[1]
-	path_y=msg.data[2]
-	path_yaw=msg.data[3]
+	#opt_ind=msg.data[0]
+	path_x=msg.x
+	path_y=msg.y
+	path_yaw=msg.yaw
+	print(path_x)
+	print(path_y)
+	print(path_yaw)
 	
 
 mode='global'
@@ -100,10 +103,10 @@ if __name__ == "__main__":
 	rospy.init_node("control")
 
 	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
-	accel_pub=rospy.Publisher("/ackermann_cmd_frenet", Float64, queue_size=1)
+	accel_pub=rospy.Publisher("/acceleration", Float64, queue_size=1)
 	state_sub = rospy.Subscriber("/objects/car_1", Object, callback_state, queue_size=1)
-	
-	path_sub= rospy.Subscriber("/optimal_frenet_path", Float64MultiArray, callback_path, queue_size=1)
+
+	path_sub= rospy.Subscriber("/optimal_frenet_path", PathArray, callback_path, queue_size=1)
 	mode_sub= rospy.Subscriber("/mode_selector", StringArray, callback_mode, queue_size=1)
 	link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_link_ind, queue_size=1)
 
@@ -153,7 +156,7 @@ if __name__ == "__main__":
 			steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw, WB, error_icte, prev_cte)
 
 		accel_msg=acceleration(a)
-		state.update(a, steer)
+		# state.update(a, steer)
 		
 		msg = state.get_ros_msg(a, steer, id=id)
 		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer) + ",a = "+str(a))
