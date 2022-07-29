@@ -35,18 +35,6 @@ class State:
 		self.dt = dt
 		self.WB = WB
 
-	def update(self, a, delta):
-		dt = self.dt
-		WB = self.WB
-
-		self.x += self.v * math.cos(self.yaw) * dt
-		self.y += self.v * math.sin(self.yaw) * dt
-		self.yaw += self.v / WB * math.tan(delta) * dt
-		self.yaw = pi_2_pi(self.yaw)
-		self.v += a * dt
-		self.rear_x = self.x - ((WB / 2) * math.cos(self.yaw))
-		self.rear_y = self.y - ((WB / 2) * math.sin(self.yaw))
-
 	def get_ros_msg(self, a, steer, id):
 		dt = self.dt
 		v = self.v
@@ -64,19 +52,14 @@ def callback_state(msg):
 	global obj_msg
 	obj_msg=msg
 
-opt_ind=-1
 path_x=[]
 path_y=[]
 path_yaw=[]
 def callback_path(msg):
-	global path_x,path_y,path_yaw,opt_ind
-	#opt_ind=msg.data[0]
-	path_x=msg.x
-	path_y=msg.y
-	path_yaw=msg.yaw
-	print(path_x)
-	print(path_y)
-	print(path_yaw)
+	global path_x,path_y,path_yaw
+	path_x=msg.x.data
+	path_y=msg.y.data
+	path_yaw=msg.yaw.data
 	
 
 mode='global'
@@ -106,7 +89,7 @@ if __name__ == "__main__":
 	accel_pub=rospy.Publisher("/acceleration", Float64, queue_size=1)
 	state_sub = rospy.Subscriber("/objects/car_1", Object, callback_state, queue_size=1)
 
-	path_sub= rospy.Subscriber("/optimal_frenet_path", PathArray, callback_path, queue_size=1)
+	path_sub= rospy.Subscriber("/optimal_frenet_path", PathArray, callback_path, queue_size=10)
 	mode_sub= rospy.Subscriber("/mode_selector", StringArray, callback_mode, queue_size=1)
 	link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_link_ind, queue_size=1)
 
@@ -115,7 +98,7 @@ if __name__ == "__main__":
 	x=0
 	y=0
 	road_yaw=0
-
+	no_solution =[]
 	error_icte=0
 	prev_cte =0
 	cte = 0
@@ -130,7 +113,7 @@ if __name__ == "__main__":
 
 	while not rospy.is_shutdown():
 
-		if opt_ind == -1: ## No solution
+		if not path_x: ## No solution
 			if mode == 'global':
 				s, d = get_frenet(state.x, state.y, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],my_wp[mode])
 				x, y, road_yaw = get_cartesian(s, d, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],use_map.waypoints[mode]['s'][:use_map.link_len[mode][link_ind]])
@@ -142,7 +125,6 @@ if __name__ == "__main__":
 			a = 0
 		else:
 			## PID control
-
 			error_pa = use_map.target_speed[mode] - state.v
 			error_da = state.v - prev_v
 			error_ia += use_map.target_speed[mode] - state.v

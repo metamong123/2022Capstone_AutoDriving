@@ -50,7 +50,7 @@ def stanley_control(x, y, yaw, v, map_xs, map_ys, map_yaws, L, error_icte, prev_
 		if dist < min_dist:
 			min_dist = dist
 			min_index = i
-
+	# print(map_xs)
 	# compute cte at front axle
 	map_x = map_xs[min_index]
 	map_y = map_ys[min_index]

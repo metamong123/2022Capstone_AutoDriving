@@ -67,7 +67,7 @@ class TopicReciver:
 	def callback3(self, msg):
 		if self.check_all_connections():
 			global ai
-			ai=msg
+			ai=msg.data
 
 def mode_array(car_mode, current_dir, next_dir):
 	m = StringArray()
@@ -86,11 +86,6 @@ def path_array(x, y, yaw):
 	p.y.data= y
 	p.yaw.data = yaw
 	return p
-
-def optimal_ind(opt_ind):
-	i=Float64()
-	i.data=opt_ind
-	return i
 
 def my_state_array(wp, ind):
 	m = Int32MultiArray()
@@ -124,8 +119,7 @@ if __name__ == "__main__":
 
 	mode_msg=mode_array(mode, find_dir(use_map.link_dir, link_ind[mode]), find_dir(use_map.link_dir, (link_ind[mode]+1)))
 
-	path_msg=path_array([-1],[-1],[-1])
-	opt_msg=optimal_ind(opt_ind)
+	path_msg=path_array([],[],[])
 
 	print("현재 링크 번호: "+ str(link_ind[mode])+", mode: "+str(mode)+", 링크 방향: "+str(find_dir(use_map.link_dir, link_ind[mode])))
 
@@ -157,6 +151,8 @@ if __name__ == "__main__":
 
 	while not rospy.is_shutdown():
 		
+		state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
+
 		if (mode == 'global') and ((my_wp[mode] >= use_map.glo_to_park_start) and (my_wp[mode] < use_map.glo_to_park_finish)):
 			for park_i in range(0,use_map.parking_map_num*2,2):
 
@@ -179,19 +175,16 @@ if __name__ == "__main__":
 		if mode == 'global':
 			path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints[mode]['x'], use_map.waypoints[mode]['y'],use_map.waypoints[mode]['s'], opt_d, use_map.target_speed[mode])
 			if opt_ind == -1:
-				path_msg=path_array([-1],[-1],[-1])
-				opt_msg=optimal_ind(opt_ind)
+				path_msg=path_array([],[],[])
+
 			else:
 				path_msg = path_array(path[opt_ind].x,path[opt_ind].y,path[opt_ind].yaw)
-				opt_msg=optimal_ind(opt_ind)
 		else:
 			path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints[mode][link_ind[mode]]['x'][:use_map.link_len[mode][link_ind[mode]]], use_map.waypoints[mode][link_ind[mode]]['y'][:use_map.link_len[mode][link_ind[mode]]],use_map.waypoints[mode][link_ind[mode]]['s'][:use_map.link_len[mode][link_ind[mode]]], opt_d, use_map.target_speed[mode])
 			if opt_ind == -1:
-				path_msg=path_array([-1],[-1],[-1])
-				opt_msg=optimal_ind(opt_ind)
+				path_msg=path_array([],[],[])
 			else:
 				path_msg = path_array(path[opt_ind].x,path[opt_ind].y,path[opt_ind].yaw)
-				opt_msg=optimal_ind(opt_ind)
 
 		if opt_ind == -1: ## No solution!
 			print("No solution!")
@@ -212,7 +205,6 @@ if __name__ == "__main__":
 				mode = 'global'
 
 			mode_msg=mode_array(mode, find_dir(use_map.link_dir, link_ind[mode]), find_dir(use_map.link_dir, (link_ind[mode]+1)))
-			print("현재 링크 번호: "+ str(link_ind[mode])+", mode: "+str(mode)+", 링크 방향: "+str(find_dir(use_map.link_dir, link_ind[mode])))
 
 			if mode == 'global':
 				s, d = get_frenet(state.x, state.y, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind[mode]]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind[mode]]],my_wp[mode])
