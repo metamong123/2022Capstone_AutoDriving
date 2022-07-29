@@ -8,6 +8,7 @@ from std_msgs.msg import Int32MultiArray, Float64
 from rocon_std_msgs.msg import StringArray 
 from ackermann_msgs.msg import AckermannDriveStamped
 from nav_msgs.msg import Odometry
+from darknet_ros_msgs.msg import BoundingBoxes
 
 import numpy as np
 
@@ -16,6 +17,7 @@ global car_mode, move_mode, parking_yaw
 car_mode = 'default'
 move_mode = 'default'
 parking_flag = 'default'
+delivery_flag = 'default'
 save_speed=[]
 save_angle=[]
 frenet_speed = 0
@@ -97,12 +99,14 @@ def yolo_callback(msg):
 	global deliveryA, deliveryB, traffic_light, person, car, uturnsign, kidzonesign, parkingsign, stopline
 	deliveryA = msg.data[0]
 	deliveryB = msg.data[1]
-	person = msg.data[2]
-	car = msg.data[3]
-	traffic_light = msg.data[4]
+	traffic_light = msg.data[2]
+	#print(traffic_light)
+	person = msg.data[3]
+	car = msg.data[4]
 	uturnsign = msg.data[5]
 	kidzonesign = msg.data[6]
-	stopline = msg.data[7]
+	parkingsign = msg.data[7]
+	stopline = msg.data[8]
 
 def odometry_callback(msg):
 	global yaw
@@ -207,12 +211,16 @@ def traffic_decision():
 			print("traffic mode : go")
 	return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
+def delivery_decision():
+
+
 if __name__=='__main__':
 
 	rospy.init_node('core_control')
 	rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
 	rospy.Subscriber("/mode_selector",StringArray,mode_selector_callback,queue_size=10)
 	rospy.Subscriber("/detect_ID", Int32MultiArray, yolo_callback)
+	rospy.Subscriber("/camera1/darknet_ros/bounding_boxes", BoundingBoxes, side_BoundingBoxes_callback)
 	rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
 	rospy.Subscriber("/waypoint", Float64, waypoint_callback)
 	rospy.Subscriber("/odom", Odometry, odometry_callback)
@@ -242,12 +250,16 @@ if __name__=='__main__':
 						cmd.drive.steering_angle = frenet_angle
 						cmd.drive.acceleration = frenet_gear
 						cmd.drive.jerk = 0
-					#print('global mode!!!')
+				#print('global mode!!!')
 
 		elif car_mode == 'parking':
 			if move_mode == 'forward': # parking forward -> frenet
 				if parking_yaw == 0:
 					parking_yaw = yaw
+					if parking_yaw+np.pi <= np.pi:
+						parking_yaw = parking_yaw + np.pi
+					else:
+						parking_yaw = parking_yaw - np.pi
 				cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = parking_decision()
 			elif move_mode == 'finish':
 				cmd.drive.speed = 0
@@ -258,6 +270,10 @@ if __name__=='__main__':
 				print('parking finish!!! stop!!')
 				rospy.sleep(5) # 5sec
 				parking_flag = 'backward'
+
+		elif car_mode == 'delivery':
+			
+
 		rospy.sleep(0.1)
 		final_cmd_Pub.publish(cmd)
 

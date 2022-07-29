@@ -97,13 +97,11 @@ def yolo_callback(msg):
 	global deliveryA, deliveryB, traffic_light, person, car, uturnsign, kidzonesign, parkingsign, stopline
 	deliveryA = msg.data[0]
 	deliveryB = msg.data[1]
+	person = msg.data[2]
+	car = msg.data[3]
 	traffic_light = msg.data[4]
-	#print(traffic_light)
-	person = msg.data[3]
-	car = msg.data[2]
 	uturnsign = msg.data[5]
 	kidzonesign = msg.data[6]
-	#parkingsign = msg.data[7]
 	stopline = msg.data[7]
 
 def odometry_callback(msg):
