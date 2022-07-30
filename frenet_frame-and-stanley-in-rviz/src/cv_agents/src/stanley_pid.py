@@ -89,7 +89,7 @@ class Stanley:
         perp_vec = [np.cos(yaw + np.pi/2), np.sin(yaw + np.pi/2)]
         cte = np.dot([dx, dy], perp_vec)
 
-        if cte < self.cte_thresh and cte > -self.cte_thresh: # 이게 맞나?
+        if -self.cte_thresh < cte < self.cte_thresh: # 이게 맞나?
             cte = cte**3
 
         # control law
