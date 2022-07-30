@@ -9,13 +9,13 @@ class Stanley:
         self.w_yaw = w_yaw
         self.w_cte = w_cte
 
-        # parameter for 
+        # parameter for stanley_control_thresh
         self.cte_thresh = cte_thresh
-
+	
+	# parameter for stanley_control_pid
         self.p_gain = p_gain
         self.i_gain = i_gain
         self.d_gain = d_gain
-
         self.error_icte = 0
         self.prev_cte = 0
 
