@@ -69,7 +69,7 @@ def callback_mode(msg):
 
 link_ind=0
 def callback_wp_link_ind(msg):
-	global link_ind, my_wp[mode]
+	global link_ind, my_wp
 	my_wp=msg.data[0]
 	link_ind=msg.data[1]
 
@@ -98,15 +98,10 @@ if __name__ == "__main__":
 
 	path_sub= rospy.Subscriber("/optimal_frenet_path", PathArray, callback_path, queue_size=10)
 	mode_sub= rospy.Subscriber("/mode_selector", StringArray, callback_mode, queue_size=1)
-<<<<<<< Updated upstream
-	link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_link_ind, queue_size=1)
+	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
 	
 	accel_msg = Float64()
-	
-=======
-	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
 
->>>>>>> Stashed changes
 	s=0
 	d=0
 	x=0
@@ -181,20 +176,18 @@ if __name__ == "__main__":
 			prev_cte = cte
 			error_icte += cte
 			
-<<<<<<< Updated upstream
-			steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw, WB, error_icte, prev_cte)
+			# steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw, WB, error_icte, prev_cte)
 
-		accel_msg.data = a
-=======
+		
 			if mode == 'global':
 				steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw, WB, error_icte, prev_cte)
 			elif mode == 'parking':
 				steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, use_map.parking_path[park_ind][0],use_map.parking_path[park_ind][1],use_map.parking_path[park_ind][1], WB, error_icte, prev_cte)
 			elif mode == 'delivery':
 				steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, use_map.delivery_path[delivery_ind][0],use_map.delivery_path[delivery_ind][1],use_map.delivery_path[delivery_ind][1], WB, error_icte, prev_cte)
-		
-		accel_msg=acceleration(a)
->>>>>>> Stashed changes
+
+		accel_msg.data = a
+
 		# state.update(a, steer)
 		
 		msg = state.get_ros_msg(a, steer, id=id)
