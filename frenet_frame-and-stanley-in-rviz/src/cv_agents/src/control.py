@@ -89,6 +89,8 @@ obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][
 
 if __name__ == "__main__":
 	WB = 1.04
+	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
+	stanley = Stanley(0.5, 5, 0.9, 0.65,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
 
 	rospy.init_node("control")
 
@@ -107,12 +109,7 @@ if __name__ == "__main__":
 	x=0
 	y=0
 	road_yaw=0
-	no_solution =[]
-	error_icte=0
-	prev_cte =0
-	cte = 0
 	park_ind=0
-
 	v=0
 
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
@@ -122,7 +119,7 @@ if __name__ == "__main__":
 	a = 0
 
 	while not rospy.is_shutdown():
-
+		"""
 		if mode == 'parking':
 			for park_i in range(use_map.parking_map_num):
 				
@@ -152,6 +149,7 @@ if __name__ == "__main__":
 						print("choose: "+str(park_i))
 						fp=fp_1
 						break
+		"""
 
 		if not path_x: ## No solution
 			if mode == 'global':
@@ -173,18 +171,16 @@ if __name__ == "__main__":
 			kd_a = 0.7
 			ki_a = 0.01
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
-			prev_cte = cte
-			error_icte += cte
 			
-			# steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw, WB, error_icte, prev_cte)
-
-		
+			# steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, path_x, path_y, path_yaw)
+			# stanley_control / stanley_control_thresh / stanley_control_pid
+			
 			if mode == 'global':
-				steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw, WB, error_icte, prev_cte)
+				steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw)
 			elif mode == 'parking':
-				steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, use_map.parking_path[park_ind][0],use_map.parking_path[park_ind][1],use_map.parking_path[park_ind][1], WB, error_icte, prev_cte)
+				steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, use_map.parking_path[park_ind][0],use_map.parking_path[park_ind][1],use_map.parking_path[park_ind][1])
 			elif mode == 'delivery':
-				steer, cte, _ = stanley_control(state.x, state.y, state.yaw, state.v, use_map.delivery_path[delivery_ind][0],use_map.delivery_path[delivery_ind][1],use_map.delivery_path[delivery_ind][1], WB, error_icte, prev_cte)
+				steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, use_map.delivery_path[delivery_ind][0],use_map.delivery_path[delivery_ind][1],use_map.delivery_path[delivery_ind][1])
 
 		accel_msg.data = a
 
