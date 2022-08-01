@@ -83,7 +83,7 @@ def acceleration(ai):
 	a.data=ai
 
 
-use_map=kcity()
+use_map=frontier()
 start_index=link_ind
 obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=0,v=0,L=1.600,W=1.04)
 
@@ -97,7 +97,7 @@ if __name__ == "__main__":
 	state_sub = rospy.Subscriber("/objects/car_1", Object, callback_state, queue_size=1)
 
 	path_sub= rospy.Subscriber("/optimal_frenet_path", PathArray, callback_path, queue_size=10)
-	mode_sub= rospy.Subscriber("/mode_selector", StringArray, callback_mode, queue_size=1)
+	# mode_sub= rospy.Subscriber("/mode_selector", StringArray, callback_mode, queue_size=1)
 	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
 	
 	accel_msg = Float64()

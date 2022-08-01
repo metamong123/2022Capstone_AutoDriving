@@ -13,7 +13,6 @@ path_map = rospack.get_path("map_server")
 sys.path.append(path_map + "/src/")
 path_frenet=rospack.get_path("cv_agents")
 sys.path.append(path_frenet+"/src/")
-sys.path.append(path_frenet+"/src/path/")
 from map_visualizer import Converter
 
 from visualization_msgs.msg import MarkerArray

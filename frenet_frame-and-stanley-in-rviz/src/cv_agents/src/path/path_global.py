@@ -13,7 +13,6 @@ path_map = rospack.get_path("map_server")
 sys.path.append(path_map + "/src/")
 path_frenet=rospack.get_path("cv_agents")
 sys.path.append(path_frenet+"/src/")
-sys.path.append(path_frenet+"/src/path/")
 from map_visualizer import Converter
 
 from visualization_msgs.msg import MarkerArray
@@ -25,9 +24,9 @@ from frenet import *
 from path_map import *
 
 ## 초기화 지점
-use_map=kcity()
+use_map=frontier()
 mode='global'
-start_index=25
+start_index=0
 obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=0,v=0,L=1.600,W=1.04)
 
 def pi_2_pi(angle):
@@ -107,7 +106,7 @@ if __name__ == "__main__":
 
 	park_msg=Int32()
 
-	my_wp={'global':0,'parking':0,'delivery':0}
+	my_wp={'global':0,'parking':0}
 	link_ind={}
 	link_ind['global']=start_index
 	opt_ind=0
@@ -158,7 +157,7 @@ if __name__ == "__main__":
 				
 			my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
-			if not mode=='global':
+			if mode=='patking':
 				my_wp[mode] = get_closest_waypoints(state.x, state.y, use_map.waypoints[mode][link_ind[mode]]['x'][:use_map.link_len[mode][link_ind[mode]]], use_map.waypoints[mode][link_ind[mode]]['y'][:use_map.link_len[mode][link_ind[mode]]],my_wp[mode])
 
 			if(my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):
@@ -218,7 +217,8 @@ if __name__ == "__main__":
 		df_d = 0
 		df_dd = 0
 
-		waypoint_msg=my_state_array(my_wp[mode], link_ind['global'])
+		# waypoint_msg=my_state_array(my_wp['global'], my_wp['parking'], link_ind['global'])
+		waypoint_msg=my_state_array(my_wp['global'], link_ind['global'])
 
 		opt_frenet_pub.publish(opt_frenet_path.ma)
 		cand_frenet_pub.publish(cand_frenet_paths.ma)

@@ -223,7 +223,7 @@ class Path:
 def frontier():
 	frontier=Path(path_map + "/src/frontier/route.pkl")
 	frontier.set_link([0,100,200,300,400,500,600])
-	frontier.target_speed=20/3.6
+	frontier.target_speed={'global':15/3.6,'parking':10/3.6}
 	frontier.set_map()
 	return frontier
 
