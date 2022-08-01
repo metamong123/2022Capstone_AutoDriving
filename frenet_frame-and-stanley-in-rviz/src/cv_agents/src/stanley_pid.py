@@ -69,6 +69,8 @@ class Stanley:
 
         # steering
         steer = self.w_yaw * yaw_term + self.w_cte * cte_term
+	print("yaw_term:", yaw_term, "cte:", cte)
+	print("steer:", steer)
         return steer
 
 
@@ -98,6 +100,8 @@ class Stanley:
 
         # steering
         steer = self.w_yaw * yaw_term + self.w_cte * cte_term
+	print("yaw_term:", yaw_term, "cte:", cte)
+	print("steer:", steer)
         return steer
 
 
@@ -127,4 +131,6 @@ class Stanley:
 
         # steering
         steer = self.w_yaw * yaw_term + self.w_cte * cte_term
+	print("yaw_term:", yaw_term, "cte:", cte)
+	print("steer:", steer)
         return steer
