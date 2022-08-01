@@ -1,1 +1,1 @@
-roslaunch darknet_ros 2022_yolo.launch
+roslaunch darknet_ros <launch_file_name>
