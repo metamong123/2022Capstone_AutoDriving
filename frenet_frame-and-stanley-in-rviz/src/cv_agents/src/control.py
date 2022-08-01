@@ -35,6 +35,18 @@ class State:
 		self.dt = dt
 		self.WB = WB
 
+	def update(self, a, delta):
+		dt = self.dt
+		WB = self.WB
+
+		# self.x += self.v * math.cos(self.yaw) * dt
+		# self.y += self.v * math.sin(self.yaw) * dt
+		# self.yaw += self.v / WB * math.tan(delta) * dt
+		# self.yaw = pi_2_pi(self.yaw)
+		self.v += a * dt
+		# self.rear_x = self.x - ((WB / 2) * math.cos(self.yaw))
+		# self.rear_y = self.y - ((WB / 2) * math.sin(self.yaw))
+
 	def get_ros_msg(self, a, steer, id):
 		dt = self.dt
 		v = self.v
@@ -68,6 +80,7 @@ def callback_mode(msg):
 	mode = msg.strings[0]
 
 link_ind=0
+my_wp=0
 def callback_wp_link_ind(msg):
 	global link_ind, my_wp
 	my_wp=msg.data[0]
@@ -83,7 +96,7 @@ def acceleration(ai):
 	a.data=ai
 
 
-use_map=frontier()
+use_map=kcity()
 start_index=link_ind
 obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=0,v=0,L=1.600,W=1.04)
 
@@ -95,10 +108,10 @@ if __name__ == "__main__":
 	rospy.init_node("control")
 
 	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
-	accel_pub=rospy.Publisher("/acceleration", Float64, queue_size=1)
+	accel_pub=rospy.Publisher("/accel", Float64, queue_size=1)
 	state_sub = rospy.Subscriber("/objects/car_1", Object, callback_state, queue_size=1)
 
-	path_sub= rospy.Subscriber("/optimal_frenet_path", PathArray, callback_path, queue_size=10)
+	path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=10)
 	# mode_sub= rospy.Subscriber("/mode_selector", StringArray, callback_mode, queue_size=1)
 	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
 	
@@ -158,10 +171,10 @@ if __name__ == "__main__":
 			# else:
 			# 	s, d = get_frenet(state.x, state.y, use_map.waypoints[mode][link_ind]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode][link_ind]['y'][:use_map.link_len[mode][link_ind]],my_wp[mode])
 			# 	x, y, road_yaw = get_cartesian(s, d, use_map.waypoints[mode][link_ind]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode][link_ind]['y'][:use_map.link_len[mode][link_ind]],use_map.waypoints[mode][link_ind]['s'][:use_map.link_len[mode][link_ind]])
-			else:
-				road_yaw=0
-			steer = road_yaw - state.yaw
-			a = 0
+			# else:
+			# 	road_yaw=0
+				steer = road_yaw - state.yaw
+				a = 0
 		else:
 			## PID control
 			error_pa = use_map.target_speed[mode] - state.v
@@ -184,7 +197,7 @@ if __name__ == "__main__":
 
 		accel_msg.data = a
 
-		# state.update(a, steer)
+		state.update(a, steer)
 		
 		msg = state.get_ros_msg(a, steer, id=id)
 		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer) + ",a = "+str(a))

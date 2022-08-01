@@ -243,7 +243,7 @@ def kcity():
 	# kcity.parking_stop=[]
 	# kcity.park_to_glo=[]
 	# kcity.low_speed_start_list,kcity.low_speed_finish_list=kcity.set_waypoint_range(waypoint_finish_list=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846])
-	kcity.target_speed={'global':20/3.6,'parking':10/3.6}
+	kcity.target_speed={'global':8/3.6,'parking':10/3.6}
 	# kcity.lane_width={'3.3':[0],'3.8':[1],'4.1':[2], '6.6':[3]...}
 	kcity.set_map()
 	kcity.parking_path=kcity.make_path('parking',kcity.parking_map_num)

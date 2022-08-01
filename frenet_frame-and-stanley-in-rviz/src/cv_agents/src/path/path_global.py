@@ -24,7 +24,7 @@ from frenet import *
 from path_map import *
 
 ## 초기화 지점
-use_map=frontier()
+use_map=kcity()
 mode='global'
 start_index=0
 obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=0,v=0,L=1.600,W=1.04)
@@ -49,7 +49,7 @@ class TopicReciver:
 	def __init__(self):
 		self.obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, self.callback_obstacle, queue_size=1)
 		self.state_sub = rospy.Subscriber("/objects/car_1", Object, self.callback2, queue_size=1)
-		self.accel_sub = rospy.Subscriber("/acceleration", Float64, self.callback3, queue_size=1)
+		self.accel_sub = rospy.Subscriber("/accel", Float64, self.callback3, queue_size=1)
 	def check_all_connections(self):
 		return (self.obstacle_sub.get_num_connections()+self.state_sub.get_num_connections()+self.accel_sub.get_num_connections())==3
 	def callback_obstacle(self, msg):
@@ -63,6 +63,7 @@ class TopicReciver:
 		if self.check_all_connections():
 			global obj_msg
 			obj_msg=msg
+			print(obj_msg)
 	def callback3(self, msg):
 		if self.check_all_connections():
 			global ai
@@ -144,7 +145,10 @@ if __name__ == "__main__":
 	cand_frenet_paths = Converter(r=0, g=100/255.0, b=100/255.0, a=0.4, scale= 0.5)
 
 	while not rospy.is_shutdown():
-			
+
+		state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
+		print(obj_msg.x, obj_msg.y)
+		print(state.x, state.y)
 		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints['global']['x'], use_map.waypoints['global']['y'],use_map.waypoints['global']['s'], opt_d, use_map.target_speed['global'])
 
 		if opt_ind == -1:
@@ -157,7 +161,7 @@ if __name__ == "__main__":
 				
 			my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
-			if mode=='patking':
+			if mode=='parking':
 				my_wp[mode] = get_closest_waypoints(state.x, state.y, use_map.waypoints[mode][link_ind[mode]]['x'][:use_map.link_len[mode][link_ind[mode]]], use_map.waypoints[mode][link_ind[mode]]['y'][:use_map.link_len[mode][link_ind[mode]]],my_wp[mode])
 
 			if(my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):
@@ -166,7 +170,7 @@ if __name__ == "__main__":
 				else:
 					link_ind['global']+=1
 
-			mode_msg=direction_array( find_dir(use_map.link_dir, link_ind['global']), find_dir(use_map.link_dir, (link_ind['global']+1)))
+			mode_msg=direction_array(find_dir(use_map.link_dir, link_ind['global']), find_dir(use_map.link_dir, (link_ind['global']+1)))
 
 			s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 			x, y, road_yaw = get_cartesian(s, d, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],use_map.waypoints['global']['s'][:use_map.link_len['global'][link_ind['global']]])
@@ -200,7 +204,7 @@ if __name__ == "__main__":
 
 		mode_msg=direction_array(find_dir(use_map.link_dir, link_ind['global']), find_dir(use_map.link_dir, (link_ind['global']+1)))
 		print("현재 링크 번호: "+ str(link_ind['global'])+", 링크 방향: "+str(find_dir(use_map.link_dir, link_ind['global'])))
-
+		
 		s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 		x, y, road_yaw = get_cartesian(s, d, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],use_map.waypoints['global']['s'][:use_map.link_len['global'][link_ind['global']]])
 

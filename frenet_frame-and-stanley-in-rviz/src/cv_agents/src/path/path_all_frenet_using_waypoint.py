@@ -26,7 +26,7 @@ from path_map import *
 ## 초기화 지점
 use_map=kcity()
 mode='global'
-start_index=25
+start_index=0
 obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=0,v=0,L=1.600,W=1.04)
 
 def pi_2_pi(angle):
