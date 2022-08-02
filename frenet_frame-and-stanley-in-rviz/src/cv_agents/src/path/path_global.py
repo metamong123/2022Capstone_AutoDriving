@@ -17,7 +17,7 @@ from map_visualizer import Converter
 
 from visualization_msgs.msg import MarkerArray
 from object_msgs.msg import Object, ObjectArray, PathArray
-from std_msgs.msg import Float64, Int32MultiArray, Float64MultiArray, MultiArrayDimension, Int32
+from std_msgs.msg import Float64, Int32MultiArray, String, Int32
 from rocon_std_msgs.msg import StringArray
 
 from frenet import *
@@ -63,11 +63,14 @@ class TopicReciver:
 		if self.check_all_connections():
 			global obj_msg
 			obj_msg=msg
-			print(obj_msg)
 	def callback3(self, msg):
 		if self.check_all_connections():
 			global ai
 			ai=msg.data
+
+def callback_mode(msg):
+	global mode
+	mode = msg.data
 
 def direction_array(current_dir, next_dir):
 	m = StringArray()
@@ -87,9 +90,9 @@ def path_array(x, y, yaw):
 	p.yaw.data = yaw
 	return p
 
-def my_state_array(wp, ind):
+def my_state_array(ind, wp, wp_p1,wp_p2,wp_p3,wp_p4,wp_p5,wp_p6):
 	m = Int32MultiArray()
-	m.data=[wp, ind]
+	m.data=[ind, wp, wp_p1,wp_p2,wp_p3,wp_p4,wp_p5,wp_p6]
 	return m
 
 if __name__ == "__main__":
@@ -97,17 +100,17 @@ if __name__ == "__main__":
 	rospy.init_node("path")
 
 	topic_receiver=TopicReciver()
+	rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
+
 
 	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
 	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
 	waypoint_pub = rospy.Publisher("/waypoint", Int32MultiArray, queue_size=1)
 	dir_pub=rospy.Publisher("/link_direction", StringArray, queue_size=1)
 	global_path_pub=rospy.Publisher("/optimal_frenet_path_global", PathArray, queue_size=10)
-	parking_ind_pub=rospy.Publisher("/path_parking", Int32, queue_size=1)
 
-	park_msg=Int32()
 
-	my_wp={'global':0,'parking':0}
+	my_wp={'global':0,'parking':{0:0,1:0,2:0,3:0,4:0,5:0}}
 	link_ind={}
 	link_ind['global']=start_index
 	opt_ind=0
@@ -119,7 +122,6 @@ if __name__ == "__main__":
 	mode_msg=direction_array(find_dir(use_map.link_dir, link_ind['global']), find_dir(use_map.link_dir, (link_ind['global']+1)))
 
 	path_msg=path_array([],[],[])
-
 	print("현재 링크 번호: "+ str(link_ind['global'])+", 링크 방향: "+str(find_dir(use_map.link_dir, link_ind['global'])))
 
 	s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
@@ -161,9 +163,6 @@ if __name__ == "__main__":
 				
 			my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
-			if mode=='parking':
-				my_wp[mode] = get_closest_waypoints(state.x, state.y, use_map.waypoints[mode][link_ind[mode]]['x'][:use_map.link_len[mode][link_ind[mode]]], use_map.waypoints[mode][link_ind[mode]]['y'][:use_map.link_len[mode][link_ind[mode]]],my_wp[mode])
-
 			if(my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):
 				if link_ind['global']==len(use_map.link_len['global']):
 					link_ind['global']=len(link_ind['global'])
@@ -193,8 +192,10 @@ if __name__ == "__main__":
 
 		my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
-		if not mode=='global':
-			my_wp[mode] = get_closest_waypoints(state.x, state.y, use_map.waypoints[mode][link_ind[mode]]['x'][:use_map.link_len[mode][link_ind[mode]]], use_map.waypoints[mode][link_ind[mode]]['y'][:use_map.link_len[mode][link_ind[mode]]],my_wp[mode])
+		if mode=='parking':
+			for park_i in range(use_map.parking_map_num):
+				park_ind=park_i*2
+				my_wp[mode][park_ind] = get_closest_waypoints(state.x, state.y, use_map.waypoints[mode][park_ind]['x'][:use_map.link_len[mode][park_ind]], use_map.waypoints[mode][park_ind]['y'][:use_map.link_len[mode][park_ind]],my_wp[mode][park_i])
 
 		if (my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):
 			if link_ind['global']==len(use_map.link_len['global']):
@@ -222,10 +223,12 @@ if __name__ == "__main__":
 		df_dd = 0
 
 		# waypoint_msg=my_state_array(my_wp['global'], my_wp['parking'], link_ind['global'])
-		waypoint_msg=my_state_array(my_wp['global'], link_ind['global'])
+		waypoint_msg=my_state_array(link_ind['global'], my_wp['global'], my_wp['parking'][0], my_wp['parking'][1],my_wp['parking'][2],my_wp['parking'][3],my_wp['parking'][4],my_wp['parking'][5])
 
 		opt_frenet_pub.publish(opt_frenet_path.ma)
 		cand_frenet_pub.publish(cand_frenet_paths.ma)
 		dir_pub.publish(mode_msg)
 		waypoint_pub.publish(waypoint_msg)
 		global_path_pub.publish(path_msg)
+
+		rospy.sleep(1)

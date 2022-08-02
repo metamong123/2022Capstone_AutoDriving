@@ -76,6 +76,8 @@ class Path:
 		self.low_speed_finish_list=[] # 저속 range 끝 점
 		self.glo_to_park_start=0 # global->parking 시작 waypoint
 		self.glo_to_park_finish=0 # global->parking 시작 waypoint range 설정
+		self.glo_to_del_start=[]
+		self.glo_to_del_finish=[]
 		self.parking_stop=[] # 주차 구역마다 주차 정지 waypoint 설정
 		self.park_to_glo=[] # parking->global 변경 waypoint 지점
 		self.lane_width={} # example lane_width={'3.3':[0],'3.8':[1],'4.1':[2], '6.6':[3]...}
@@ -238,12 +240,15 @@ def kcity():
 		park_route=path_map+"/src/kcity/parking_"+park_ver+"_"+str(i)+".pkl"
 		kcity.parking_route.append(park_route)
 		kcity.set_other_mode(mode='parking', pc_route=park_route,link=2*i)
-	# kcity.glo_to_park_start=15
-	# kcity.glo_to_park_finish=18
+	kcity.glo_to_park_start=15
+	kcity.glo_to_park_finish=18
 	# kcity.parking_stop=[]
-	# kcity.park_to_glo=[]
+	# kcity.park_to_glo_start=[]
+	# kcity.park_to_glo_finish=[]
+	kcity.glo_to_del_start=[200, 400]
+	kcity.glo_to_del_finish=[205, 405]
 	# kcity.low_speed_start_list,kcity.low_speed_finish_list=kcity.set_waypoint_range(waypoint_finish_list=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846])
-	kcity.target_speed={'global':8/3.6,'parking':10/3.6}
+	kcity.target_speed={'global':20/3.6,'parking':10/3.6}
 	# kcity.lane_width={'3.3':[0],'3.8':[1],'4.1':[2], '6.6':[3]...}
 	kcity.set_map()
 	kcity.parking_path=kcity.make_path('parking',kcity.parking_map_num)

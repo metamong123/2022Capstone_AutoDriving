@@ -2,9 +2,11 @@
 #-*- coding: utf-8 -*-
 
 import rospy
+import tf
 import math
 import rospkg
 import sys
+from visualization_msgs.msg import Marker
 from ackermann_msgs.msg import AckermannDriveStamped
 
 from object_msgs.msg import Object, PathArray
@@ -60,7 +62,31 @@ class State:
 
 		return c
 
+def ros_msg(x, y, yaw, v):
+	quat = tf.transformations.quaternion_from_euler(0, 0, yaw)
 
+	m = Marker()
+
+	m.scale.x = 1.600
+	m.scale.y = 1.650
+	m.scale.z = 0.110
+
+	o = Object()
+	o.header.frame_id = "/map"
+	o.header.stamp = rospy.Time.now()
+	o.id = 1
+	o.classification = o.CLASSIFICATION_CAR
+	o.x = x
+	o.y = y
+	o.yaw = yaw
+	o.v = v
+	o.L = m.scale.x
+	o.W = m.scale.y
+
+	return {
+		"quaternion": quat,
+		"object_msg": o
+	}
 
 path_x=[]
 path_y=[]
@@ -108,13 +134,16 @@ if __name__ == "__main__":
 	stanley = Stanley(0.5, 5, 0.9, 0.65,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
 
 	rospy.init_node("control")
+	tf_broadcaster = tf.TransformBroadcaster()
 
 	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
 	accel_pub=rospy.Publisher("/accel", Float64, queue_size=1)
+	object_pub = rospy.Publisher("/objects/car_1", Object, queue_size=1)
 
 
 	state_sub = rospy.Subscriber("/objects/car_1", Object, callback_state, queue_size=1)
-	path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=10)
+	# path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=10)
+	path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=10)
 	mode_sub= rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
 	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
 	
@@ -128,7 +157,7 @@ if __name__ == "__main__":
 	park_ind=0
 	v=0
 
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=2, dt=0.1)
 	prev_v = state.v
 	error_ia = 0
 	r = rospy.Rate(10)
@@ -136,8 +165,6 @@ if __name__ == "__main__":
 
 	while not rospy.is_shutdown():
 
-		state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
-		
 		if not path_x: ## No solution
 			if mode == 'global':
 				s, d = get_frenet(state.x, state.y, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],my_wp)
@@ -168,11 +195,20 @@ if __name__ == "__main__":
 		accel_msg.data = a
 
 		state.update(a, steer)
-		
+		o_msg = ros_msg(state.x, state.y, state.yaw, state.v)
 		msg = state.get_ros_msg(a, steer, id=id)
 		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer) + ",a = "+str(a))
 		prev_v = state.v
 
+		# send tf
+		tf_broadcaster.sendTransform(
+			(state.x, state.y, 1.5),
+			o_msg["quaternion"],
+			rospy.Time.now(),
+			"/car_" + str(id), "/map"
+		)
+
+		object_pub.publish(o_msg["object_msg"])
 		control_pub.publish(msg)
 		accel_pub.publish(accel_msg)
 
