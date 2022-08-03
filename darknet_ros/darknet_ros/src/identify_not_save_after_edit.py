@@ -77,7 +77,7 @@ def pub_detected(count):
         else:
             final_check.data[i + 3] = 0
 
-    pub_ID = rospy.Publisher('/sign_ID', Int32MultiArray, queue_size=1)
+    pub_ID = rospy.Publisher('/detect_ID', Int32MultiArray, queue_size=1)
     pub_ID.publish(final_check)
 
 
@@ -96,9 +96,8 @@ def BoundingBoxes_callback(data):
         if (data.bounding_boxes[i].probability > 0.8):
             #신호등 인식 범위 지정
             if(class_id >= 6 and class_id <= 10):
-                if(xmin >= 200 and xmax <= 440):
-                    detected_count[class_id] += 1
-                    detected_time[class_id] = sec
+                detected_count[class_id] += 1
+                detected_time[class_id] = sec
             elif class_id == 15:
                 if class_name == "parking":
                     detected_count[class_id] += 1
@@ -118,11 +117,12 @@ def BoundingBoxes_callback(data):
                 if all(detected_count[i] == 0 for i in range(3,6)):
                     detected_count[17] = 0
             print(str(class_id) + class_name + " - xmin : " + str(xmin) + " ymin : " + str(ymin))
+        print(detected_count)
 
 
 if __name__ == '__main__':
     
-    global pub_sign, detected_count, detected_time, final_check, now, sec, A_num, B_flag
+    global pub_sign, detected_count, detected_time, final_check, sec, A_num, B_flag
     
     detected_count = np.zeros(21, dtype=int)
     detected_time = np.zeros(17)
@@ -134,8 +134,8 @@ if __name__ == '__main__':
     final_check=Int32MultiArray()
     final_check.data = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     
-    rospy.init_node('sign_ID', anonymous=True)
-    rospy.Subscriber("/camera2/darknet_ros/bounding_boxes", BoundingBoxes, BoundingBoxes_callback)
+    rospy.init_node('obj_ID', anonymous=True)
+    rospy.Subscriber("/camera1/darknet_ros/bounding_boxes", BoundingBoxes, BoundingBoxes_callback)
     rate = rospy.Rate(10)
     
 # /bounding_boxes==============================================================
@@ -150,8 +150,7 @@ if __name__ == '__main__':
 
     while (True):
         try:
-            now = time.gmtime(time.time())
-            sec = now.tm_sec
+            sec = int(time.time())
 
 	    #객체가 더이상 없다고 판단할 시간 설정
             for i in range(3,len(detected_time)):

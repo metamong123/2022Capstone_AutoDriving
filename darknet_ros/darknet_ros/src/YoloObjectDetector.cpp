@@ -127,7 +127,7 @@ void YoloObjectDetector::init() {
   int detectionImageQueueSize;
   bool detectionImageLatch;
 
-  nodeHandle_.param("subscribers/camera_reading/topic", cameraTopicName, std::string("/camera/image_raw"));
+  nodeHandle_.param("subscribers/camera_reading/topic", cameraTopicName, std::string("/usb_cam/image_raw"));
   nodeHandle_.param("subscribers/camera_reading/queue_size", cameraQueueSize, 1);
   nodeHandle_.param("publishers/object_detector/topic", objectDetectorTopicName, std::string("found_object"));
   nodeHandle_.param("publishers/object_detector/queue_size", objectDetectorQueueSize, 1);
@@ -496,6 +496,8 @@ void YoloObjectDetector::yolo() {
       fps_ = 1. / (what_time_is_it_now() - demoTime_);
       demoTime_ = what_time_is_it_now();
       if (viewImage_) {
+        //generate_image : able to view /darknet_ros/detection_image at rosbag
+        generate_image(buff_[(buffIndex_ + 1)%3], ipl_); 
         displayInThread(0);
       } else {
         generate_image(buff_[(buffIndex_ + 1) % 3], ipl_);
@@ -587,6 +589,8 @@ void* YoloObjectDetector::publishInThread() {
     msg.header.frame_id = "detection";
     msg.count = 0;
     objectPublisher_.publish(msg);
+
+    boundingBoxesPublisher_.publish(boundingBoxesResults_);
   }
   if (isCheckingForObjects()) {
     ROS_DEBUG("[YoloObjectDetector] check for objects in image.");

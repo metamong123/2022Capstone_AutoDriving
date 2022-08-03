@@ -20,6 +20,29 @@ vo_Pub=rospy.Publisher('/odom',Odometry,queue_size=1)
 heading_array = []
 filtered_heading = 0
 
+def euler_from_quaternion(x, y, z, w):
+        """
+        Convert a quaternion into euler angles (roll, pitch, yaw)
+        roll is rotation around x in radians (counterclockwise)
+        pitch is rotation around y in radians (counterclockwise)
+        yaw is rotation around z in radians (counterclockwise)
+        """
+        t0 = +2.0 * (w * x + y * z)
+        t1 = +1.0 - 2.0 * (x * x + y * y)
+        roll_x = math.atan2(t0, t1)
+     
+        t2 = +2.0 * (w * y - z * x)
+        t2 = +1.0 if t2 > +1.0 else t2
+        t2 = -1.0 if t2 < -1.0 else t2
+        pitch_y = math.asin(t2)
+     
+        t3 = +2.0 * (w * z + x * y)
+        t4 = +1.0 - 2.0 * (y * y + z * z)
+        yaw_z = math.atan2(t3, t4)
+     
+        return yaw_z
+
+
 def callback(msg):
 
 	global cov1,cov2
@@ -42,8 +65,10 @@ def callback1(msg):
 	
 	global i, before_qz, before_qw
 	heading=np.arctan( msg.twist.twist.linear.y / msg.twist.twist.linear.x )
+	
 	if msg.twist.twist.linear.x < 0 :
 		heading=heading+np.pi
+	
 	#heading=math.atan2(msg.twist.twist.linear.y , msg.twist.twist.linear.x)
 	heading_array.insert(0,heading)   # heading value save
 	qx=0
@@ -66,12 +91,19 @@ def callback1(msg):
 		rpose.pose.pose.orientation.w=qw
 		before_qz = qz			
 		before_qw = qw
+
+		yaw = euler_from_quaternion(qx, qy, qz, qw)
+
 	else :
 		rpose.pose.pose.orientation.x=qx
 		rpose.pose.pose.orientation.y=qy
 		rpose.pose.pose.orientation.z=before_qz	
 		rpose.pose.pose.orientation.w=before_qw
-  
+
+		yaw = euler_from_quaternion(qx, qy, before_qz, before_qw)
+	
+	#print(yaw)
+
 	rpose.twist.twist.linear.x = msg.twist.twist.linear.x
 	rpose.twist.twist.linear.y = msg.twist.twist.linear.y
 	rpose.twist.twist.linear.z = msg.twist.twist.linear.z
@@ -87,7 +119,7 @@ def callback1(msg):
 
 if __name__=='__main__':
 	
-	rospy.init_node('gps_to_vo')
+	rospy.init_node('odometry')
 
 	global rpose, a, b, heading
 	a=0

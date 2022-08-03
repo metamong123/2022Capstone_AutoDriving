@@ -82,7 +82,6 @@ def pub_detected(count):
 
 
 def BoundingBoxes_callback(data):
-    
     number = len(data.bounding_boxes)
     for i in range(number):
         class_id = data.bounding_boxes[i].id
@@ -96,9 +95,8 @@ def BoundingBoxes_callback(data):
         if (data.bounding_boxes[i].probability > 0.8):
             #신호등 인식 범위 지정
             if(class_id >= 6 and class_id <= 10):
-                if(xmin >= 200 and xmax <= 440):
-                    detected_count[class_id] += 1
-                    detected_time[class_id] = sec
+                detected_count[class_id] += 1
+                detected_time[class_id] = sec
             elif class_id == 15:
                 if class_name == "parking":
                     detected_count[class_id] += 1
@@ -122,7 +120,7 @@ def BoundingBoxes_callback(data):
 
 if __name__ == '__main__':
     
-    global pub_sign, detected_count, detected_time, final_check, now, sec, A_num, B_flag
+    global pub_sign, detected_count, detected_time, final_check, sec, A_num, B_flag
     
     detected_count = np.zeros(21, dtype=int)
     detected_time = np.zeros(17)
@@ -135,7 +133,7 @@ if __name__ == '__main__':
     final_check.data = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     
     rospy.init_node('obj_ID', anonymous=True)
-    rospy.Subscriber("/darknet_ros/bounding_boxes", BoundingBoxes, BoundingBoxes_callback)
+    rospy.Subscriber("/camera1/darknet_ros/bounding_boxes", BoundingBoxes, BoundingBoxes_callback)
     rate = rospy.Rate(10)
     
 # /bounding_boxes==============================================================
@@ -150,15 +148,15 @@ if __name__ == '__main__':
 
     while (True):
         try:
-            now = time.gmtime(time.time())
-            sec = now.tm_sec
+            sec = int(time.time())
 
 	    #객체가 더이상 없다고 판단할 시간 설정
-            for i in range(3,len(detected_time)):
+            for i in range(6,len(detected_time)):
                 if (sec - detected_time[i] >= 3):
                     detected_count[i] = 0
 
             pub_detected(detected_count)
+            print(detected_count)
 
         except rospy.ROSInterruptException:
             pass

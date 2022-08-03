@@ -22,7 +22,7 @@ publishers:
     latch: false
 
   detection_image:
-    topic: /camera2/darknet_ros/detection_image/compressed
+    topic: /camera2/darknet_ros/detection_image
     queue_size: 1
     latch: true
 

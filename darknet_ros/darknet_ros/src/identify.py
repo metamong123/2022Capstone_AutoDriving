@@ -1,163 +1,140 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import numpy as np
-import time
+from scipy.stats import mode
+
 import rospy
 from darknet_ros_msgs.msg import BoundingBoxes
 from std_msgs.msg import Int32MultiArray
 
          
-# CLASS====================================================================================
+# CLASS ====================================================================================
 # 0 : A1  1 : A2  2 : A3  3 : B1  4 : B2  5: B3                  idx = 0(1 2 3), 1(1 2 3)
 # 6 : green  7 : left  8 : red  9 : straightleft  10 : yellew    idx = 2(0 1 2 3 4)
-# 11 : person  12 : car  13 : uturn  14 : kidzone  
-# 15 : parking  16 : stopline                                    idx = 3 ~ 8 (0 0 0 0 0 0)
+# 11 : person  12 : car  13 : uturn  14 : kidzone
+# 15 : stopline                                                  idx = 3 ~ 8 (0 0 0 0 0 0)
 # =========================================================================================
 
-# Ex===========================================================================
-# count = [0,0,10, 10,10,10, 0,0,0,10,0, 0,10,0,10,0,0, 1,20,60,40]
-# pub = [3, 2, 3, 0, 1, 0, 1, 0, 0] (A3, B1-B3-B2, straightleft, car, kidzone)
+# OUTPUT ===========================================================================
+# pub = [3, 2, 3, 0, 1, 0, 1, 0, 0] (A, B1_x, B2_x, B3_x, traffic_light, person, car, sign)
 # =============================================================================
 
-def pub_detected(count):
-    
-    thresh = 50
-    
-    delivery_A = [count[0], count[1], count[2]]
-    delivery_B = [count[3], count[4], count[5]]
-    traffic_sign = [count[6], count[7], count[8], count[9], count[10]]
-    detect_else = [count[11], count[12], count[13], count[14], count[15], count[16]]
-    B_flag = count[17]
-    B_xpos = [count[18], count[19], count[20]]
-    
-    class_list=["A1", "A2", "A3", "B1", "B2", "B3", "green", "left", "red", "straightleft", "yellow", "person", "car", "uturn", "kidzone", "parking", "stopline"]
+class YoloPub():
+    def __init__(self, class_map, queue_size, thresh):
+        self.queue_size = queue_size
+        self.threshold = thresh
+        self.callback_flag = False
 
-    final_check.data = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        # [[A queue], [B1 queue], [B2 queue], ...]
+        self.queue_list = [[-1 for i in range(self.queue_size)] for j in range(len(class_map))]
 
-    # 배달 미션 - A표지판 판별
-    if any(d_A != 0 for d_A in delivery_A):
-        max_A = delivery_A[0]
-        for a in range(len(delivery_A)):
-            if (delivery_A[a] >= max_A):
-                max_A = delivery_A[a]
-                A_num = a
-        if (max_A >= thresh):
-            final_check.data[0] = A_num + 1
+        # [[A1 to A queue], [A2 to A queue], [A3 to A queue], [B1 to B1 queue], [B2 to B2 queue], [B3 to B3 queue], ...]
+        self.id_to_queue_list = [self.queue_list[i] for i in range(len(class_map)) for _ in range(len(class_map[i]))]
+
+        self.id_pub = rospy.Publisher('/detect_ID', Int32MultiArray, queue_size=10)
+        self.boundingbox_sub = rospy.Subscriber('/camera2/darknet_ros/bounding_boxes', BoundingBoxes, self.BoundingBoxes_callback)
+
+
+    def deliveryB_vote(self, queue):
+        if queue.count(-1) > int(self.queue_size/2):
+            return -1
         else:
-            final_check.data[0] = 0
+            for element in queue: # get latest x_min
+                if element != -1:
+                    val = element
+            return val
 
-    #배달 미션 - B표지판 위치를 통해 경로 설정
-    if (B_flag == 1):
-        if any(b >= thresh for b in delivery_B):
-            min_B = min(B_xpos)
-            max_B = max(B_xpos)
-            if (B_xpos[A_num] == min_B):
-                final_check.data[1] = 1
-            elif (B_xpos[A_num] == max_B):
-                final_check.data[1] = 3
+
+    def hard_vote(self, queue):
+        return int(mode(queue)[0])
+
+
+    def majority_vote(self, queue):
+        # Finding majority candidate
+        candidate = -1
+        votes = 0
+
+        for i in range(self.queue_size):
+            if (votes == 0):
+                candidate = queue[i]
+                votes = 1
             else:
-                final_check.data[1] = 2
-
-    #신호등 확인
-    clearly_sign = traffic_sign[0]
-    for t in range(len(traffic_sign)):
-        if (traffic_sign[t] >= clearly_sign):
-            clearly_sign = traffic_sign[t]
-            traffic_num = t
-    if (clearly_sign >= thresh):
-        final_check.data[2] = traffic_num + 1
-    else:
-        final_check.data[2] = 0
-    
-    #그 외 객체 판별
-    for i in range(len(detect_else)-2):
-        if (detect_else[i] >= thresh):
-            final_check.data[i + 3] = 1
-        else:
-            final_check.data[i + 3] = 0
-
-    pub_ID = rospy.Publisher('/detect_ID', Int32MultiArray, queue_size=1)
-    pub_ID.publish(final_check)
+                votes = votes + 1 if (queue[i] == candidate) else votes - 1
+        
+        count = 0
+        # Checking if majority candidate occurs more than n/2
+        # times
+        for i in range (self.queue_size):
+            if (queue[i] == candidate):
+                count += 1
+        
+        return candidate if (count > self.queue_size // 2) else -1
 
 
-def BoundingBoxes_callback(data):
-    print(1)
-    number = len(data.bounding_boxes)
-    for i in range(number):
-        class_id = data.bounding_boxes[i].id
-        class_name = data.bounding_boxes[i].Class
-        xmin = data.bounding_boxes[i].xmin
-        xmax = data.bounding_boxes[i].xmax
-        ymin = data.bounding_boxes[i].ymin
-        ymax = data.bounding_boxes[i].ymax
+    def soft_vote(self):
+        pass
 
-        #정확도 판별
-        if (data.bounding_boxes[i].probability > 0.8):
-            #신호등 인식 범위 지정
-            if(class_id >= 6 and class_id <= 10):
-                detected_count[class_id] += 1
-                detected_time[class_id] = sec
-            elif class_id == 15:
-                if class_name == "parking":
-                    detected_count[class_id] += 1
-                    detected_time[class_id] = sec
-                elif class_name == "stopline":
-                    detected_count[class_id+1] += 1
-                    detected_time[class_id+1] = sec
+
+    def weight_hard_vote(self):
+        pass
+
+
+    def weight_soft_vote(self):
+        pass
+
+
+    def msg_pub(self):
+        final_check = Int32MultiArray()
+        queue_list = self.queue_list
+
+        # queue voting
+        for idx in range(len(queue_list)):
+            if idx in (1, 2, 3): # (B1, B2, B3)
+                final_check.data.append(self.deliveryB_vote(queue_list[idx]))
             else:
-                detected_count[class_id] += 1
-                detected_time[class_id] = sec
-                #B 표지판 정보 저장
-                if (class_id >= 3 and class_id <= 5):
-                    detected_count[17] = 1
-                    B_xpos=[0,0,0]
-                    B_xpos[class_id-3] = max(B_xpos[class_id-3],xmin)
-                    detected_count[class_id + 15] = B_xpos[class_id-3]
-                if all(detected_count[i] == 0 for i in range(3,6)):
-                    detected_count[17] = 0
-            print(str(class_id) + class_name + " - xmin : " + str(xmin) + " ymin : " + str(ymin))
-        print(detected_count)
+                final_check.data.append(self.hard_vote(queue_list[idx]))
+
+        self.id_pub.publish(final_check)
+        self.callback_flag = False
+
+
+    def BoundingBoxes_callback(self, data):
+        queue_size = self.queue_size
+
+        # append new bounding boxes data
+        for bounding_box in data.bounding_boxes:
+            if bounding_box.probability >= self.threshold:
+                if bounding_box.id in (3, 4, 5): # (B1, B2, B3)
+                    self.id_to_queue_list[bounding_box.id].append(bounding_box.xmin)
+                else:
+                    self.id_to_queue_list[bounding_box.id].append(bounding_box.id)
+        
+        for queue in self.queue_list:
+            if len(queue) == queue_size: # append -1 to an undetected classes
+                queue.append(-1)
+            while len(queue) != queue_size: # delete first element
+                del queue[0]
+        self.callback_flag = True
 
 
 if __name__ == '__main__':
-    
-    global pub_sign, detected_count, detected_time, final_check, sec, A_num, B_flag
-    
-    detected_count = np.zeros(21, dtype=int)
-    detected_time = np.zeros(17)
-    for i in range(17):
-        detected_time[i] = time.time()
 
-    A_num = 0
+    CLASS_MAP = (
+        ("A1", "A2", "A3"),
+        ("B1",),
+        ("B2",),
+        ("B3",),
+        ("green", "left", "red", "straightleft", "yellow"),
+        ("person",),
+        ("car",),
+        ("uturn", "kidzone", "stopline")
+    )
+    QUEUE_SIZE = 13
+    ACCURACY_THRESHOLD = 0.7
 
-    final_check=Int32MultiArray()
-    final_check.data = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    
-    rospy.init_node('obj_ID', anonymous=True)
-    rospy.Subscriber("/camera1/darknet_ros/bounding_boxes", BoundingBoxes, BoundingBoxes_callback)
-    rate = rospy.Rate(10)
-    
-# /bounding_boxes==============================================================
-# float64 probability
-# int64 xmin
-# int64 ymin
-# int64 xmax
-# int64 ymax
-# int16 id
-# string Class
-# =============================================================================
+    rospy.init_node('identify')
+    node = YoloPub(CLASS_MAP, QUEUE_SIZE, ACCURACY_THRESHOLD)
 
-    while (True):
-        try:
-            sec = int(time.time())
-
-	    #객체가 더이상 없다고 판단할 시간 설정
-            for i in range(3,len(detected_time)):
-                if (sec - detected_time[i] >= 3):
-                    detected_count[i] = 0
-
-            pub_detected(detected_count)
-
-        except rospy.ROSInterruptException:
-            pass
+    while not rospy.is_shutdown():
+        if node.callback_flag:
+            node.msg_pub()

@@ -56,7 +56,7 @@ class LaneDetectionNode:
 
 	#print(center_lane[:,0])
 	#print(len(center_lane[0,:]))
-
+                
         mask_image = self.detector.draw_lanes(lanes, shape)
         mask_image = cv2.resize(mask_image,(1280,720),interpolation=cv2.INTER_LINEAR)
         mask_image = cv2.bitwise_or(mask_image,image_np)
