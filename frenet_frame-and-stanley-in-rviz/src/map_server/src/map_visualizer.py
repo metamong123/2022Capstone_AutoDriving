@@ -15,7 +15,7 @@ sys.path.append(path_frenet+"/src/path/")
 
 from path_map import *
 
-use_map=kcity()
+use_map=frontier()
 
 class Converter(object):
 	def __init__(self, file_=None, waypoints=None, start_id=0, r=255/255.0, g=255/255.0, b=255/255.0, a= 0.5, scale=0.1):

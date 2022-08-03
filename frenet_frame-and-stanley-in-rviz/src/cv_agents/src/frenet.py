@@ -46,8 +46,8 @@ WB = 1.04
 
 ## 10km/h
 MIN_T = 2.0 # minimum terminal time [s]
-MAX_T = 4.0 # maximum terminal time [s], default = 2
-DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+MAX_T = 6.0 # maximum terminal time [s], default = 2
+DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 DT = 0.5 # timestep for update
 
 
@@ -428,7 +428,7 @@ def check_path(fplist, obs_info, mapx, mapy, maps):
 			continue
 		ok_ind.append(i)
 	print("v = " + str(vel) + ", a = " + str(a) + ", curv = " + str(curv) + ", col = "+ str(col))
-	print("total = " + str(len(fplist)) + ", selected = " + str(len(fplist) - curv - col - vel - a) + "\n")
+	print("total = " + str(len(fplist)) + ", selected = " + str(len(fplist) - curv - col - vel - a))
 	return [fplist[i] for i in ok_ind]
 
 # def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed, DF_SET):

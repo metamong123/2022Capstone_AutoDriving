@@ -69,9 +69,7 @@ class Stanley:
 
 		# steering
 		steer = self.w_yaw * yaw_term + self.w_cte * cte_term
-		print("yaw_term:", yaw_term, "cte:", cte)
-		print("steer:", steer)
-		return steer
+		return steer, yaw_term, cte
 
 
 	def stanley_control_thresh(self, x, y, yaw, v, map_xs, map_ys, map_yaws):
@@ -100,9 +98,7 @@ class Stanley:
 
 		# steering
 		steer = self.w_yaw * yaw_term + self.w_cte * cte_term
-		print("yaw_term:", yaw_term, "cte:", cte)
-		print("steer:", steer)
-		return steer
+		return steer, yaw_term, cte
 
 
 	def stanley_control_pid(self, x, y, yaw, v, map_xs, map_ys, map_yaws):
@@ -131,6 +127,4 @@ class Stanley:
 
 		# steering
 		steer = self.w_yaw * yaw_term + self.w_cte * cte_term
-		print("yaw_term:", yaw_term, "cte:", cte)
-		print("steer:", steer)
-		return steer
+		return steer, yaw_term, cte

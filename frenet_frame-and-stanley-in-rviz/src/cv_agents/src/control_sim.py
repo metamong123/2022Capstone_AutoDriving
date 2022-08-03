@@ -8,6 +8,7 @@ import rospkg
 import sys
 from visualization_msgs.msg import Marker
 from ackermann_msgs.msg import AckermannDriveStamped
+import time
 
 from object_msgs.msg import Object, PathArray
 from std_msgs.msg import Float64, Int32MultiArray,String
@@ -93,9 +94,11 @@ path_y=[]
 path_yaw=[]
 def callback_path(msg):
 	global path_x,path_y,path_yaw
+	global t1
 	path_x=msg.x.data
 	path_y=msg.y.data
 	path_yaw=msg.yaw.data
+	t1 = time.time()
 	
 
 mode='global'
@@ -121,7 +124,7 @@ def acceleration(ai):
 
 
 use_map=kcity()
-start_index=link_ind
+start_index=11
 obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=0,v=0,L=1.600,W=1.04)
 
 def callback_state(msg):
@@ -131,7 +134,9 @@ def callback_state(msg):
 if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	stanley = Stanley(0.5, 5, 0.9, 0.65,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
+	stanley = Stanley(0.5, 5, 0.9, 0.65,  cte_thresh = 0.1, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
+	#stanley = Stanley(0.5, 5, 0.9, 0.9,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
+	t1 = time.time()
 
 	rospy.init_node("control")
 	tf_broadcaster = tf.TransformBroadcaster()
@@ -141,9 +146,9 @@ if __name__ == "__main__":
 	object_pub = rospy.Publisher("/objects/car_1", Object, queue_size=1)
 
 
-	state_sub = rospy.Subscriber("/objects/car_1", Object, callback_state, queue_size=1)
+	# state_sub = rospy.Subscriber("/objects/car_1", Object, callback_state, queue_size=1)
 	# path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=10)
-	path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=10)
+	path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
 	mode_sub= rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
 	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
 	
@@ -163,6 +168,8 @@ if __name__ == "__main__":
 	r = rospy.Rate(10)
 	a = 0
 
+	f = open("/home/mds/stanley/k1.csv", "w")
+
 	while not rospy.is_shutdown():
 
 		if not path_x: ## No solution
@@ -177,20 +184,23 @@ if __name__ == "__main__":
 			error_pa = use_map.target_speed[mode] - state.v
 			error_da = state.v - prev_v
 			error_ia += use_map.target_speed[mode] - state.v
-			kp_a = 0.5
-			kd_a = 0.7
-			ki_a = 0.01
+			kp_a = 1
+			kd_a = 0
+			ki_a = 0
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
 			
-			steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, path_x, path_y, path_yaw)
 			# stanley_control / stanley_control_thresh / stanley_control_pid
-			
+			steer, yaw_term, cte = stanley.stanley_control_thresh(state.x, state.y, state.yaw, state.v, path_x, path_y, path_yaw)
+
 			# if mode == 'global':
 			# 	steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw)
 			# elif mode == 'parking':
 			# 	steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, use_map.parking_path[park_ind][0],use_map.parking_path[park_ind][1],use_map.parking_path[park_ind][1])
 			# elif mode == 'delivery':
 			# 	steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, use_map.delivery_path[delivery_ind][0],use_map.delivery_path[delivery_ind][1],use_map.delivery_path[delivery_ind][1])
+			
+			# dt, yaw_term, cte, steer
+			f.write(str(t1) + ',' + str(yaw_term*180/math.pi) + ',' + str(cte*1e2) + ',' + str(steer*180/math.pi) + '\n')
 
 		accel_msg.data = a
 
