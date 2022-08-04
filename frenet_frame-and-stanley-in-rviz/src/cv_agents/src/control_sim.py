@@ -123,9 +123,9 @@ def acceleration(ai):
 	a.data=ai
 
 
-use_map=kcity()
-start_index=11
-obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=0,v=0,L=1.600,W=1.04)
+use_map=frontier()
+start_index=0
+obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=3.14,v=0,L=1.600,W=1.04)
 
 def callback_state(msg):
 	global obj_msg
@@ -134,7 +134,7 @@ def callback_state(msg):
 if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	stanley = Stanley(0.5, 5, 0.9, 0.65,  cte_thresh = 0.1, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
+	stanley = Stanley(1, 5, 1, 1,  cte_thresh = 0.5, yaw_dgain = 0, WB = 1.04)
 	#stanley = Stanley(0.5, 5, 0.9, 0.9,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
 	t1 = time.time()
 
@@ -168,7 +168,7 @@ if __name__ == "__main__":
 	r = rospy.Rate(10)
 	a = 0
 
-	f = open("/home/mds/stanley/k1.csv", "w")
+	#f = open("/home/mds/stanley/k1.csv", "w")
 
 	while not rospy.is_shutdown():
 
@@ -190,7 +190,7 @@ if __name__ == "__main__":
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
 			
 			# stanley_control / stanley_control_thresh / stanley_control_pid
-			steer, yaw_term, cte = stanley.stanley_control_thresh(state.x, state.y, state.yaw, state.v, path_x, path_y, path_yaw)
+			steer, yaw_term, cte = stanley.stanley_control_pd(state.x, state.y, state.yaw, state.v, path_x, path_y, path_yaw)
 
 			# if mode == 'global':
 			# 	steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw)
@@ -200,7 +200,7 @@ if __name__ == "__main__":
 			# 	steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, use_map.delivery_path[delivery_ind][0],use_map.delivery_path[delivery_ind][1],use_map.delivery_path[delivery_ind][1])
 			
 			# dt, yaw_term, cte, steer
-			f.write(str(t1) + ',' + str(yaw_term*180/math.pi) + ',' + str(cte*1e2) + ',' + str(steer*180/math.pi) + '\n')
+			#f.write(str(t1) + ',' + str(yaw_term*180/math.pi) + ',' + str(cte*1e2) + ',' + str(steer*180/math.pi) + '\n')
 
 		accel_msg.data = a
 

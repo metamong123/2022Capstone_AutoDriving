@@ -69,13 +69,10 @@ DT = 0.5 # timestep for update
 
 
 V_MAX = 20/3.6	  # maximum velocity [m/s]
-# ACC_MAX=2.0
-# ACC_MAX=V_MAX/DT_T
 ACC_MAX=V_MAX/0.1
-#ACC_MAX = V_MAX / MIN_T # maximum acceleration [m/ss]
-#ACC_MAX = 99999999999999999999999999999999999999999999
 
-STEER_MAX = math.radians(30)
+
+STEER_MAX = math.radians(28)
 
 K_MAX = STEER_MAX / WB	 # maximum curvature [1/m]
 #K_MAX = 100
@@ -342,6 +339,7 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 			v_diff = (target_speed - tfp.s_d[-1]) ** 2
 			#cost for global path tracking
 			d_track = (tfp.d[-1]) ** 2 
+			# print("cost for global path tracking",d_track)
 			# lateral cost
 			tfp.c_lat = K_J * J_lat + K_T * T + K_D * d_diff + K_GD * d_track 
 			# logitudinal cost

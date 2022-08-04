@@ -3,12 +3,13 @@ import matplotlib.pyplot as plt
 
 ## rostopic echo -b '/home/nsclmds/bagfiles/test_1/2022-06-13-21-05-57.bag' -p /ackermann_cmd > k_4_steer.csv
 
-df=pd.read_csv('/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/cv_agents/src/steer_control/k_4_speed_low.csv')
+df=pd.read_csv('/home/mds/stanley/k05_sg5_wy08_wc08_yd07_thersh_015_0804_imu-all.csv')
 
 df.columns
 # df.loc[391]['field.drive.steering_angle']
-x=df.loc[:]['%time']
-y=df.loc[:]['field.drive.steering_angle']
+x=df.iloc[:]['1659627507.25']
+print(x)
+y=df.loc[:]['-437.9024276643614']
 
 plt.plot(x,y)
 plt.show()

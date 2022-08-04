@@ -1,7 +1,7 @@
 import numpy as np
 
 class Stanley:
-	def __init__(self, k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04):
+	def __init__(self, k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, yaw_dgain = 0, WB = 1.04):
 		self.WB = WB
         
 		self.k = k
@@ -13,11 +13,11 @@ class Stanley:
 		self.cte_thresh = cte_thresh
 	
 		# parameter for stanley_control_pid
-		self.p_gain = p_gain
-		self.i_gain = i_gain
-		self.d_gain = d_gain
-		self.error_icte = 0
-		self.prev_cte = 0
+		self.yaw_dgain = yaw_dgain
+		#self.cte_dgain = cte_dgain
+
+		self.prev_yaw = 0
+		#self.prev_cte = 0
 
 
 	def normalize_angle(self, angle):
@@ -101,9 +101,9 @@ class Stanley:
 		return steer, yaw_term, cte
 
 
-	def stanley_control_pid(self, x, y, yaw, v, map_xs, map_ys, map_yaws):
-		front_x = x + self.WB/2*np.cos(yaw)
-		front_y = y + self.WB/2*np.sin(yaw)
+	def stanley_control_pd(self, x, y, yaw, v, map_xs, map_ys, map_yaws):
+		front_x = x + self.WB*np.cos(yaw)
+		front_y = y + self.WB*np.sin(yaw)
 
 		# find nearest point
 		min_index = self.find_nearest_point(front_x, front_y, map_xs, map_ys)
@@ -118,13 +118,17 @@ class Stanley:
 		perp_vec = [np.cos(yaw + np.pi/2), np.sin(yaw + np.pi/2)]
 		cte = np.dot([dx, dy], perp_vec)
 
+		if -self.cte_thresh < cte < self.cte_thresh: # is this okay?
+			cte = cte**3
+
 		# control law
 		yaw_term = self.normalize_angle(map_yaw - yaw) # heading error
-		error_dcte = cte - self.prev_cte
-		self.prev_cte = cte
-		self.error_icte += cte
-		cte_term = np.arctan2(self.p_gain*cte + self.i_gain*self.error_icte + self.d_gain*error_dcte, (self.speed_gain + v)) # cross track error
+		d_yaw = yaw_term - self.prev_yaw
+		self.prev_yaw = yaw_term
+		#d_cte = cte - self.prev_cte
+		#self.prev_cte = cte
+		cte_term = np.arctan2(self.k*cte, (self.speed_gain + v)) # cross track error
 
 		# steering
-		steer = self.w_yaw * yaw_term + self.w_cte * cte_term
+		steer = self.w_yaw*yaw_term + self.yaw_dgain*d_yaw + self.w_cte*cte_term
 		return steer, yaw_term, cte

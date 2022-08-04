@@ -27,7 +27,7 @@ from path_map import *
 ## 초기화 지점
 use_map=frontier()
 mode='global'
-start_index=0
+start_index=2
 obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=0,v=0,L=1.600,W=1.04)
 
 def pi_2_pi(angle):
@@ -91,8 +91,6 @@ def callback3(msg):
 	ai=msg.data
 
 
-
-
 def callback_mode(msg):
 	global mode
 	mode = msg.data
@@ -145,7 +143,7 @@ if __name__ == "__main__":
 	link_ind['global']=start_index
 	opt_ind=0
 	
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.05)
 
 	my_wp['global']=get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
@@ -176,10 +174,10 @@ if __name__ == "__main__":
 	opt_frenet_path = Converter(r=0, g=255/255.0, b=100/255.0, a=1, scale=0.5)
 	cand_frenet_paths = Converter(r=0, g=100/255.0, b=100/255.0, a=0.4, scale= 0.5)
 	r = rospy.Rate(1)
-	t1=0
 
 	while not rospy.is_shutdown():
-		state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
+		state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.05)
+
 
 		s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 		x, y, road_yaw = get_cartesian(s, d, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],use_map.waypoints['global']['s'][:use_map.link_len['global'][link_ind['global']]])
@@ -276,5 +274,3 @@ if __name__ == "__main__":
 		dir_pub.publish(mode_msg)
 		waypoint_pub.publish(waypoint_msg)
 		global_path_pub.publish(path_msg)
-
-		r.sleep()
