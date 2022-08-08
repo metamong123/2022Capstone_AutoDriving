@@ -43,13 +43,13 @@ parking_wp5 = 0
 parking_wp6 = 0
 def waypoint_callback(msg):
 	global global_wp, parking_wp1, parking_wp2, parking_wp3, parking_wp4, parking_wp5, parking_wp6
-	global_wp = msg.data[1]  #global waypoint
-	parking_wp1 = msg.data[2] #parking waypoint
-	parking_wp2 = msg.data[3]
-	parking_wp3 = msg.data[4]
-	parking_wp4 = msg.data[5]
-	parking_wp5 = msg.data[6]
-	parking_wp6 = msg.data[7]
+	global_wp = msg.data[0]  #global waypoint
+	parking_wp1 = msg.data[1] #parking waypoint
+	parking_wp2 = msg.data[2]
+	parking_wp3 = msg.data[3]
+	parking_wp4 = msg.data[4]
+	parking_wp5 = msg.data[5]
+	parking_wp6 = msg.data[6]
  
 current_dir = 'straight'
 next_dir = 'straight'
@@ -59,7 +59,7 @@ def link_callback(msg):
 	next_dir = msg.strings[1]
     
 mode_status = 'going'
-def finish_callback(msg):
+def end_callback(msg):
     global mode_status
     mode_status = msg.data
 
@@ -73,7 +73,6 @@ def obstacle_callback(msg):
 		obs_info.append(obj)
 ##########################################
 
-
 if __name__ == "__main__":
 
 	rospy.init_node("path_select")
@@ -82,14 +81,15 @@ if __name__ == "__main__":
 	rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
 	rospy.Subscriber("/link_direction", StringArray, link_callback)
 	rospy.Subscriber("/obstacles", ObjectArray, obstacle_callback)
-	rospy.Subscriber("/status", String, finish_callback)
+	rospy.Subscriber("/mission_status", String, end_callback)
 
-
-	mode_pub=rospy.Publisher("/mode_selector", String, queue_size=1)
+	mode_pub = rospy.Publisher("/mode_selector", String, queue_size=1)
 	path_pub = rospy.Publisher("/final_path", PathArray, queue_size=1)
+	park_pub = rospy.Publisher("/park_ind", Float64, queue_size=1)
 
 	path_msg = PathArray()
 	mode_msg = String()
+	park_msg = Float64()
 
 	parking_ind = 0
 
@@ -99,14 +99,18 @@ if __name__ == "__main__":
 
 		######## mode select based waypoint #######
 		if (global_wp <= use_map.glo_to_park_finish and global_wp >=use_map.glo_to_park_start):  # parking mode
+			mode_msg.data = 'parking'
 			mode = 'parking'
 		elif (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
+			mode_msg.data = 'delivery'
 			mode = 'delivery_A'
 		elif (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
+			mode_msg.data = 'delivery'
 			mode = 'delivery_B'
    
-        ### 미션이 끝나면 finish flag를 받아 global path 로 복귀 ##
-		if mode_status == 'finish':
+        ### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
+		if mode_status == 'end':
+			mode_msg.data = 'global'
 			mode = 'global'
 
 		mode_msg.data=mode
@@ -144,7 +148,7 @@ if __name__ == "__main__":
 						print("parking_choose: "+str(park_i))
 						fp=fp_1
 						break
-
+			park_msg.data = parking_ind #현재 이동하는 parking index보내줌
 			path_msg.x.data = fp.x  # parking final path
 			path_msg.y.data = fp.y
 			path_msg.yaw.data = fp.yaw
@@ -160,6 +164,6 @@ if __name__ == "__main__":
    
 		mode_pub.publish(mode_msg)
 		path_pub.publish(path_msg)
-
+		park_pub.publish(park_msg)
 		#r.sleep()
 	
