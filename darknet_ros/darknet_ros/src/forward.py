@@ -81,7 +81,8 @@ if __name__ == '__main__':
         ("green", "left", "red", "straightleft", "yellow"),
         ("person",),
         ("car",),
-        ("uturn", "kidzone", "stopline")
+        ("uturn", "kidzone"),
+        ("stopline")
     )
     QUEUE_SIZE = 13
     ACCURACY_THRESHOLD = 0.7
