@@ -19,7 +19,6 @@ sys.path.append(path_frenet+"/src/path/")
 from path_map import *
 
 ##################### load path ###############################
-use_map=kcity()
 
 global_path_x=[]
 global_path_y=[]
@@ -43,13 +42,13 @@ parking_wp5 = 0
 parking_wp6 = 0
 def waypoint_callback(msg):
 	global global_wp, parking_wp1, parking_wp2, parking_wp3, parking_wp4, parking_wp5, parking_wp6
-	global_wp = msg.data[0]  #global waypoint
-	parking_wp1 = msg.data[1] #parking waypoint
-	parking_wp2 = msg.data[2]
-	parking_wp3 = msg.data[3]
-	parking_wp4 = msg.data[4]
-	parking_wp5 = msg.data[5]
-	parking_wp6 = msg.data[6]
+	global_wp = msg.data[1]  #global waypoint
+	parking_wp1 = msg.data[2] #parking waypoint
+	parking_wp2 = msg.data[3]
+	parking_wp3 = msg.data[4]
+	parking_wp4 = msg.data[5]
+	parking_wp5 = msg.data[6]
+	parking_wp6 = msg.data[7]
  
 current_dir = 'straight'
 next_dir = 'straight'
@@ -94,27 +93,31 @@ if __name__ == "__main__":
 	parking_ind = 0
 
 	mode='global'
-	
+	#mode_msg.data = 'global'
 	while not rospy.is_shutdown():
-
+		#print(use_map.glo_to_park_start)
 		######## mode select based waypoint #######
-		if (global_wp <= use_map.glo_to_park_finish and global_wp >=use_map.glo_to_park_start):  # parking mode
-			mode_msg.data = 'parking'
+		if (not use_map.parking_map_num==0) and (global_wp <= use_map.glo_to_park_finish and global_wp >=use_map.glo_to_park_start):  # parking mode
 			mode = 'parking'
-		elif (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
-			mode_msg.data = 'delivery'
+		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
 			mode = 'delivery_A'
-		elif (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
-			mode_msg.data = 'delivery'
+		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
 			mode = 'delivery_B'
-   
+
         ### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
 		if mode_status == 'end':
-			mode_msg.data = 'global'
 			mode = 'global'
 
-		mode_msg.data=mode
-
+		
+		if (mode == 'delivery_A' and mode == 'delivery_B'):
+			mode_msg.data = 'delivery'
+		else:
+			
+			mode_msg.data = mode
+			print(mode_msg.data)
+			mode_pub.publish(mode_msg)
+			print(mode_msg.data)
+		
 		if mode == 'global':
 			path_msg.x.data = global_path_x
 			path_msg.y.data = global_path_y
@@ -162,8 +165,7 @@ if __name__ == "__main__":
 			path_msg.y.data = use_map.delivery_path[1][1]
 			path_msg.yaw.data = use_map.delivery_path[1][2]
    
-		mode_pub.publish(mode_msg)
+		
 		path_pub.publish(path_msg)
 		park_pub.publish(park_msg)
-		#r.sleep()
-	
+		rospy.sleep(0.1)

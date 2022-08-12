@@ -1,0 +1,13 @@
+<launch>
+
+	<node name="map_visualizer" pkg="map_server" type="map_visualizer.py" />
+
+	<node name="state" pkg="update" type="state_gps_base.py"/>
+	
+	<node name="path" pkg="cv_agents" type="path_global_gps_base.py" output="screen"/>
+	<node name="path_select" pkg="cv_agents" type="path_mode_select.py"/>
+	<node name="control" pkg="cv_agents" type="control_gps_base.py" output="screen"/>
+
+	<node type="rviz" name="rviz" pkg="rviz" args="-d /home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/cv_agents/rviz/boong.rviz" />
+	
+</launch>

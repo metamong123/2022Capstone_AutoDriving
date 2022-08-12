@@ -128,7 +128,7 @@ class Path:
 		w_f_l=waypoint_finish_list
 	
 		if waypoint_start_list == None:
-			w_s_l=[sw-10 for sw in waypoint_finish_list] # for stopline
+			w_s_l=[sw-8 for sw in waypoint_finish_list] # for stopline
 		else:
 			w_s_l=waypoint_start_list
 	
@@ -232,26 +232,79 @@ def frontier():
 
 def kcity():
 	kcity=Path(path_map + "/src/kcity/route.pkl")
-	kcity.set_link([0,100,300,500,720,750,775,800,950,1000,1025,1060,1230,1280,1320,1360,1500,1600,1780,1820,1900,1960,2140,2190,2250,2300,2480,2550,2600,2750,3180])
-	kcity.set_dir([0,1,2,3,4,7,8,9,11,12,14,16,20,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37],[6,10,13,15,17],[5,18,19,21])    
-	# kcity.stopline_start_list,kcity.stopline_finish_list=kcity.set_waypoint_range(waypoint_finish_list=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846])
+	kcity.set_link([0,110,190,280,390,530,600,670,720,780,880,940,970,1010,1190,1220,1260,1300,1360,1450,1580,1600,1640,1730,1780,1850,1910,2060,2140,2190,2260,2400,2510,2670,2760,2880,2960,3138])
+	kcity.set_dir([0,1,2,3,4,6,7,8,9,11,13,15,17,18,19,20,22,24,26,30,31,33,34,35,36,37],[21,23,25,27],[5,10,12,14,16,28,29,32])    
+	kcity.stopline_start_list,kcity.stopline_finish_list=kcity.set_waypoint_range(waypoint_finish_list=[190,280,390,670,880,970,1260,1450,1730,2060,2190,2400,2670,2760,2880])
+	
 	kcity.parking_map_num=6
 	park_ver="v1"
 	for i in range(kcity.parking_map_num):
 		park_route=path_map+"/src/kcity/parking_"+park_ver+"_"+str(i)+".pkl"
 		kcity.parking_route.append(park_route)
 		kcity.set_other_mode(mode='parking', pc_route=park_route,link=2*i)
-	kcity.glo_to_park_start=15
-	kcity.glo_to_park_finish=18
+
+	kcity.delivery_map_num=2
+	for i in range(kcity.delivery_map_num):
+		del_route=path_map+"/src/kcity/delivery_"+str(i)+".pkl"
+		kcity.delivery_route.append(del_route)
+		kcity.set_other_mode(mode='delivery', pc_route=del_route,link=i)
+
+	kcity.glo_to_park_start=110
+	kcity.glo_to_park_finish=120
 	# kcity.parking_stop=[]
 	# kcity.park_to_glo_start=[]
 	# kcity.park_to_glo_finish=[]
-	kcity.glo_to_del_start=[200, 400]
-	kcity.glo_to_del_finish=[205, 405]
-	# kcity.low_speed_start_list,kcity.low_speed_finish_list=kcity.set_waypoint_range(waypoint_finish_list=[260, 349, 459,737,947,1328,1522,1797,2153,2269,2485,2750,2846])
-	kcity.target_speed={'global':20/3.6,'parking':10/3.6}
-	# kcity.lane_width={'3.3':[0],'3.8':[1],'4.1':[2], '6.6':[3]...}
+	kcity.glo_to_del_start=[720, 1360]
+	kcity.glo_to_del_finish=[730, 1370]
+	
+	kcity.target_speed={'global':20/3.6,'parking':10/3.6, 'delivery':10/3.6}
+	kcity.lane_width={'3.3':[4,7,8,9,10,15,16,17,18,19,20,21,22,23,24,25,27,29,30,31,32],'3.8':[0,1,2,3,33,34,35,36],'4.1':[11,12,28], '6.6':[13,14,26], '7.1':[5,6]}
 	kcity.set_map()
 	kcity.parking_path=kcity.make_path('parking',kcity.parking_map_num)
 	kcity.delivery_path=kcity.make_path('delivery',kcity.delivery_map_num)
 	return kcity
+
+
+def boong():
+	offset_state = "_offset"
+	# "" or "_offset"
+
+	boong=Path(path_map + "/src/boong/global"+offset_state+".pkl")
+	
+	if offset_state == "":
+		boong.set_link([0,20,190,220,420,460,620,680,800,838])
+	else:
+		boong.set_link([0,20,190,220,420,460,620,680,800,830])
+
+	boong.set_dir([0,1,3,5,7,9,10,11],[],[2,4,6,8])
+	
+	boong.parking_map_num=9
+	for i in range(boong.parking_map_num):
+		park_route=path_map+"/src/boong/parking"+offset_state+"_"+str(i)+".pkl"
+		boong.parking_route.append(park_route)
+		boong.set_other_mode(mode='parking', pc_route=park_route,link=2*i)
+	
+	# boong.delivery_map_num=2
+	# for i in range(boong.delivery_map_num):
+	# 	del_route=path_map+"/src/boong/delivery_"+str(i)+".pkl"
+	# 	boong.delivery_route.append(del_route)
+	# 	boong.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
+	
+	boong.glo_to_park_start=15
+	boong.glo_to_park_finish=20
+	
+	# boong.parking_stop=[]
+	# boong.park_to_glo_start=[]
+	# boong.park_to_glo_finish=[]
+	# boong.glo_to_del_start=[]
+	# boong.glo_to_del_finish=[]
+	
+	boong.target_speed={'global':{'straight':12/3.6, 'curve':8/3.6},'parking':10/3.6,'delivery':10/3.6}
+	boong.set_map()
+	boong.parking_path=boong.make_path('parking',boong.parking_map_num)
+	# boong.delivery_path=boong.make_path('delivery',boong.delivery_map_num)
+	return boong
+
+
+use_map=boong()
+start_index=0

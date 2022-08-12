@@ -220,7 +220,7 @@ def traffic_decision():
 			print("traffic mode : go")
 	return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
-def delivery_decision():
+# def delivery_decision():
 
 
 if __name__=='__main__':
@@ -298,7 +298,7 @@ if __name__=='__main__':
 				cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = parking_decision()
 		
 		
-		elif car_mode == 'delivery':
+		# elif car_mode == 'delivery':
 			
 
 		rospy.sleep(0.1)

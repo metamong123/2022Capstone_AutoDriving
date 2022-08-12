@@ -12,6 +12,7 @@ import time
 
 from object_msgs.msg import Object, PathArray
 from std_msgs.msg import Float64, Int32MultiArray,String
+from rocon_std_msgs.msg import StringArray
 
 from frenet import *
 from stanley_pid import *
@@ -122,19 +123,30 @@ def acceleration(ai):
 	a=Float64()
 	a.data=ai
 
-
-use_map=frontier()
-start_index=0
 obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=3.14,v=0,L=1.600,W=1.04)
 
 def callback_state(msg):
 	global obj_msg
 	obj_msg=msg
 
+dir='straight'
+def callback_dir(msg):
+	global dir
+	dir=msg.strings[0]
+
+
 if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	stanley = Stanley(1, 5, 1, 1,  cte_thresh = 0.5, yaw_dgain = 0, WB = 1.04)
+	
+	control_gain=0.9
+	cte_speed_gain=5
+	yaw_weight=0.8
+	cte_weight=0.9
+	cte_thresh_hold=0
+	yaw_d_gain=0
+
+	stanley = Stanley(k=control_gain, speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
 	#stanley = Stanley(0.5, 5, 0.9, 0.9,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
 	t1 = time.time()
 
@@ -151,7 +163,8 @@ if __name__ == "__main__":
 	path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
 	mode_sub= rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
 	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
-	
+	dir_sub=rospy.Subscriber("/link_direction", StringArray, callback_dir, queue_size=1)
+
 	accel_msg = Float64()
 
 	s=0
@@ -169,7 +182,9 @@ if __name__ == "__main__":
 	a = 0
 
 	#f = open("/home/mds/stanley/k1.csv", "w")
-
+	if dir == 'right' or dir == 'left':
+		dir='curve'
+	
 	while not rospy.is_shutdown():
 
 		if not path_x: ## No solution
@@ -181,17 +196,26 @@ if __name__ == "__main__":
 				a = 0
 		else:
 			## PID control
-			error_pa = use_map.target_speed[mode] - state.v
-			error_da = state.v - prev_v
-			error_ia += use_map.target_speed[mode] - state.v
-			kp_a = 1
-			kd_a = 0
-			ki_a = 0
+			if dir == 'right' or dir == 'left':
+				dir='curve'
+			
+			if mode == 'global':
+				error_pa = use_map.target_speed[mode][dir] - state.v
+				error_da = state.v - prev_v
+				error_ia += use_map.target_speed[mode][dir] - state.v
+			else:
+				error_pa = use_map.target_speed[mode] - state.v
+				error_da = state.v - prev_v
+				error_ia += use_map.target_speed[mode] - state.v
+			
+			kp_a = 0.5
+			kd_a = 0.7
+			ki_a = 0.01
+			
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
 			
 			# stanley_control / stanley_control_thresh / stanley_control_pid
 			steer, yaw_term, cte = stanley.stanley_control_pd(state.x, state.y, state.yaw, state.v, path_x, path_y, path_yaw)
-
 			# if mode == 'global':
 			# 	steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw)
 			# elif mode == 'parking':

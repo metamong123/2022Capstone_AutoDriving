@@ -18,7 +18,7 @@ from separation_axis_theorem import *
 
 # initialize
 # initialize
-LANE_WIDTH = 3.5  # lane width [m]
+LANE_WIDTH = 3.0  # lane width [m]
 WB = 1.04
 
 ## defalt

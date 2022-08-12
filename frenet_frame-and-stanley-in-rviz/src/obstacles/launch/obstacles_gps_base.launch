@@ -1,0 +1,9 @@
+<launch>
+
+	<!-- include file="$(find velodyne_pointcloud)/launch/VLP16_points.launch" />
+	<include file="$(find adaptive_clustering_v1)/launch/adaptive_clustering_v1.launch" / -->
+
+	<node name="parking_car" pkg="obstacles" type="parking_car.py" />
+	<node name="collision_check" pkg="obstacles" type="collision_check_with_visualizing_car_gps_base.py" />
+
+</launch>

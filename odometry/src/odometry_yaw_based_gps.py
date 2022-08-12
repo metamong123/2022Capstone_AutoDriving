@@ -14,7 +14,7 @@ from nav_msgs.msg import Odometry
 
 import numpy as np
 
-vo_Pub=rospy.Publisher('/odom',Odometry,queue_size=1)
+vo_Pub=rospy.Publisher('/odom_gps',Odometry,queue_size=1)
 
 
 heading_array = []
@@ -119,7 +119,7 @@ def callback1(msg):
 
 if __name__=='__main__':
 	
-	rospy.init_node('odometry')
+	rospy.init_node('odometry_gps')
 
 	global rpose, a, b, heading
 	a=0

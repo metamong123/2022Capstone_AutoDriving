@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Lane Detection")
     parser.add_argument("--detector", dest="detector", help="lanenet/scnn", default="lanenet", type=str)
     parser.add_argument("--subscriber", dest="subscriber", help="video/node", default='node', type=str)
-    parser.add_argument("--name", dest="name", help="path to video or the node to be subscribed", default="/lanenet_cam/image_raw/compressed",type=str)
+    parser.add_argument("--name", dest="name", help="path to video or the node to be subscribed", default="/usb_cam/image_raw/compressed",type=str)
     parsed_args = parser.parse_args()
     assert parsed_args.detector.lower() in ["lanenet", "scnn"]
     assert parsed_args.subscriber.lower() in ["node", "video"]

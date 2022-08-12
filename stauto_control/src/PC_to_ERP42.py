@@ -145,11 +145,11 @@ def acker_callback(msg):
 if __name__ == '__main__':
     rospy.init_node('serial_node')
 
-    rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,acker_callback)
+    rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
 
     rate = rospy.Rate(10)
     
-    port = str(rospy.get_param("~robot_port","/dev/ttyUSB3"))
+    port = str(rospy.get_param("~robot_port","/dev/ttyUSB0"))
 
     ser = serial.serial_for_url(port, baudrate=115200, timeout=1)
 
