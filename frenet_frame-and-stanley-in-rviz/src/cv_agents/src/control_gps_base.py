@@ -83,18 +83,18 @@ def acceleration(ai):
 	a.data=ai
 
 obj_msg_gps=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=use_map.nodes[mode][start_index]['yaw'][0],v=0,L=1.600,W=1.04)
-obj_msg_imu=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=use_map.nodes[mode][start_index]['yaw'][0],v=0,L=1.600,W=1.04)
+#obj_msg_imu=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=use_map.nodes[mode][start_index]['yaw'][0],v=0,L=1.600,W=1.04)
 
 def callback_state_gps(msg):
 	global obj_msg_gps, t1
 	obj_msg_gps=msg
 	t1 = time.time()
-
+'''
 def callback_state_imu(msg):
 	global obj_msg_imu, t2
 	obj_msg_imu=msg
 	t2 = time.time()
-
+'''
 dir='straight'
 def callback_dir(msg):
 	global dir
@@ -111,13 +111,13 @@ if __name__ == "__main__":
 	yaw_d_gain=0
 
 	stanley_gps = Stanley(k=control_gain, speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
-	stanley_imu = Stanley(k=control_gain, speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
+	#stanley_imu = Stanley(k=control_gain, speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
 	
 	f_gps = open("/home/mds/stanley/"+"gps_"+time.strftime('%Y%m%d_%H:%M')+"_k"+str(control_gain)+"_sg"+str(cte_speed_gain)+"_wy"+str(yaw_weight)+"_wc"+str(cte_weight)+"_thresh"+str(cte_thresh_hold)+"_dgain"+str(yaw_d_gain)+".csv", "w")
-	f_gps.write('time' + ',' + 'x' + ',' + 'y' + ',' + 'yaw' + ',' + 'yaw_term(degree)' + ',' + 'cte(cm)' + ',' + 'steering(degree)' + '\n')
+	f_gps.write('time' + ',' + 'x' + ',' + 'y' + ',' + 'map_yaw' + ',' + 'yaw' + ',' + 'yaw_term(degree)' + ',' + 'cte(cm)' + ',' + 'steering(degree)' + '\n')
 
-	f_imu = open("/home/mds/stanley/"+"imu_"+time.strftime('%Y%m%d_%H:%M')+"_k"+str(control_gain)+"_sg"+str(cte_speed_gain)+"_wy"+str(yaw_weight)+"_wc"+str(cte_weight)+"_thresh"+str(cte_thresh_hold)+"_dgain"+str(yaw_d_gain)+".csv", "w")
-	f_imu.write('time' + ',' + 'x' + ',' + 'y' + ',' + 'yaw' + ',' + 'yaw_term(degree)' + ',' + 'cte(cm)' + ',' + 'steering(degree)' + '\n')
+	#f_imu = open("/home/mds/stanley/"+"imu_"+time.strftime('%Y%m%d_%H:%M')+"_k"+str(control_gain)+"_sg"+str(cte_speed_gain)+"_wy"+str(yaw_weight)+"_wc"+str(cte_weight)+"_thresh"+str(cte_thresh_hold)+"_dgain"+str(yaw_d_gain)+".csv", "w")
+	#f_imu.write('time' + ',' + 'x' + ',' + 'y' + ',' + 'yaw' + ',' + 'yaw_term(degree)' + ',' + 'cte(cm)' + ',' + 'steering(degree)' + '\n')
 	
 	t1 = time.time()
 	t2 = time.time()
@@ -129,9 +129,9 @@ if __name__ == "__main__":
 
 
 	state_gps_sub = rospy.Subscriber("/objects/car_1/gps", Object, callback_state_gps, queue_size=1)
-	state_imu_sub = rospy.Subscriber("/objects/car_1/imu", Object, callback_state_imu, queue_size=1)
-	#path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=1)
-	path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
+	#state_imu_sub = rospy.Subscriber("/objects/car_1/imu", Object, callback_state_imu, queue_size=1)
+	path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=1)
+	#path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
 	mode_sub= rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
 	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
 	dir_sub=rospy.Subscriber("/link_direction", StringArray, callback_dir, queue_size=1)
@@ -184,8 +184,8 @@ if __name__ == "__main__":
 			kd_a = 0.7
 			ki_a = 0.01
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
-			steer_gps, yaw_term_gps, cte_gps = stanley_gps.stanley_control_pd(obj_msg_gps.x, obj_msg_gps.y, obj_msg_gps.yaw, state.v, path_x, path_y, path_yaw)
-			steer_imu, yaw_term_imu, cte_imu = stanley_imu.stanley_control_pd(obj_msg_imu.x, obj_msg_imu.y, obj_msg_imu.yaw, state.v, path_x, path_y, path_yaw)
+			steer_gps, yaw_term_gps, cte_gps, map_yaw_gps = stanley_gps.stanley_control_pd(obj_msg_gps.x, obj_msg_gps.y, obj_msg_gps.yaw, state.v, path_x, path_y, path_yaw)
+			#steer_imu, yaw_term_imu, cte_imu, map_yaw = stanley_imu.stanley_control_pd(obj_msg_imu.x, obj_msg_imu.y, obj_msg_imu.yaw, state.v, path_x, path_y, path_yaw)
 			# stanley_control / stanley_control_thresh / stanley_control_pid
 			
 			# if mode == 'global':
@@ -195,8 +195,8 @@ if __name__ == "__main__":
 			# elif mode == 'delivery':
 			# 	steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, use_map.delivery_path[delivery_ind][0],use_map.delivery_path[delivery_ind][1],use_map.delivery_path[delivery_ind][1])
 			
-			f_gps.write(str(t1) + ',' + str(obj_msg_gps.x) + ',' + str(obj_msg_gps.y) + ',' + str(obj_msg_gps.yaw*180/math.pi) + ',' + str(yaw_term_gps*180/math.pi) + ',' + str(cte_gps*1e2) + ',' + str(steer_gps*180/math.pi) + '\n')
-			f_imu.write(str(t2) + ',' + str(obj_msg_imu.x) + ',' + str(obj_msg_imu.y) + ',' + str(obj_msg_imu.yaw*180/math.pi) + ',' + str(yaw_term_imu*180/math.pi) + ',' + str(cte_imu*1e2) + ',' + str(steer_imu*180/math.pi) + '\n')
+			f_gps.write(str(t1) + ',' + str(obj_msg_gps.x) + ',' + str(obj_msg_gps.y) + ',' + str(map_yaw_gps) + ',' + str(obj_msg_gps.yaw*180/math.pi) + ',' + str(yaw_term_gps*180/math.pi) + ',' + str(cte_gps*1e2) + ',' + str(steer_gps*180/math.pi) + '\n')
+			#f_imu.write(str(t2) + ',' + str(obj_msg_imu.x) + ',' + str(obj_msg_imu.y) + ',' + str(obj_msg_imu.yaw*180/math.pi) + ',' + str(yaw_term_imu*180/math.pi) + ',' + str(cte_imu*1e2) + ',' + str(steer_imu*180/math.pi) + '\n')
 
 		accel_msg.data = a
 		

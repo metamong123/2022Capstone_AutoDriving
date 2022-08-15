@@ -265,9 +265,50 @@ def kcity():
 	return kcity
 
 
-def boong():
+def boong_old():
 	offset_state = "_offset"
 	# "" or "_offset"
+
+	boong_old=Path(path_map + "/src/boong_old/global"+offset_state+".pkl")
+	
+	if offset_state == "":
+		boong_old.set_link([0,20,190,220,420,460,620,680,800,838])
+	else:
+		boong_old.set_link([0,20,190,220,420,460,620,680,800,830])
+
+	boong_old.set_dir([0,1,3,5,7,9,10,11],[],[2,4,6,8])
+	
+	boong_old.parking_map_num=6
+	for i in range(boong_old.parking_map_num):
+		park_route=path_map+"/src/boong_old/parking"+offset_state+"_"+str(i)+".pkl"
+		boong_old.parking_route.append(park_route)
+		boong_old.set_other_mode(mode='parking', pc_route=park_route,link=2*i)
+	
+	# boong_old.delivery_map_num=2
+	# for i in range(boong_old.delivery_map_num):
+	# 	del_route=path_map+"/src/boong_old/delivery_"+str(i)+".pkl"
+	# 	boong_old.delivery_route.append(del_route)
+	# 	boong_old.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
+	
+	boong_old.glo_to_park_start=15
+	boong_old.glo_to_park_finish=18
+	
+	# boong_old.parking_stop=[]
+	# boong_old.park_to_glo_start=[]
+	# boong_old.park_to_glo_finish=[]
+	# boong_old.glo_to_del_start=[]
+	# boong_old.glo_to_del_finish=[]
+	
+	boong_old.target_speed={'global':{'straight':12/3.6, 'curve':10/3.6},'parking':10/3.6,'delivery':10/3.6}
+	boong_old.set_map()
+	boong_old.parking_path=boong_old.make_path('parking',boong_old.parking_map_num)
+	# boong_old.delivery_path=boong_old.make_path('delivery',boong_old.delivery_map_num)
+	return boong_old
+
+
+def boong():
+	offset_state = "_offset2"
+	# "" or "_offset" or "_offset2"
 
 	boong=Path(path_map + "/src/boong/global"+offset_state+".pkl")
 	
@@ -276,7 +317,7 @@ def boong():
 	else:
 		boong.set_link([0,20,190,220,420,460,620,680,800,830])
 
-	boong.set_dir([0,1,3,5,7,9,10,11],[],[2,4,6,8])
+	boong.set_dir([0,1,3,5,7,9,10],[],[2,4,6,8])
 	
 	boong.parking_map_num=9
 	for i in range(boong.parking_map_num):
@@ -292,14 +333,13 @@ def boong():
 	
 	boong.glo_to_park_start=15
 	boong.glo_to_park_finish=20
-	
 	# boong.parking_stop=[]
 	# boong.park_to_glo_start=[]
 	# boong.park_to_glo_finish=[]
 	# boong.glo_to_del_start=[]
 	# boong.glo_to_del_finish=[]
 	
-	boong.target_speed={'global':{'straight':12/3.6, 'curve':8/3.6},'parking':10/3.6,'delivery':10/3.6}
+	boong.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6},'parking':5/3.6,'delivery':10/3.6}
 	boong.set_map()
 	boong.parking_path=boong.make_path('parking',boong.parking_map_num)
 	# boong.delivery_path=boong.make_path('delivery',boong.delivery_map_num)

@@ -41,29 +41,45 @@ class ObstaclePub():
 		msg = ObjectArray()
 
 		if markers:
-			world_frame = self.world_frame
-			detection_frame = self.detection_frame
-			
 			for id in range(len(markers.markers)):
 
 				o = Object()
-
-				o.header.frame_id = "map"
-				o.id = id
-				o.classification = o.CLASSIFICATION_CAR
 
 				# object length, width
 				o.L = abs(markers.markers[id].points[0].x - markers.markers[id].points[1].x)
 				o.W = abs(markers.markers[id].points[4].y - markers.markers[id].points[3].y)
 
-				# object x, y, yaw
-				# center of bounding box
+				o.header.frame_id = "map"
+				o.id = id
+				o.classification = o.CLASSIFICATION_CAR
+
+				# object x, y, yaw (frame = car_1)
 				x = (markers.markers[id].points[0].x + markers.markers[id].points[1].x)/2
 				y = (markers.markers[id].points[4].y + markers.markers[id].points[3].y)/2
 				yaw = 0
 
 				# transformation (car_1 -> map)
-				o.x, o.y, o.yaw = self.change_frame(x, y, yaw, world_frame, detection_frame)
+				pose = tf.transformations.euler_matrix(0, 0, yaw)
+				pose[0, 3] = x
+				pose[1, 3] = y
+				pose[2, 3] = 0
+
+				self.listener.waitForTransform(self.world_frame,self.detection_frame, rospy.Time(),rospy.Duration(10))
+				t, r = self.listener.lookupTransform(self.world_frame,self.detection_frame, rospy.Time(0))
+
+				tf_matrix = np.matrix(tf.transformations.quaternion_matrix(r))
+				tf_matrix[0, 3] = t[0]
+				tf_matrix[1, 3] = t[1]
+				tf_matrix[2, 3] = t[2]
+        
+				result = np.array(np.dot(tf_matrix, pose))
+
+				# object x, y, yaw (frame = map)
+				o.x = result[0, 3]
+				o.y = result[1, 3]
+
+				euler = tf.transformations.euler_from_matrix(result)
+				o.yaw = euler[2]
 
 				o.header.stamp = rospy.Time.now()
 				msg.object_list.append(o)

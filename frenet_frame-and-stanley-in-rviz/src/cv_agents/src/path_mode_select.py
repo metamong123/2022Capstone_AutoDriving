@@ -6,7 +6,7 @@ import rospy
 import numpy as np
 import math, time
 
-from object_msgs.msg import PathArray, ObjectArray
+from object_msgs.msg import PathArray, ObjectArray, Object
 from std_msgs.msg import Float64, Int32MultiArray, String, Int32
 from rocon_std_msgs.msg import StringArray
 
@@ -57,10 +57,12 @@ def link_callback(msg):
 	current_dir = msg.strings[0]
 	next_dir = msg.strings[1]
     
-mode_status = 'going'
+#mode_status = 
 def end_callback(msg):
-    global mode_status
-    mode_status = msg.data
+	global mode_status
+	
+	print("1")
+	mode_status = msg.data
 
 ######## 주차칸에 차량의 위치 파악 ############
 obs_info=[]
@@ -72,6 +74,13 @@ def obstacle_callback(msg):
 		obs_info.append(obj)
 ##########################################
 
+state_x=0
+state_y=0
+def state_callback(msg):
+	global state_x, state_y
+	state_x = msg.x
+	state_y = msg.y
+
 if __name__ == "__main__":
 
 	rospy.init_node("path_select")
@@ -80,19 +89,21 @@ if __name__ == "__main__":
 	rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
 	rospy.Subscriber("/link_direction", StringArray, link_callback)
 	rospy.Subscriber("/obstacles", ObjectArray, obstacle_callback)
-	rospy.Subscriber("/mission_status", String, end_callback)
-
-	mode_pub = rospy.Publisher("/mode_selector", String, queue_size=1)
+	rospy.Subscriber("/mission_status", String, end_callback,queue_size=10)
+	rospy.Subscriber("/objects/car_1/gps", Object, state_callback, queue_size=1)
+	mode_pub = rospy.Publisher("/mode_selector", String, queue_size=10)
 	path_pub = rospy.Publisher("/final_path", PathArray, queue_size=1)
-	park_pub = rospy.Publisher("/park_ind", Float64, queue_size=1)
+	park_pub = rospy.Publisher("/park_ind_wp", Int32MultiArray, queue_size=1)
 
 	path_msg = PathArray()
 	mode_msg = String()
-	park_msg = Float64()
+	park_msg = Int32MultiArray()
 
 	parking_ind = 0
-
+	park_wp = 0
+	
 	mode='global'
+	mode_status ='going'
 	#mode_msg.data = 'global'
 	while not rospy.is_shutdown():
 		#print(use_map.glo_to_park_start)
@@ -105,18 +116,18 @@ if __name__ == "__main__":
 			mode = 'delivery_B'
 
         ### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
+		print(mode_status)
 		if mode_status == 'end':
+			print('global start')
 			mode = 'global'
-
-		
+			mode_status = 'going'
+		else:
+			pass
 		if (mode == 'delivery_A' and mode == 'delivery_B'):
 			mode_msg.data = 'delivery'
 		else:
-			
 			mode_msg.data = mode
-			print(mode_msg.data)
 			mode_pub.publish(mode_msg)
-			print(mode_msg.data)
 		
 		if mode == 'global':
 			path_msg.x.data = global_path_x
@@ -151,10 +162,14 @@ if __name__ == "__main__":
 						print("parking_choose: "+str(park_i))
 						fp=fp_1
 						break
-			park_msg.data = parking_ind #현재 이동하는 parking index보내줌
+
+			park_wp = get_closest_waypoints(state_x, state_y, use_map.waypoints[mode][parking_ind]['x'][:use_map.link_len[mode][parking_ind]], use_map.waypoints[mode][parking_ind]['y'][:use_map.link_len[mode][parking_ind]],park_wp)
+			print(park_wp)
+			park_msg.data = [parking_ind, park_wp] #현재 이동하는 parking index, wp보내줌
 			path_msg.x.data = fp.x  # parking final path
 			path_msg.y.data = fp.y
 			path_msg.yaw.data = fp.yaw
+			park_pub.publish(park_msg)
   
 		elif mode == 'delivery_A':
 			path_msg.x.data = use_map.delivery_path[0][0]  # A path
@@ -167,5 +182,5 @@ if __name__ == "__main__":
    
 		
 		path_pub.publish(path_msg)
-		park_pub.publish(park_msg)
+		
 		rospy.sleep(0.1)

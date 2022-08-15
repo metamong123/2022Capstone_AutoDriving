@@ -37,14 +37,14 @@ assist_steer=0
 waypoint = 0
 w = 0
 z = 0
+yaw = 0
 parking_yaw = 0
-park_ind = 0
 
 ##########################################################################
 
 # parking 시작하기전에 수정해야할 파라미터 값들 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-parking_finish_wp=[10,10,10,10,10,10] # 각 parking index마다의 finish waypoint임
-parking_straight_back_wp=[8,8,8,8,8,8]
+parking_finish_wp=[16,10,10,10,10,10] # 각 parking index마다의 finish waypoint임
+parking_straight_back_wp=[19,8,8,8,8,8]
 
 ###########################################################################
 
@@ -73,6 +73,7 @@ def euler_from_quaternion(x, y, z, w):
 car_mode = 'global'
 def mode_callback(msg):
 	global car_mode
+	print(1)
 	car_mode = msg.data
 
 current_dir = 'straight'
@@ -125,34 +126,38 @@ def odometry_callback(msg):
 	w = msg.pose.pose.orientation.w
 	yaw = euler_from_quaternion(x, y, z, w)
 
+park_ind_wp = [0,0]
 def parking_callback(msg):
-	global park_ind
-	park_ind = msg.data
+	global park_ind_wp
+	park_ind_wp = msg.data
 
 def parking_decision():
 	global parking_flag
 	global back_speed, back_angle
 	global save_speed,save_angle
 	global move_mode, frenet_speed, frenet_angle, frenet_gear, backward_speed, backward_angle, backward_gear, backward_brake   
-	global parking_angle, parking_brake, parking_speed, parking_gear, parking_yaw
+	global parking_angle, parking_brake, parking_speed, parking_gear, parking_yaw, yaw
  	
+	#print(park_ind_wp[1])
+
 	if parking_flag == 'backward':
-		if abs(yaw - parking_yaw) < 5: # hyperparameter(degree)
+		print(yaw)
+		if abs(yaw - parking_yaw) < 3*np.pi/180: # hyperparameter(degree)
 			parking_flag = 'end'	
 		else:
-			if parking_wp[park_ind] > parking_straight_back_wp[park_ind]:
-				parking_speed = 10/3.6
+			if park_ind_wp[1] > parking_straight_back_wp[park_ind_wp[0]]:
+				parking_speed = 8/3.6
 				parking_angle = 0
 				parking_gear = 2
 				parking_brake = 0	
 			else:
-				parking_speed = 10/3.6
+				parking_speed = 8/3.6
 				parking_angle = -20*np.pi/180
 				parking_gear = 2
 				parking_brake = 0
 	
 	else:
-		if parking_wp[park_ind] > parking_finish_wp[park_ind]:
+		if park_ind_wp[1] > parking_finish_wp[park_ind_wp[0]]:
 			parking_flag = 'finish'
 		else:
 			parking_speed = frenet_speed
@@ -234,18 +239,18 @@ if __name__=='__main__':
 	rospy.Subscriber("/detect_ID", Int32MultiArray, yolo_callback)
 	rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
 	rospy.Subscriber("/waypoint", Float64, waypoint_callback)
-	rospy.Subscriber("/odom", Odometry, odometry_callback)
-	rospy.Subscriber("/park_ind", Float64, parking_callback)
+	rospy.Subscriber("/odom_gps", Odometry, odometry_callback)
+	rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
 
 	rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
 	rospy.Subscriber("/link_direction", StringArray, link_callback)
 
-	mission_pub = rospy.Publisher('/mission_status', String, queue_size=1)
+	mission_pub = rospy.Publisher('/mission_status', String, queue_size=10)
 	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
 	
 	cmd=AckermannDriveStamped()
 	end_msg=String()
-	
+	mode_status = 'going'
 	while not rospy.is_shutdown():
 		if car_mode == 'global':
 			#if move_mode == 'finish':
@@ -273,7 +278,7 @@ if __name__=='__main__':
 			#print('global mode!!!')
 
 		elif car_mode == 'parking':
-			
+			print(parking_yaw)
 			if parking_flag == 'finish':
 				cmd.drive.speed = 0
 				cmd.drive.steering_angle = 0
@@ -289,11 +294,12 @@ if __name__=='__main__':
 				cmd.drive.acceleration = 0
 				cmd.drive.jerk = 50
 				final_cmd_Pub.publish(cmd)
-				end_msg.data = 'end'   # global mode로 바꾸기위한 flag보냄
+				mode_status = 'end'   # global mode로 바꾸기위한 flag보냄
 				mission_pub.publish(end_msg)
 				print('parking mission end!')
-				rospy.sleep(2) # 2sec
+				#rospy.sleep(2) # 2sec
 			else:	
+				
 				if parking_yaw == 0:
 					parking_yaw = yaw
 					if parking_yaw+np.pi <= np.pi:    # gps heading
@@ -302,9 +308,11 @@ if __name__=='__main__':
 						parking_yaw = parking_yaw - np.pi
 				cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = parking_decision()
 		
-
-		#rospy.sleep(0.1)
+		end_msg.data = mode_status
 		final_cmd_Pub.publish(cmd)
 		mission_pub.publish(end_msg)
+
+		rospy.sleep(0.1)
+
 
 

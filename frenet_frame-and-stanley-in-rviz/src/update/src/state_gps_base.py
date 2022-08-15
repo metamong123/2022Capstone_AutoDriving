@@ -20,19 +20,22 @@ y_gps=0.0
 yaw_gps=0.0
 v_gps=0.0
 
+'''
 x_imu=0.0
 y_imu=0.0
 yaw_imu=0.0
 v_imu=0.0
+'''
 
 id=1
 
 class TopicReciver:
 	def __init__(self):
 		self.odom_gps_sub=rospy.Subscriber("/odom_gps", Odometry,self.odometry_gps_callback)
-		self.odom_imu_sub=rospy.Subscriber("/odom_imu", Odometry,self.odometry_imu_callback)
+		#self.odom_imu_sub=rospy.Subscriber("/odom_imu", Odometry,self.odometry_imu_callback)
 	def check_all_connections(self):
-		return (self.odom_gps_sub.get_num_connections()+self.odom_imu_sub.get_num_connections())==2
+		#return (self.odom_gps_sub.get_num_connections()+self.odom_imu_sub.get_num_connections())==2
+		return self.odom_gps_sub.get_num_connections()==1
 	def odometry_gps_callback(self, data):
 		if self.check_all_connections():
 			global x_gps, y_gps, v_gps, yaw_gps
@@ -49,7 +52,7 @@ class TopicReciver:
 			roll, pitch, yaw_gps = euler_from_quaternion (orientation_list) 
 			# imu_theta=yaw*(180/np.pi) 
 			# print("lap: %f" %cur_gps_position[0])
-
+	'''
 	def odometry_imu_callback(self, data):
 		if self.check_all_connections():
 			global x_imu, y_imu, v_imu, yaw_imu
@@ -66,6 +69,7 @@ class TopicReciver:
 			roll, pitch, yaw_imu = euler_from_quaternion (orientation_list) 
 			# imu_theta=yaw*(180/np.pi) 
 			# print("lap: %f" %cur_gps_position[0])
+	'''
 
 
 # def speed_callback(data): 
@@ -78,7 +82,7 @@ if __name__ == "__main__":
 	#state_pub=rospy.Publisher("/state",Object,queue_size=1)
 	topic_receiver=TopicReciver()
 	object_gps_pub=rospy.Publisher("/objects/car_1/gps", Object,queue_size=1)
-	object_imu_pub=rospy.Publisher("/objects/car_1/imu", Object,queue_size=1)
+	#object_imu_pub=rospy.Publisher("/objects/car_1/imu", Object,queue_size=1)
 	marker_pub=rospy.Publisher("/objects/marker/car_1", Marker,queue_size=1)
 	
 	r = rospy.Rate(10)
@@ -149,6 +153,7 @@ if __name__ == "__main__":
 		#o.WB = 1.06
 		object_gps_pub.publish(o_gps)		
 
+		'''
 		o_imu = Object()
 		o_imu.header.frame_id = "/map"
 		o_imu.header.stamp = rospy.Time.now()
@@ -165,5 +170,6 @@ if __name__ == "__main__":
 		o_imu.W = 1.160
 		#o.WB = 1.06
 		object_imu_pub.publish(o_imu)
+		'''
 
 		r.sleep()

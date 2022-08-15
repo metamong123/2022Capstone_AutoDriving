@@ -92,6 +92,7 @@ def callback3(msg):
 def callback_mode(msg):
 	global mode
 	mode = msg.data
+	print(mode)
 
 def direction_array(current_dir, next_dir):
 	m = StringArray()
@@ -126,7 +127,7 @@ if __name__ == "__main__":
 	state_sub = rospy.Subscriber("/objects/car_1/gps", Object, callback2, queue_size=1)
 	accel_sub = rospy.Subscriber("/accel", Float64, callback3, queue_size=1)
 
-	rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
+	rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=10)
 
 
 	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
@@ -244,7 +245,7 @@ if __name__ == "__main__":
 			prev_opt_d = path[opt_ind].d[-1]
 
 		my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
-
+		#print(mode)
 		if mode=='parking':
 			for park_i in range(use_map.parking_map_num):
 				park_ind=park_i*2

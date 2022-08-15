@@ -39,12 +39,7 @@ class Stanley:
 			if dist < min_dist:
 				min_dist = dist
 				min_index = i
-		
-		map_vec = [map_xs[min_index + 1] - map_xs[min_index], map_ys[min_index + 1] - map_ys[min_index]]
-		ego_vec = [front_x - map_xs[min_index], front_y - map_ys[min_index]]
-		direction  = np.sign(np.dot(map_vec, ego_vec))
 
-		min_index = min_index + 1 if direction >= 0 else min_index
 		return min_index
 
     
@@ -105,4 +100,4 @@ class Stanley:
 
 		# steering
 		steer = self.w_yaw*yaw_term + self.yaw_dgain*d_yaw + self.w_cte*cte_term
-		return steer, yaw_term, cte
+		return steer, yaw_term, cte, map_yaw
