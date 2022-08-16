@@ -45,30 +45,30 @@ class State:
 
 ai=0
 obs_info = []
-class TopicReciver:
-	def __init__(self):
-		self.obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, self.callback_obstacle, queue_size=1)
-		self.state_sub = rospy.Subscriber("/objects/car_1/gps", Object, self.callback2, queue_size=1)
-		self.accel_sub = rospy.Subscriber("/accel", Float64, self.callback3, queue_size=1)
-	def check_all_connections(self):
-		return (self.obstacle_sub.get_num_connections()+self.state_sub.get_num_connections()+self.accel_sub.get_num_connections())==3
-	def callback_obstacle(self, msg):
-		if self.check_all_connections():
-			global obs_info
-			obs_info = []
-			for o in msg.object_list:
-				obj = [o.x, o.y, o.yaw, o.L, o.W]
-				obs_info.append(obj)
-	def callback2(self, msg):
-		if self.check_all_connections():
-			global obj_msg
-			global t1
-			obj_msg=msg
-			t1=time.time()
-	def callback3(self, msg):
-		if self.check_all_connections():
-			global ai
-			ai=msg.data
+# class TopicReciver:
+# 	def __init__(self):
+# 		self.obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, self.callback_obstacle, queue_size=1)
+# 		self.state_sub = rospy.Subscriber("/objects/car_1/gps", Object, self.callback2, queue_size=1)
+# 		self.accel_sub = rospy.Subscriber("/accel", Float64, self.callback3, queue_size=1)
+# 	def check_all_connections(self):
+# 		return (self.obstacle_sub.get_num_connections()+self.state_sub.get_num_connections()+self.accel_sub.get_num_connections())==3
+# 	def callback_obstacle(self, msg):
+# 		if self.check_all_connections():
+# 			global obs_info
+# 			obs_info = []
+# 			for o in msg.object_list:
+# 				obj = [o.x, o.y, o.yaw, o.L, o.W]
+# 				obs_info.append(obj)
+# 	def callback2(self, msg):
+# 		if self.check_all_connections():
+# 			global obj_msg
+# 			global t1
+# 			obj_msg=msg
+# 			t1=time.time()
+# 	def callback3(self, msg):
+# 		if self.check_all_connections():
+# 			global ai
+# 			ai=msg.data
 
 
 

@@ -166,7 +166,8 @@ if __name__ == "__main__":
 				s, d = get_frenet(state.x, state.y, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],my_wp)
 				x, y, road_yaw = get_cartesian(s, d, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],use_map.waypoints[mode]['s'][:use_map.link_len[mode][link_ind]])
 				
-				steer_gps = road_yaw - state.yaw
+				#steer_gps = road_yaw - state.yaw
+				steer_gps, yaw_term_gps, cte_gps, map_yaw_gps = stanley_gps.stanley_control_pd(state.x, state.y, state.yaw, state.v, [x], [y], [road_yaw])
 				a = 0
 		else:
 			## PID control
@@ -195,7 +196,7 @@ if __name__ == "__main__":
 			# elif mode == 'delivery':
 			# 	steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, use_map.delivery_path[delivery_ind][0],use_map.delivery_path[delivery_ind][1],use_map.delivery_path[delivery_ind][1])
 			
-			f_gps.write(str(t1) + ',' + str(obj_msg_gps.x) + ',' + str(obj_msg_gps.y) + ',' + str(map_yaw_gps) + ',' + str(obj_msg_gps.yaw*180/math.pi) + ',' + str(yaw_term_gps*180/math.pi) + ',' + str(cte_gps*1e2) + ',' + str(steer_gps*180/math.pi) + '\n')
+			f_gps.write(str(t1) + ',' + str(obj_msg_gps.x) + ',' + str(obj_msg_gps.y) + ',' + str(map_yaw_gps*180/math.pi) + ',' + str(obj_msg_gps.yaw*180/math.pi) + ',' + str(yaw_term_gps*180/math.pi) + ',' + str(cte_gps*1e2) + ',' + str(steer_gps*180/math.pi) + '\n')
 			#f_imu.write(str(t2) + ',' + str(obj_msg_imu.x) + ',' + str(obj_msg_imu.y) + ',' + str(obj_msg_imu.yaw*180/math.pi) + ',' + str(yaw_term_imu*180/math.pi) + ',' + str(cte_imu*1e2) + ',' + str(steer_imu*180/math.pi) + '\n')
 
 		accel_msg.data = a
