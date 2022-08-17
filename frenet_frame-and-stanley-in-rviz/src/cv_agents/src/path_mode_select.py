@@ -62,6 +62,7 @@ def link_callback(msg):
 mode_status ="going"
 def end_callback(msg):
 	global mode_status
+	print("1")
 	mode_status = msg.data
 	print(mode_status)
 
@@ -118,7 +119,7 @@ if __name__ == "__main__":
 			mode = 'delivery_B'
 
         ### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
-		
+		mode_status = rospy.get_param('mission_status')
 		if mode_status == 'end':
 			print('global start')
 			mode = 'global'

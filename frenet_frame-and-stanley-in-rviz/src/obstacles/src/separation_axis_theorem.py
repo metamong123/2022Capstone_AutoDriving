@@ -28,10 +28,10 @@ def normalize(v):
     return (v[0] / norm, v[1] / norm)
 
 def dot(a, b):
-    return a[0] * b[0] + a[1] * b[1];
+    return a[0] * b[0] + a[1] * b[1]
 
 def edge_direction(p0, p1):
-    return (p1[0] - p0[0], p1[1] - p0[1]);
+    return (p1[0] - p0[0], p1[1] - p0[1])
 
 def orthogonal(v):
     return (v[1], -v[0])
@@ -50,22 +50,22 @@ def contains(n, range_):
     if b < a:
         a = range_[1]
         b = range_[0]
-    return (n >= a) and (n <= b);
+    return (n >= a) and (n <= b)
 
 def overlap(a, b):
     if contains(a[0], b):
-        return True;
+        return True
     if contains(a[1], b):
-        return True;
+        return True
     if contains(b[0], a):
-        return True;
+        return True
     if contains(b[1], a):
-        return True;
-    return False;
+        return True
+    return False
 
 def separating_axis_theorem(vertices_a, vertices_b):
-    edges_a = vertices_to_edges(vertices_a);
-    edges_b = vertices_to_edges(vertices_b);
+    edges_a = vertices_to_edges(vertices_a)
+    edges_b = vertices_to_edges(vertices_b)
 
     edges = edges_a + edges_b
 
@@ -76,7 +76,7 @@ def separating_axis_theorem(vertices_a, vertices_b):
         projection_b = project(vertices_b, axes[i])
         overlapping = overlap(projection_a, projection_b)
         if not overlapping:
-            return False;
+            return False
     return True
 
 def get_vertice_rect(msg_tuple):

@@ -47,7 +47,7 @@ class TFPub:
 			m1.id = self.id
 			m1.pose.position.x = self.odom_dict['gps'][0]
 			m1.pose.position.y = self.odom_dict['gps'][1]
-			m1.pose.position.z = 1.5
+			m1.pose.position.z = 0.1
 			m1.pose.orientation.x = self.odom_dict['gps'][2][0]
 			m1.pose.orientation.y = self.odom_dict['gps'][2][1]
 			m1.pose.orientation.z = self.odom_dict['gps'][2][2]
@@ -70,7 +70,7 @@ class TFPub:
 			m2.id = self.id
 			m2.pose.position.x = self.odom_dict['imu'][0]
 			m2.pose.position.y = self.odom_dict['imu'][1]
-			m2.pose.position.z = 1.5
+			m2.pose.position.z = 0.1
 			m2.pose.orientation.x = self.odom_dict['imu'][2][0]
 			m2.pose.orientation.y = self.odom_dict['imu'][2][1]
 			m2.pose.orientation.z = self.odom_dict['imu'][2][2]

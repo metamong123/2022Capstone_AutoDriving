@@ -265,57 +265,97 @@ def kcity():
 	return kcity
 
 
-def boong_old():
+def boond_old2():
 	offset_state = "_offset"
 	# "" or "_offset"
 
-	boong_old=Path(path_map + "/src/boong_old/global"+offset_state+".pkl")
+	boond_old2=Path(path_map + "/src/boond_old2/global"+offset_state+".pkl")
 	
 	if offset_state == "":
-		boong_old.set_link([0,20,190,220,420,460,620,680,800,838])
+		boond_old2.set_link([0,20,190,220,420,460,620,680,800,838])
 	else:
-		boong_old.set_link([0,20,190,220,420,460,620,680,800,830])
+		boond_old2.set_link([0,20,190,220,420,460,620,680,800,830])
 
-	boong_old.set_dir([0,1,3,5,7,9,10,11],[],[2,4,6,8])
+	boond_old2.set_dir([0,1,3,5,7,9,10,11],[],[2,4,6,8])
 	
-	boong_old.parking_map_num=6
-	for i in range(boong_old.parking_map_num):
-		park_route=path_map+"/src/boong_old/parking"+offset_state+"_"+str(i)+".pkl"
-		boong_old.parking_route.append(park_route)
-		boong_old.set_other_mode(mode='parking', pc_route=park_route,link=2*i)
+	boond_old2.parking_map_num=6
+	for i in range(boond_old2.parking_map_num):
+		park_route=path_map+"/src/boond_old2/parking"+offset_state+"_"+str(i)+".pkl"
+		boond_old2.parking_route.append(park_route)
+		boond_old2.set_other_mode(mode='parking', pc_route=park_route,link=2*i)
 	
-	# boong_old.delivery_map_num=2
-	# for i in range(boong_old.delivery_map_num):
-	# 	del_route=path_map+"/src/boong_old/delivery_"+str(i)+".pkl"
-	# 	boong_old.delivery_route.append(del_route)
-	# 	boong_old.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
+	# boond_old2.delivery_map_num=2
+	# for i in range(boond_old2.delivery_map_num):
+	# 	del_route=path_map+"/src/boond_old2/delivery_"+str(i)+".pkl"
+	# 	boond_old2.delivery_route.append(del_route)
+	# 	boond_old2.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
 	
-	boong_old.glo_to_park_start=15
-	boong_old.glo_to_park_finish=18
+	boond_old2.glo_to_park_start=15
+	boond_old2.glo_to_park_finish=18
 	
-	# boong_old.parking_stop=[]
-	# boong_old.park_to_glo_start=[]
-	# boong_old.park_to_glo_finish=[]
-	# boong_old.glo_to_del_start=[]
-	# boong_old.glo_to_del_finish=[]
+	# boond_old2.parking_stop=[]
+	# boond_old2.park_to_glo_start=[]
+	# boond_old2.park_to_glo_finish=[]
+	# boond_old2.glo_to_del_start=[]
+	# boond_old2.glo_to_del_finish=[]
 	
-	boong_old.target_speed={'global':{'straight':12/3.6, 'curve':10/3.6},'parking':10/3.6,'delivery':10/3.6}
-	boong_old.set_map()
-	boong_old.parking_path=boong_old.make_path('parking',boong_old.parking_map_num)
-	# boong_old.delivery_path=boong_old.make_path('delivery',boong_old.delivery_map_num)
-	return boong_old
+	boond_old2.target_speed={'global':{'straight':12/3.6, 'curve':10/3.6},'parking':10/3.6,'delivery':10/3.6}
+	boond_old2.set_map()
+	boond_old2.parking_path=boond_old2.make_path('parking',boond_old2.parking_map_num)
+	# boond_old2.delivery_path=boond_old2.make_path('delivery',boond_old2.delivery_map_num)
+	return boond_old2
 
 
-def boong():
+def boond_old():
 	offset_state = "_offset2"
 	# "" or "_offset" or "_offset2"
 
-	boong=Path(path_map + "/src/boong/global"+offset_state+".pkl")
+	boond_old=Path(path_map + "/src/boond_old/global"+offset_state+".pkl")
 	
 	if offset_state == "":
-		boong.set_link([0,20,190,220,420,460,620,680,800,838])
+		boond_old.set_link([0,20,190,220,420,460,620,680,800,838])
 	else:
+		boond_old.set_link([0,20,190,220,420,460,620,680,800,830])
+
+	boond_old.set_dir([0,1,3,5,7,9,10],[],[2,4,6,8])
+	
+	boond_old.parking_map_num=9
+	for i in range(boond_old.parking_map_num):
+		park_route=path_map+"/src/boond_old/parking"+offset_state+"_"+str(i)+".pkl"
+		boond_old.parking_route.append(park_route)
+		boond_old.set_other_mode(mode='parking', pc_route=park_route,link=2*i)
+	
+	# boond_old.delivery_map_num=2
+	# for i in range(boond_old.delivery_map_num):
+	# 	del_route=path_map+"/src/boond_old/delivery_"+str(i)+".pkl"
+	# 	boond_old.delivery_route.append(del_route)
+	# 	boond_old.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
+	
+	boond_old.glo_to_park_start=15
+	boond_old.glo_to_park_finish=20
+	# boond_old.parking_stop=[]
+	# boond_old.park_to_glo_start=[]
+	# boond_old.park_to_glo_finish=[]
+	# boond_old.glo_to_del_start=[]
+	# boond_old.glo_to_del_finish=[]
+	
+	boond_old.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6},'parking':5/3.6,'delivery':10/3.6}
+	boond_old.set_map()
+	boond_old.parking_path=boond_old.make_path('parking',boond_old.parking_map_num)
+	# boond_old.delivery_path=boond_old.make_path('delivery',boond_old.delivery_map_num)
+	return boond_old
+
+def boong():
+	offset_state = "_old_offset2"
+	# "" or "_offset"
+	# old maps : "_old", "_old_offset", "_old_offset2"
+
+	boong=Path(path_map + "/src/boong/global"+offset_state+".pkl")
+	
+	if offset_state == "_old_offset2":
 		boong.set_link([0,20,190,220,420,460,620,680,800,830])
+	else:
+		boong.set_link([0,20,190,220,420,460,620,680,800,838])
 
 	boong.set_dir([0,1,3,5,7,9,10],[],[2,4,6,8])
 	
