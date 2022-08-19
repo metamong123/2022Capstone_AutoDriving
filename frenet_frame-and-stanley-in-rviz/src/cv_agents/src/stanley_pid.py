@@ -1,4 +1,6 @@
 import numpy as np
+from math import sqrt
+from scipy import interpolate
 
 class Stanley:
 	def __init__(self, k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, yaw_dgain = 0, WB = 1.04):
@@ -27,63 +29,51 @@ class Stanley:
 		return angle
 
 
-	def find_nearest_point(self, front_x, front_y, map_xs, map_ys):
+	def get_map_state(self, front_x, front_y, map_xs, map_ys, map_yaws):
 		min_dist = 1e3
-		min_index=0
-		n_points = len(map_xs)
+		cte_index = 0
+		yaw_index = 0
 
-		for i in range(n_points):
+		# get_closest waypoint for cte
+		for i in range(len(map_xs)):
 			dx = front_x - map_xs[i]
 			dy = front_y - map_ys[i]
 
 			dist = np.sqrt(dx * dx + dy * dy)
 			if dist < min_dist:
 				min_dist = dist
-				min_index = i
+				cte_index = i
 
-		return min_index
+		# get yaw_index for yaw_term
+		map_vec = np.array([map_xs[cte_index + 1] - map_xs[cte_index], map_ys[cte_index + 1] - map_ys[cte_index]])
+		ego_vec = np.array([front_x - map_xs[cte_index], front_y - map_ys[cte_index]])
+		direction  = np.sign(np.dot(map_vec, ego_vec))
 
-    
-	def stanley_control(self, x, y, yaw, v, map_xs, map_ys, map_yaws):
-		front_x = x + self.WB/2*np.cos(yaw)
-		front_y = y + self.WB/2*np.sin(yaw)
+		if direction < 0:
+			yaw_index = cte_index - 1
+		else:
+			yaw_index = cte_index
 
-		# find nearest point
-		min_index = self.find_nearest_point(front_x, front_y, map_xs, map_ys)
-        
-		map_x = map_xs[min_index]
-		map_y = map_ys[min_index]
-		map_yaw = map_yaws[min_index]
-		dx = map_x - front_x
-		dy = map_y - front_y
+		# get map_yaw: linear interpolation
+		map_dist = sqrt((map_xs[yaw_index + 1] - map_xs[yaw_index])**2 + (map_ys[yaw_index + 1] - map_ys[yaw_index])**2)
+		map_car_dist = np.dot(map_vec/map_dist, ego_vec)
 
-		# compute cte at front axle
-		perp_vec = [np.cos(yaw + np.pi/2), np.sin(yaw + np.pi/2)]
-		cte = np.dot([dx, dy], perp_vec)
+		yaw_linear = interpolate.interp1d([0, map_dist], [map_yaws[yaw_index], map_yaws[yaw_index+1]], kind='linear')
+		map_yaw = yaw_linear(map_car_dist)
 
-		# control law
-		yaw_term = self.normalize_angle(map_yaw - yaw) # heading error
-		cte_term = np.arctan2(self.k*cte , (self.speed_gain + v)) # cross track error
-
-		# steering
-		steer = self.w_yaw * yaw_term + self.w_cte * cte_term
-		return steer, yaw_term, cte
+		return map_xs[cte_index], map_ys[cte_index], map_yaw
 
 
 	def stanley_control_pd(self, x, y, yaw, v, map_xs, map_ys, map_yaws):
 		front_x = x + self.WB/2*np.cos(yaw)
 		front_y = y + self.WB/2*np.sin(yaw)
 
-		# find nearest point
-		min_index = self.find_nearest_point(front_x, front_y, map_xs, map_ys)
-
-		map_x = map_xs[min_index]
-		map_y = map_ys[min_index]
-		map_yaw = map_yaws[min_index]
-		dx = map_x - front_x
-		dy = map_y - front_y
+		# get map state of closest waypoint
+		map_x, map_y, map_yaw = self.get_map_state(front_x, front_y, map_xs, map_ys, map_yaws)
 
 		# compute cte at front axle
+		dx = map_x - front_x
+		dy = map_y - front_y
 		perp_vec = [np.cos(yaw + np.pi/2), np.sin(yaw + np.pi/2)]
 		cte = np.dot([dx, dy], perp_vec)
 
