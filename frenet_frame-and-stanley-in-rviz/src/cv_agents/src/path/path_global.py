@@ -135,6 +135,9 @@ if __name__ == "__main__":
 	waypoint_pub = rospy.Publisher("/waypoint", Int32MultiArray, queue_size=1)
 	dir_pub=rospy.Publisher("/link_direction", StringArray, queue_size=1)
 	global_path_pub=rospy.Publisher("/optimal_frenet_path_global", PathArray, queue_size=1)
+	col_pub=rospy.Publisher("/col", Int32, queue_size=1)
+
+	col_msg=Int32()
 
 
 	my_wp={'global':0,'parking':{0:0,1:0,2:0,3:0,4:0,5:0}}
@@ -198,8 +201,9 @@ if __name__ == "__main__":
 		df_d = 0
 		df_dd = 0
 		
-		path, opt_ind = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints['global']['x'], use_map.waypoints['global']['y'],use_map.waypoints['global']['s'], opt_d, use_map.target_speed['global'][dir])
-
+		path, opt_ind, col = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints['global']['x'], use_map.waypoints['global']['y'],use_map.waypoints['global']['s'], opt_d, use_map.target_speed['global'][dir])
+		col_msg.data=col
+		
 		if opt_ind == -1:
 			path_msg=path_array([],[],[])
 		else:
@@ -286,5 +290,6 @@ if __name__ == "__main__":
 		dir_pub.publish(mode_msg)
 		waypoint_pub.publish(waypoint_msg)
 		global_path_pub.publish(path_msg)
+		col_pub.publish(col_msg)
 
 		rospy.sleep(0.1)

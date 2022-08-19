@@ -165,8 +165,10 @@ if __name__ == "__main__":
 						print("parking_choose: "+str(park_i))
 						fp=fp_1
 						break
-
-			park_wp = get_closest_waypoints(state_x, state_y, use_map.waypoints[mode][parking_ind]['x'][:use_map.link_len[mode][parking_ind]], use_map.waypoints[mode][parking_ind]['y'][:use_map.link_len[mode][parking_ind]],park_wp)
+			parking_ind=2
+			state_x=962802.5118152874
+			state_y=1959347.0844059486
+			park_wp = get_closest_waypoints(state_x, state_y, use_map.waypoints[mode][parking_ind*2]['x'][:use_map.link_len[mode][parking_ind*2]], use_map.waypoints[mode][parking_ind*2]['y'][:use_map.link_len[mode][parking_ind*2]],park_wp)
 			print(park_wp)
 			park_msg.data = [parking_ind, park_wp] #현재 이동하는 parking index, wp보내줌
 			path_msg.x.data = fp.x  # parking final path

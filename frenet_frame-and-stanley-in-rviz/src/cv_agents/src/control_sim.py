@@ -215,7 +215,7 @@ if __name__ == "__main__":
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
 			
 			# stanley_control / stanley_control_thresh / stanley_control_pid
-			steer, yaw_term, cte = stanley.stanley_control_pd(state.x, state.y, state.yaw, state.v, path_x, path_y, path_yaw)
+			steer, yaw_term, cte, map_yaw = stanley.stanley_control_pd(state.x, state.y, state.yaw, state.v, path_x, path_y, path_yaw)
 			# if mode == 'global':
 			# 	steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw)
 			# elif mode == 'parking':

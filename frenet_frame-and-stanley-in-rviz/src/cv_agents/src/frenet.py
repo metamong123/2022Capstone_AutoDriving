@@ -14,7 +14,10 @@ import rospkg
 rospack = rospkg.RosPack()
 path = rospack.get_path("obstacles")
 sys.path.append(path + "/src/")
+path_frenet=rospack.get_path("cv_agents")
+sys.path.append(path_frenet+"/src/path")
 from separation_axis_theorem import *
+from path_map import *
 
 # initialize
 # initialize
@@ -86,7 +89,10 @@ K_LAT = 1.0 # weight for lateral direction, default = 1.0 (횡방향을 위한 �
 K_LON = 1.0 # weight for longitudinal direction (종방향을 위한 웨이트)
 
 # lateral planning 시 terminal position condition 후보  (양 차선 중앙), default len(DF_SET) = 2
-DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
+# DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
+# 4번째값 +왼, -오
+DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, 50])
+
 
 def next_waypoint(x, y, mapx, mapy, prev_wp):
 	closest_wp = get_closest_waypoints(x, y, mapx, mapy, prev_wp)
@@ -181,7 +187,6 @@ def get_cartesian(s, d, mapx, mapy, maps):
 	return x, y, heading
 
 class QuinticPolynomial:
-
 	def __init__(self, xi, vi, ai, xf, vf, af, T):
 		# calculate coefficient of quintic polynomial
 		# used for lateral trajectory
@@ -427,7 +432,7 @@ def check_path(fplist, obs_info, mapx, mapy, maps):
 		ok_ind.append(i)
 	print("v = " + str(vel) + ", a = " + str(a) + ", curv = " + str(curv) + ", col = "+ str(col))
 	print("total = " + str(len(fplist)) + ", selected = " + str(len(fplist) - curv - col - vel - a))
-	return [fplist[i] for i in ok_ind]
+	return [fplist[i] for i in ok_ind], col
 
 # def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed, DF_SET):
 def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed):
@@ -435,7 +440,7 @@ def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d,
 	fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed)
 	fplist = calc_global_paths(fplist, mapx, mapy, maps)
 
-	fplist = check_path(fplist, obs_info, mapx, mapy, maps)
+	fplist, col = check_path(fplist, obs_info, mapx, mapy, maps)
 	# find minimum cost path
 	min_cost = float("inf")
 	opt_traj = None
@@ -453,4 +458,4 @@ def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d,
 		print(" No solution ! ")
 		_opt_ind = -1
 
-	return fplist, _opt_ind
+	return fplist, _opt_ind, col

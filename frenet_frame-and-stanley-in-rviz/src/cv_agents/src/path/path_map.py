@@ -80,13 +80,14 @@ class Path:
 		self.glo_to_del_finish=[]
 		self.parking_stop=[] # 주차 구역마다 주차 정지 waypoint 설정
 		self.park_to_glo=[] # parking->global 변경 waypoint 지점
-		self.lane_width={} # example lane_width={'3.3':[0],'3.8':[1],'4.1':[2], '6.6':[3]...}
+		self.lane_width={} # example lane_width={'left':3.3(우리 차선 width):2.2(왼쪽으로 갈 수 있는 width):0, 'right':3.3:2.2:1, 'none':3.3:2}        {'3.3':[0],'3.8':[1],'4.1':[2], '6.6':[3]...}
+		self.DF_SET={}
 	def set_other_mode(self, mode='parking', pc_route=path_map+"/src/frontier/parking_route.pkl", link=None):
 
 		if not link==None:
 			self.nodes[mode][link]={}
 			if mode=='parking':
-				with open(pc_route[i], 'rb') as f:
+				with open(pc_route, 'rb') as f:
 					file=pickle.load(f)
 					self.nodes[mode][link]=file[0]
 					self.nodes[mode][link+1]={}
@@ -186,10 +187,10 @@ class Path:
 			elif i=='parking':
 				for j in range(len(self.nodes[i].keys())):
 					if j%2==0:
-						self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.1)
+						self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.2)
 			elif i=='delivery':
 				for j in range(len(self.nodes[i].keys())):
-					self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.1)
+					self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.2)
 
 			link_i=-1
 			for j in range(len(self.nodes[i].keys())):
@@ -225,7 +226,41 @@ class Path:
 				way.yaw=self.waypoints[mode][link_ind]['yaw'][:self.link_len[mode][link_ind]]
 				path[link_ind]=[way.x, way.y, way.yaw]
 		return path
+	
+	def set_lanewidth(self):
+		for i in self.lane_width.keys(): #left, light, none
+			if self.lane_width[i] == 'left':
+				for j in self.lane_width[i]: # j=lane_width
+					LANE_WIDTH = j
+					for k in self.lane_width[i][j]: # k=left_width, left_width+lanewidth/2 ~ lanewidth/2
+						width = k
+						for l in self.lane_width[i][j][k]: # l = link_index
+							self.DF_SET[l]=self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, width])
+			elif self.lane_width[i] =='right':
+				for j in self.lane_width[i]: # j=lane_width
+					LANE_WIDTH = j
+					for k in self.lane_width[i][j]: # k=left_width, left_width+lanewidth/2 ~ lanewidth/2
+						width = k
+						for l in self.lane_width[i][j][k]: # l = link_index
+							self.DF_SET[l]=self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -width])
+			elif self.lane_width[i] =='none':
+				for j in self.lane_width[i]: # j=lane_width
+					LANE_WIDTH = j
+					for l in self.lane_width[i][j]: # l = link_index
+						self.DF_SET[l]=self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2])
 
+
+	def set_lanewidth(self, link_ind, dir=None, width=None):
+		for i in self.lane_width.keys():
+			for j in self.lane_width[i]:
+				if link_ind == j:
+					LANE_WIDTH=i
+		if dir=='left':
+			self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, width])
+		elif dir == 'right':
+			self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -width])
+		elif dir==None:
+			self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2])
 
 def frontier():
 	frontier=Path(path_map + "/src/frontier/curve_test.pkl")
