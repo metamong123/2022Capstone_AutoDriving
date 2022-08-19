@@ -48,9 +48,9 @@ WB = 1.04
 # DT = 0.5 # timestep for update
 
 ## 10km/h
-MIN_T = 2.0 # minimum terminal time [s]
+MIN_T = 3.0 # minimum terminal time [s]
 MAX_T = 6.0 # maximum terminal time [s], default = 2
-DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 DT = 0.5 # timestep for update
 
 
@@ -91,7 +91,8 @@ K_LON = 1.0 # weight for longitudinal direction (종방향을 위한 웨이트)
 # lateral planning 시 terminal position condition 후보  (양 차선 중앙), default len(DF_SET) = 2
 # DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
 # 4번째값 +왼, -오
-DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, 50])
+# DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, 50])
+# DF_SET=use_map.DF_SET
 
 
 def next_waypoint(x, y, mapx, mapy, prev_wp):
@@ -293,8 +294,8 @@ class FrenetPath:
 		self.ds = []
 		self.kappa = []
 
-# def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET):
-def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed):
+def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET):
+# def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed):
 	frenet_paths = []
 
 	# generate path to each offset goal
@@ -433,13 +434,14 @@ def check_path(fplist, obs_info, mapx, mapy, maps):
 	print("v = " + str(vel) + ", a = " + str(a) + ", curv = " + str(curv) + ", col = "+ str(col))
 	print("total = " + str(len(fplist)) + ", selected = " + str(len(fplist) - curv - col - vel - a))
 	return [fplist[i] for i in ok_ind], col
+	# return fplist, col
 
-# def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed, DF_SET):
-def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed):
-    # fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed,DF_SET)
-	fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed)
+def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed, DF_SET):
+# def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed):
+	fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed,DF_SET)
+	# fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed)
 	fplist = calc_global_paths(fplist, mapx, mapy, maps)
-
+	col=0
 	fplist, col = check_path(fplist, obs_info, mapx, mapy, maps)
 	# find minimum cost path
 	min_cost = float("inf")

@@ -140,7 +140,7 @@ if __name__ == "__main__":
 
 
 	my_wp={'global':0,'parking':{}}
-	for i in range(use_map.parking_map_num):
+	for i in range(use_map.diagonal_parking_map_num):
 		my_wp['parking'][i]=0
 
 	link_ind={}
@@ -203,7 +203,7 @@ if __name__ == "__main__":
 		df_d = 0
 		df_dd = 0
 		
-		path, opt_ind, col = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints['global']['x'], use_map.waypoints['global']['y'],use_map.waypoints['global']['s'], opt_d, use_map.target_speed['global'][dir])
+		path, opt_ind, col = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints['global']['x'], use_map.waypoints['global']['y'],use_map.waypoints['global']['s'], opt_d, use_map.target_speed['global'][dir], use_map.DF_SET[link_ind['global']])
 		col_msg.data=col
 
 		if opt_ind == -1:
@@ -250,7 +250,7 @@ if __name__ == "__main__":
 		my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
 		if mode=='parking':
-			for park_i in range(use_map.parking_map_num):
+			for park_i in range(use_map.diagonal_parking_map_num):
 				park_ind=park_i*2
 				my_wp[mode][park_i] = get_closest_waypoints(state.x, state.y, use_map.waypoints[mode][park_ind]['x'][:use_map.link_len[mode][park_ind]], use_map.waypoints[mode][park_ind]['y'][:use_map.link_len[mode][park_ind]],my_wp[mode][park_i])
 

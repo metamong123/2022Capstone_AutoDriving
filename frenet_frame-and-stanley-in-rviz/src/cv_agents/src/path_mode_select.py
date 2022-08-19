@@ -111,7 +111,7 @@ if __name__ == "__main__":
 	while not rospy.is_shutdown():
 		#print(use_map.glo_to_park_start)
 		######## mode select based waypoint #######
-		if (not use_map.parking_map_num==0) and (global_wp <= use_map.glo_to_park_finish and global_wp >=use_map.glo_to_park_start):  # parking mode
+		if (not use_map.diagonal_parking_map_num==0) and (global_wp <= use_map.glo_to_diagonal_park_finish and global_wp >=use_map.glo_to_diagonal_park_start):  # parking mode
 			mode = 'parking'
 		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
 			mode = 'delivery_A'
@@ -139,12 +139,12 @@ if __name__ == "__main__":
 
 		elif mode == 'parking':
 
-			for park_i in range(use_map.parking_map_num):
+			for park_i in range(use_map.diagonal_parking_map_num):
 				
 				fp = MakingPath()
-				fp.x=use_map.parking_path[park_i][0]
-				fp.y=use_map.parking_path[park_i][1]
-				fp.yaw=use_map.parking_path[park_i][2]
+				fp.x=use_map.diagonal_parking_path[park_i][0]
+				fp.y=use_map.diagonal_parking_path[park_i][1]
+				fp.yaw=use_map.diagonal_parking_path[park_i][2]
 				print("위치" + str(park_i) + "번 차량존재유무 : " + str(collision_check(fp,obs_info,0,0,0)))
 
 				if collision_check(fp,obs_info,0,0,0)==False:
@@ -153,11 +153,11 @@ if __name__ == "__main__":
 					break
 
 			if collision_check(fp,obs_info,0,0,0)==True:
-				for park_i in range(parking_ind,use_map.parking_map_num,1):
+				for park_i in range(parking_ind,use_map.diagonal_parking_map_num,1):
 					fp_1=MakingPath()
-					fp_1.x=use_map.parking_path[park_i][0]
-					fp_1.y=use_map.parking_path[park_i][1]
-					fp_1.yaw=use_map.parking_path[park_i][2]
+					fp_1.x=use_map.diagonal_parking_path[park_i][0]
+					fp_1.y=use_map.diagonal_parking_path[park_i][1]
+					fp_1.yaw=use_map.diagonal_parking_path[park_i][2]
 					print("위치" + str(park_i) + "번 차량존재유무 : " + str(collision_check(fp_1,obs_info,0,0,0)))
 
 					if collision_check(fp_1,obs_info,0,0,0)==False:
@@ -168,7 +168,7 @@ if __name__ == "__main__":
 			parking_ind=2
 			state_x=962802.5118152874
 			state_y=1959347.0844059486
-			park_wp = get_closest_waypoints(state_x, state_y, use_map.waypoints[mode][parking_ind*2]['x'][:use_map.link_len[mode][parking_ind*2]], use_map.waypoints[mode][parking_ind*2]['y'][:use_map.link_len[mode][parking_ind*2]],park_wp)
+			park_wp = get_closest_waypoints(state_x, state_y, use_map.waypoints['diagonal_parking'][parking_ind*2]['x'][:use_map.link_len['diagonal_parking'][parking_ind*2]], use_map.waypoints['diagonal_parking'][parking_ind*2]['y'][:use_map.link_len['diagonal_parking'][parking_ind*2]],park_wp)
 			print(park_wp)
 			park_msg.data = [parking_ind, park_wp] #현재 이동하는 parking index, wp보내줌
 			path_msg.x.data = fp.x  # parking final path

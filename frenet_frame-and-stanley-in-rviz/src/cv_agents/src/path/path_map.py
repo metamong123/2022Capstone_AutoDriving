@@ -53,17 +53,21 @@ class Path:
 	def __init__(self,pc_route):
 		self.nodes={}
 		self.nodes['global']={}
-		self.nodes['parking']={}
-		# self.nodes['delivery']={}
+		self.nodes['horizontal_parking']={}
+		self.nodes['diagonal_parking']={}
+		self.nodes['delivery']={}
 		self.global_route=pc_route #global pkl파일 경로
 		with open(pc_route, 'rb') as f:
 			self.nodes['global']=pickle.load(f)
-		self.parking_route=[] #parking pkl파일 경로
+		self.horizontal_parking_route=[] #parking pkl파일 경로
+		self.diagonal_parking_route=[]
 		self.delivery_route=[] #delivery pkl파일 경로
-		self.parking_path={}
+		self.horizontal_parking_path={}
+		self.diagonal_parking_path={}
 		self.delivery_path={}
 		self.w={}
-		self.parking_map_num=0 # 주차 구역 수
+		self.horizontal_parking_map_num=0 # 주차 구역 수
+		self.diagonal_parking_map_num=0 # 주차 구역 수
 		self.delivery_map_num=0 # 배달 구역 수
 		self.waypoints={}
 		self.link_len={}
@@ -74,46 +78,56 @@ class Path:
 		# 예선 구간의 경우에는 저속 관련 변수를 int로 사용해야할 수도 있음
 		self.low_speed_start_list=[] #curve, 어린이 보호 구역 등 저속 range 시작점
 		self.low_speed_finish_list=[] # 저속 range 끝 점
-		self.glo_to_park_start=0 # global->parking 시작 waypoint
-		self.glo_to_park_finish=0 # global->parking 시작 waypoint range 설정
+		self.glo_to_horizontal_park_start=0 # global->horizontal_parking 시작 waypoint
+		self.glo_to_horizontal_park_finish=0 # global->horizontal_parking 시작 waypoint range 설정
+		self.glo_to_diagonal_park_start=0 # global->diagonal_parking 시작 waypoint
+		self.glo_to_diagonal_park_finish=0 # global->diagonal_parking 시작 waypoint range 설
 		self.glo_to_del_start=[]
 		self.glo_to_del_finish=[]
-		self.parking_stop=[] # 주차 구역마다 주차 정지 waypoint 설정
-		self.park_to_glo=[] # parking->global 변경 waypoint 지점
+		self.horizontal_parking_stop=[] # 주차 구역마다 주차 정지 waypoint 설정
+		self.horizontal_park_to_glo=[] # parking->global 변경 waypoint 지점
+		self.diagonal_parking_stop=[] # 주차 구역마다 주차 정지 waypoint 설정
+		self.diagonal_park_to_glo=[] # parking->global 변경 waypoint 지점
 		self.lane_width={} # example lane_width={'left':3.3(우리 차선 width):2.2(왼쪽으로 갈 수 있는 width):0, 'right':3.3:2.2:1, 'none':3.3:2}        {'3.3':[0],'3.8':[1],'4.1':[2], '6.6':[3]...}
 		self.DF_SET={}
 	def set_other_mode(self, mode='parking', pc_route=path_map+"/src/frontier/parking_route.pkl", link=None):
-
 		if not link==None:
 			self.nodes[mode][link]={}
-			if mode=='parking':
+			if mode=='diagonal_parking':
 				with open(pc_route, 'rb') as f:
 					file=pickle.load(f)
 					self.nodes[mode][link]=file[0]
 					self.nodes[mode][link+1]={}
 				for i in self.nodes[mode][link].keys():
 					self.nodes[mode][link+1][i]=list(reversed(self.nodes[mode][link][i]))
-			
-			# with open(use_map.parking_route, 'rb') as f:
-			# 	file=pickle.load(f)
-
-
+			elif mode == 'horizontal_parking':
+				with open(pc_route, 'rb') as f:
+					file=pickle.load(f)
+					self.nodes[mode][link+1]={}
+					self.nodes[mode][link+1]=file[0]
+				for i in self.nodes[mode][link+1].keys():
+					self.nodes[mode][link][i]=list(reversed(self.nodes[mode][link+1][i]))
 			else:
 				for i in range(self.delivery_map_num):
 					with open(pc_route, 'rb') as f:
 						file=pickle.load(f)
-						self.nodes[mode][link]=file[0]
-		
+						self.nodes[mode][link]=file[0]		
 		else:
 			self.nodes[mode][0]={}
-			if mode=='parking':
+			if mode=='diagonal_parking':
 				with open(pc_route, 'rb') as f:
 					file=pickle.load(f)
 					self.nodes[mode][0]=file[0]
 					self.nodes[mode][link+1]={}
 				for i in self.nodes[mode][0].keys():
 					self.nodes[mode][1][i]=list(reversed(self.nodes[mode][0][i]))
-		
+			elif mode == 'horizontal_parking':
+				with open(pc_route, 'rb') as f:
+					file=pickle.load(f)
+					self.nodes[mode][1]={}
+					self.nodes[mode][1]=file[0]
+				for i in self.nodes[mode][0].keys():
+					self.nodes[mode][0][i]=list(reversed(self.nodes[mode][1][i]))
 			else:
 				with open(pc_route, 'rb') as f:
 					file=pickle.load(f)
@@ -151,7 +165,7 @@ class Path:
 				self.waypoints[i]={'x':[],'y':[],'yaw':[],'s':[]}
 			
 			for j in range(len(self.nodes[i].keys())):
-				if i == 'parking':
+				if i == 'horizontal_parking' or i =='diagonal_parking':
 					if j %2==0:
 						self.w[i][j]={'x':[],'y':[]}
 						self.waypoints[i][j]={'x':[],'y':[],'yaw':[],'s':[]}
@@ -162,7 +176,7 @@ class Path:
 				for k in ('x','y'):
 					if i == 'global':
 						self.w[i][k].append(self.nodes[i][j][k][1:])
-					elif i == 'parking':
+					elif i == 'horizontal_parking' or i =='diagonal_parking':
 						if j%2==0:
 							self.w[i][j][k].append(self.nodes[i][j][k][1:])
 						else:
@@ -176,7 +190,7 @@ class Path:
 			
 			for j in range(len(self.nodes[i].keys())):
 				for k in ('x','y'):
-					if i == 'parking':
+					if i == 'horizontal_parking' or i =='diagonal_parking':
 						if j%2==0:
 							self.w[i][j][k] = np.concatenate(self.w[i][j][k])
 					elif i =='delivery':
@@ -184,7 +198,7 @@ class Path:
 
 			if i == 'global':
 				self.waypoints[i] = interpolate_waypoints(self.w[i]['x'], self.w[i]['y'], space=0.5)
-			elif i=='parking':
+			elif i == 'horizontal_parking' or i =='diagonal_parking':
 				for j in range(len(self.nodes[i].keys())):
 					if j%2==0:
 						self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.2)
@@ -194,7 +208,7 @@ class Path:
 
 			link_i=-1
 			for j in range(len(self.nodes[i].keys())):
-				if i == 'parking':
+				if i == 'horizontal_parking' or i =='diagonal_parking':
 					if j % 2 ==0:
 						link_i=-1
 						link_i+=len(self.nodes[i][j]["x"])
@@ -211,13 +225,20 @@ class Path:
 					self.link_len[i].append(link_i)
 	def make_path(self, mode, map_num):
 		path={}
-		if mode == 'parking':
+		if mode == 'horizontal_parking':
 			for link_ind in range(0,map_num*2,2):
 				way=MakingPath()
 				way.x=self.waypoints[mode][link_ind]['x'][:self.link_len[mode][link_ind]]
 				way.y=self.waypoints[mode][link_ind]['y'][:self.link_len[mode][link_ind]]
 				way.yaw=self.waypoints[mode][link_ind]['yaw'][:self.link_len[mode][link_ind]]
-				path[link_ind/2]=[way.x, way.y, way.yaw]
+				path[link_ind]=[way.x, way.y, way.yaw] #짝수 후진 홀수 전진
+		if mode == 'diagonal_parking':
+			for link_ind in range(0,map_num*2,2):
+				way=MakingPath()
+				way.x=self.waypoints[mode][link_ind]['x'][:self.link_len[mode][link_ind]]
+				way.y=self.waypoints[mode][link_ind]['y'][:self.link_len[mode][link_ind]]
+				way.yaw=self.waypoints[mode][link_ind]['yaw'][:self.link_len[mode][link_ind]]
+				path[link_ind/2]=[way.x, way.y, way.yaw] #짝수 전진 (홀수 후진)
 		else:
 			for link_ind in range(map_num):
 				way=MakingPath()
@@ -229,38 +250,38 @@ class Path:
 	
 	def set_lanewidth(self):
 		for i in self.lane_width.keys(): #left, light, none
-			if self.lane_width[i] == 'left':
+			if i == 'left':
 				for j in self.lane_width[i]: # j=lane_width
 					LANE_WIDTH = j
 					for k in self.lane_width[i][j]: # k=left_width, left_width+lanewidth/2 ~ lanewidth/2
 						width = k
 						for l in self.lane_width[i][j][k]: # l = link_index
-							self.DF_SET[l]=self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, width])
-			elif self.lane_width[i] =='right':
+							self.DF_SET[l]=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, width])
+			elif i =='right':
 				for j in self.lane_width[i]: # j=lane_width
 					LANE_WIDTH = j
 					for k in self.lane_width[i][j]: # k=left_width, left_width+lanewidth/2 ~ lanewidth/2
 						width = k
 						for l in self.lane_width[i][j][k]: # l = link_index
-							self.DF_SET[l]=self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -width])
-			elif self.lane_width[i] =='none':
+							self.DF_SET[l]=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -width])
+			elif i =='none':
 				for j in self.lane_width[i]: # j=lane_width
 					LANE_WIDTH = j
 					for l in self.lane_width[i][j]: # l = link_index
-						self.DF_SET[l]=self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2])
+						self.DF_SET[l]=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2])
 
 
-	def set_lanewidth(self, link_ind, dir=None, width=None):
-		for i in self.lane_width.keys():
-			for j in self.lane_width[i]:
-				if link_ind == j:
-					LANE_WIDTH=i
-		if dir=='left':
-			self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, width])
-		elif dir == 'right':
-			self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -width])
-		elif dir==None:
-			self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2])
+	# def set_lanewidth(self, link_ind, dir=None, width=None):
+	# 	for i in self.lane_width.keys():
+	# 		for j in self.lane_width[i]:
+	# 			if link_ind == j:
+	# 				LANE_WIDTH=i
+	# 	if dir=='left':
+	# 		self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, width])
+	# 	elif dir == 'right':
+	# 		self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -width])
+	# 	elif dir==None:
+	# 		self.DF_SET=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2])
 
 def frontier():
 	frontier=Path(path_map + "/src/frontier/curve_test.pkl")
@@ -276,12 +297,12 @@ def kcity():
 	kcity.set_dir([0,1,2,3,4,6,7,8,9,11,13,15,17,18,19,20,22,24,26,30,31,33,34,35,36,37],[21,23,25,27],[5,10,12,14,16,28,29,32])    
 	kcity.stopline_start_list,kcity.stopline_finish_list=kcity.set_waypoint_range(waypoint_finish_list=[190,280,390,670,880,970,1260,1450,1730,2060,2190,2400,2670,2760,2880])
 	
-	kcity.parking_map_num=6
+	kcity.diagonal_parking_map_num=6
 	park_ver="v1"
-	for i in range(kcity.parking_map_num):
-		park_route=path_map+"/src/kcity/parking_"+park_ver+"_"+str(i)+".pkl"
-		kcity.parking_route.append(park_route)
-		kcity.set_other_mode(mode='parking', pc_route=park_route,link=2*i)
+	for i in range(kcity.diagonal_parking_map_num):
+		park_route=path_map+"/src/kcity/diagonal_parking_"+park_ver+"_"+str(i)+".pkl"
+		kcity.diagonal_parking_route.append(park_route)
+		kcity.set_other_mode(mode='diagonal_parking', pc_route=park_route,link=2*i)
 
 	kcity.delivery_map_num=2
 	for i in range(kcity.delivery_map_num):
@@ -289,9 +310,9 @@ def kcity():
 		kcity.delivery_route.append(del_route)
 		kcity.set_other_mode(mode='delivery', pc_route=del_route,link=i)
 
-	kcity.glo_to_park_start=110
-	kcity.glo_to_park_finish=120
-	# kcity.parking_stop=[]
+	kcity.glo_to_diagonal_park_start=110
+	kcity.glo_to_diagonal_park_finish=120
+	# kcity.diagonal_parking_stop=[]
 	# kcity.park_to_glo_start=[]
 	# kcity.park_to_glo_finish=[]
 	kcity.glo_to_del_start=[720, 1360]
@@ -300,130 +321,9 @@ def kcity():
 	kcity.target_speed={'global':20/3.6,'parking':10/3.6, 'delivery':10/3.6}
 	kcity.lane_width={'3.3':[4,7,8,9,10,15,16,17,18,19,20,21,22,23,24,25,27,29,30,31,32],'3.8':[0,1,2,3,33,34,35,36],'4.1':[11,12,28], '6.6':[13,14,26], '7.1':[5,6]}
 	kcity.set_map()
-	kcity.parking_path=kcity.make_path('parking',kcity.parking_map_num)
+	kcity.diagonal_parking_path=kcity.make_path('diagonal_parking',kcity.diagonal_parking_map_num)
 	kcity.delivery_path=kcity.make_path('delivery',kcity.delivery_map_num)
 	return kcity
-
-
-def boond_old2():
-	offset_state = "_offset"
-	# "" or "_offset"
-
-	boond_old2=Path(path_map + "/src/boond_old2/global"+offset_state+".pkl")
-	
-	if offset_state == "":
-		boond_old2.set_link([0,20,190,220,420,460,620,680,800,838])
-	else:
-		boond_old2.set_link([0,20,190,220,420,460,620,680,800,830])
-
-	boond_old2.set_dir([0,1,3,5,7,9,10,11],[],[2,4,6,8])
-	
-	boond_old2.parking_map_num=6
-	for i in range(boond_old2.parking_map_num):
-		park_route=path_map+"/src/boond_old2/parking"+offset_state+"_"+str(i)+".pkl"
-		boond_old2.parking_route.append(park_route)
-		boond_old2.set_other_mode(mode='parking', pc_route=park_route,link=2*i)
-	
-	# boond_old2.delivery_map_num=2
-	# for i in range(boond_old2.delivery_map_num):
-	# 	del_route=path_map+"/src/boond_old2/delivery_"+str(i)+".pkl"
-	# 	boond_old2.delivery_route.append(del_route)
-	# 	boond_old2.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
-	
-	boond_old2.glo_to_park_start=15
-	boond_old2.glo_to_park_finish=18
-	
-	# boond_old2.parking_stop=[]
-	# boond_old2.park_to_glo_start=[]
-	# boond_old2.park_to_glo_finish=[]
-	# boond_old2.glo_to_del_start=[]
-	# boond_old2.glo_to_del_finish=[]
-	
-	boond_old2.target_speed={'global':{'straight':12/3.6, 'curve':10/3.6},'parking':10/3.6,'delivery':10/3.6}
-	boond_old2.set_map()
-	boond_old2.parking_path=boond_old2.make_path('parking',boond_old2.parking_map_num)
-	# boond_old2.delivery_path=boond_old2.make_path('delivery',boond_old2.delivery_map_num)
-	return boond_old2
-
-
-def boond_old():
-	offset_state = "_offset2"
-	# "" or "_offset" or "_offset2"
-
-	boond_old=Path(path_map + "/src/boond_old/global"+offset_state+".pkl")
-	
-	if offset_state == "":
-		boond_old.set_link([0,20,190,220,420,460,620,680,800,838])
-	else:
-		boond_old.set_link([0,20,190,220,420,460,620,680,800,830])
-
-	boond_old.set_dir([0,1,3,5,7,9,10],[],[2,4,6,8])
-	
-	boond_old.parking_map_num=9
-	for i in range(boond_old.parking_map_num):
-		park_route=path_map+"/src/boond_old/parking"+offset_state+"_"+str(i)+".pkl"
-		boond_old.parking_route.append(park_route)
-		boond_old.set_other_mode(mode='parking', pc_route=park_route,link=2*i)
-	
-	# boond_old.delivery_map_num=2
-	# for i in range(boond_old.delivery_map_num):
-	# 	del_route=path_map+"/src/boond_old/delivery_"+str(i)+".pkl"
-	# 	boond_old.delivery_route.append(del_route)
-	# 	boond_old.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
-	
-	boond_old.glo_to_park_start=15
-	boond_old.glo_to_park_finish=20
-	# boond_old.parking_stop=[]
-	# boond_old.park_to_glo_start=[]
-	# boond_old.park_to_glo_finish=[]
-	# boond_old.glo_to_del_start=[]
-	# boond_old.glo_to_del_finish=[]
-	
-	boond_old.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6},'parking':5/3.6,'delivery':10/3.6}
-	boond_old.set_map()
-	boond_old.parking_path=boond_old.make_path('parking',boond_old.parking_map_num)
-	# boond_old.delivery_path=boond_old.make_path('delivery',boond_old.delivery_map_num)
-	return boond_old
-
-def boong1():
-	offset_state = "_old_offset2"
-	# "" or "_offset"
-	# old maps : "_old", "_old_offset", "_old_offset2"
-
-	boong1=Path(path_map + "/src/boong1/global"+offset_state+".pkl")
-	
-	if offset_state == "_old_offset2":
-		boong1.set_link([0,20,190,220,420,460,620,680,800,830])
-	else:
-		boong1.set_link([0,20,190,220,420,460,620,680,800,838])
-
-	boong1.set_dir([0,1,3,5,7,9,10],[],[2,4,6,8])
-	
-	boong1.parking_map_num=9
-	for i in range(boong1.parking_map_num):
-		park_route=path_map+"/src/boong1/parking"+offset_state+"_"+str(i)+".pkl"
-		boong1.parking_route.append(park_route)
-		boong1.set_other_mode(mode='parking', pc_route=park_route,link=2*i)
-	
-	# boong1.delivery_map_num=2
-	# for i in range(boong1.delivery_map_num):
-	# 	del_route=path_map+"/src/boong1/delivery_"+str(i)+".pkl"
-	# 	boong1.delivery_route.append(del_route)
-	# 	boong1.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
-	
-	boong1.glo_to_park_start=15
-	boong1.glo_to_park_finish=20
-	# boong1.parking_stop=[]
-	# boong1.park_to_glo_start=[]
-	# boong1.park_to_glo_finish=[]
-	# boong1.glo_to_del_start=[]
-	# boong1.glo_to_del_finish=[]
-	
-	boong1.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6},'parking':5/3.6,'delivery':10/3.6}
-	boong1.set_map()
-	boong1.parking_path=boong1.make_path('parking',boong1.parking_map_num)
-	# boong1.delivery_path=boong1.make_path('delivery',boong1.delivery_map_num)
-	return boong1
 
 def boong():
 	offset_state = "_offset"
@@ -439,11 +339,11 @@ def boong():
 
 	boong.set_dir([0,1,3,5,7,9,10],[],[2,4,6,8])
 	
-	boong.parking_map_num=9
-	for i in range(boong.parking_map_num):
+	boong.diagonal_parking_map_num=9
+	for i in range(boong.diagonal_parking_map_num):
 		park_route=path_map+"/src/boong/parking"+offset_state+"_"+str(i)+".pkl"
-		boong.parking_route.append(park_route)
-		boong.set_other_mode(mode='parking', pc_route=park_route,link=2*i)
+		boong.diagonal_parking_route.append(park_route)
+		boong.set_other_mode(mode='diagonal_parking', pc_route=park_route,link=2*i)
 	
 	# boong.delivery_map_num=2
 	# for i in range(boong.delivery_map_num):
@@ -451,8 +351,8 @@ def boong():
 	# 	boong.delivery_route.append(del_route)
 	# 	boong.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
 	
-	boong.glo_to_park_start=15
-	boong.glo_to_park_finish=20
+	boong.glo_to_diagonal_park_start=15
+	boong.glo_to_diagonal_park_finish=20
 	# boong.parking_stop=[]
 	# boong.park_to_glo_start=[]
 	# boong.park_to_glo_finish=[]
@@ -461,9 +361,12 @@ def boong():
 	
 	boong.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'parking':8/3.6,'delivery':10/3.6}
 	boong.set_map()
-	boong.parking_path=boong.make_path('parking',boong.parking_map_num)
+	boong.diagonal_parking_path=boong.make_path('diagonal_parking',boong.diagonal_parking_map_num)
 	# boong.delivery_path=boong.make_path('delivery',boong.delivery_map_num)
+
+	boong.lane_width={'none':{3.0:[i for i in range(11)]}}
+	boong.set_lanewidth()
 	return boong
 
 use_map=boong()
-start_index=0
+start_index=2

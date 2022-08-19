@@ -29,6 +29,7 @@ class Stanley:
 
 	def find_nearest_point(self, front_x, front_y, map_xs, map_ys):
 		min_dist = 1e3
+		min_index=0
 		n_points = len(map_xs)
 
 		for i in range(n_points):
