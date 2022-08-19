@@ -13,7 +13,7 @@ class ObstaclePub():
 		self.detection_frame = "car_1"
 		self.msg = MarkerArray()
 		self.pub = rospy.Publisher('obstacles', ObjectArray, queue_size=1)
-		self.sub_cluster = rospy.Subscriber('/adaptive_clustering_v1/markers', MarkerArray, self.cluster_callback)
+		self.sub_cluster = rospy.Subscriber('/adaptive_clustering_v1', MarkerArray, self.cluster_callback)
 		self.listener = tf.TransformListener()
 
 	
@@ -21,8 +21,9 @@ class ObstaclePub():
 		pose = tf.transformations.euler_matrix(0, 0, yaw)
 		pose[:2, 3] = np.matrix([x, y])
 
-		self.listener.waitForTransform(world_frame, detection_frame, rospy.Time(),rospy.Duration(10))
-		t, r = self.listener.lookupTransform(world_frame, detection_frame, rospy.Time(0))
+		now = rospy.Time()
+		self.listener.waitForTransform(world_frame, detection_frame, now, rospy.Duration(1.0))
+		t, r = self.listener.lookupTransform(world_frame, detection_frame, now)
 		
 		tf_matrix = tf.transformations.quaternion_matrix(r)
 		tf_matrix[:3, 3] = t[:3]

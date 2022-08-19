@@ -105,7 +105,7 @@ if __name__ == "__main__":
 		tf_broadcaster = tf.TransformBroadcaster()
         
 		quat_imu = tf.transformations.quaternion_from_euler(0, 0, yaw_imu)
-		tf_broadcaster.sendTransform((x_imu, y_imu, 1.5),quat_imu,rospy.Time.now(),"/car_" + str(id), "/map")
+		tf_broadcaster.sendTransform((x_imu, y_imu, 1.5),quat_imu,rospy.Time.now(),"/car_1", "/map")
 		
 		m = Marker()
 		m.header.frame_id = "/map"

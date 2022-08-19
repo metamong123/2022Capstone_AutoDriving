@@ -43,8 +43,8 @@ parking_yaw = 0
 ##########################################################################
 
 # parking 시작하기전에 수정해야할 파라미터 값들 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-parking_finish_wp=[16,10,10,10,10,10] # 각 parking index마다의 finish waypoint임
-parking_straight_back_wp=[19,8,8,8,8,8]
+parking_finish_wp=[16,16,16,16,16,16] # 각 parking index마다의 finish waypoint임
+parking_straight_back_wp=[17,16,16,16,16,16]
 
 ###########################################################################
 
@@ -145,7 +145,7 @@ def parking_decision():
 		if abs(yaw - parking_yaw) < 3*np.pi/180: # hyperparameter(degree)
 			parking_flag = 'end'
 		else:
-			if park_ind_wp[1] > parking_straight_back_wp[park_ind_wp[0]]:
+			if park_ind_wp[1] >= parking_straight_back_wp[park_ind_wp[0]]:
 				parking_speed = 8/3.6
 				parking_angle = 0
 				parking_gear = 2
@@ -157,7 +157,7 @@ def parking_decision():
 				parking_brake = 0
 	
 	else:
-		if park_ind_wp[1] > parking_finish_wp[park_ind_wp[0]]:
+		if park_ind_wp[1] >= parking_finish_wp[park_ind_wp[0]]:
 			parking_flag = 'finish'
 		else:
 			parking_speed = frenet_speed

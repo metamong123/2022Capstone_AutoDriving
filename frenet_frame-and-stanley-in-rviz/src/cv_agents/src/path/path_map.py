@@ -86,17 +86,22 @@ class Path:
 		if not link==None:
 			self.nodes[mode][link]={}
 			if mode=='parking':
-				with open(pc_route, 'rb') as f:
+				with open(pc_route[i], 'rb') as f:
 					file=pickle.load(f)
 					self.nodes[mode][link]=file[0]
 					self.nodes[mode][link+1]={}
 				for i in self.nodes[mode][link].keys():
 					self.nodes[mode][link+1][i]=list(reversed(self.nodes[mode][link][i]))
 			
+			# with open(use_map.parking_route, 'rb') as f:
+			# 	file=pickle.load(f)
+
+
 			else:
-				with open(pc_route, 'rb') as f:
-					file=pickle.load(f)
-					self.nodes[mode][link]=file[0]
+				for i in range(self.delivery_map_num):
+					with open(pc_route, 'rb') as f:
+						file=pickle.load(f)
+						self.nodes[mode][link]=file[0]
 		
 		else:
 			self.nodes[mode][0]={}
@@ -181,10 +186,10 @@ class Path:
 			elif i=='parking':
 				for j in range(len(self.nodes[i].keys())):
 					if j%2==0:
-						self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.5)
+						self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.1)
 			elif i=='delivery':
 				for j in range(len(self.nodes[i].keys())):
-					self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.5)
+					self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.1)
 
 			link_i=-1
 			for j in range(len(self.nodes[i].keys())):
@@ -345,9 +350,49 @@ def boond_old():
 	# boond_old.delivery_path=boond_old.make_path('delivery',boond_old.delivery_map_num)
 	return boond_old
 
-def boong():
+def boong1():
 	offset_state = "_old_offset2"
 	# "" or "_offset"
+	# old maps : "_old", "_old_offset", "_old_offset2"
+
+	boong1=Path(path_map + "/src/boong1/global"+offset_state+".pkl")
+	
+	if offset_state == "_old_offset2":
+		boong1.set_link([0,20,190,220,420,460,620,680,800,830])
+	else:
+		boong1.set_link([0,20,190,220,420,460,620,680,800,838])
+
+	boong1.set_dir([0,1,3,5,7,9,10],[],[2,4,6,8])
+	
+	boong1.parking_map_num=9
+	for i in range(boong1.parking_map_num):
+		park_route=path_map+"/src/boong1/parking"+offset_state+"_"+str(i)+".pkl"
+		boong1.parking_route.append(park_route)
+		boong1.set_other_mode(mode='parking', pc_route=park_route,link=2*i)
+	
+	# boong1.delivery_map_num=2
+	# for i in range(boong1.delivery_map_num):
+	# 	del_route=path_map+"/src/boong1/delivery_"+str(i)+".pkl"
+	# 	boong1.delivery_route.append(del_route)
+	# 	boong1.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
+	
+	boong1.glo_to_park_start=15
+	boong1.glo_to_park_finish=20
+	# boong1.parking_stop=[]
+	# boong1.park_to_glo_start=[]
+	# boong1.park_to_glo_finish=[]
+	# boong1.glo_to_del_start=[]
+	# boong1.glo_to_del_finish=[]
+	
+	boong1.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6},'parking':5/3.6,'delivery':10/3.6}
+	boong1.set_map()
+	boong1.parking_path=boong1.make_path('parking',boong1.parking_map_num)
+	# boong1.delivery_path=boong1.make_path('delivery',boong1.delivery_map_num)
+	return boong1
+
+def boong():
+	offset_state = "_offset"
+	# offset_state : "", "_offset", "_offset2", "_offset3"
 	# old maps : "_old", "_old_offset", "_old_offset2"
 
 	boong=Path(path_map + "/src/boong/global"+offset_state+".pkl")
@@ -379,12 +424,11 @@ def boong():
 	# boong.glo_to_del_start=[]
 	# boong.glo_to_del_finish=[]
 	
-	boong.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6},'parking':5/3.6,'delivery':10/3.6}
+	boong.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'parking':8/3.6,'delivery':10/3.6}
 	boong.set_map()
 	boong.parking_path=boong.make_path('parking',boong.parking_map_num)
 	# boong.delivery_path=boong.make_path('delivery',boong.delivery_map_num)
 	return boong
-
 
 use_map=boong()
 start_index=0
