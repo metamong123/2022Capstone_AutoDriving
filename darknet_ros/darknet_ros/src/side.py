@@ -8,16 +8,13 @@ from darknet_ros_msgs.msg import BoundingBoxes
 from std_msgs.msg import Int32MultiArray
 
          
-# CLASS ====================================================================================
-# 0 : A1  1 : A2  2 : A3  3 : B1  4 : B2  5: B3                  idx = 0(1 2 3), 1(1 2 3)
-# 6 : green  7 : left  8 : red  9 : straightleft  10 : yellew    idx = 2(0 1 2 3 4)
-# 11 : person  12 : car  13 : uturn  14 : kidzone
-# 15 : stopline                                                  idx = 3 ~ 8 (0 0 0 0 0 0)
+# CLASS ===================================================================================
+# 0 : A1  1 : A2  2 : A3  3 : B1  4 : B2  5: B3 
 # =========================================================================================
 
-# OUTPUT ===========================================================================
-# pub = [3, 2, 3, 0, 1, 0, 1, 0, 0] (A, B1_x, B2_x, B3_x, traffic_light, person, car, sign)
-# =============================================================================
+# OUTPUT ==================================================================================
+# [(A1.id, A2.id, A3.id), (A1.x), (A2.x), (A3.x), (B1.x), (B2.x), (B3.x)]
+# =========================================================================================
 
 class YoloPub():
     def __init__(self, class_map, queue_size, thresh):
@@ -35,7 +32,7 @@ class YoloPub():
         self.boundingbox_sub = rospy.Subscriber('/camera2/darknet_ros/bounding_boxes', BoundingBoxes, self.BoundingBoxes_callback)
 
 
-    def deliveryB_vote(self, queue):
+    def delivery_vote(self, queue):
         if queue.count(-1) > int(self.queue_size/2):
             return -1
         else:
@@ -77,10 +74,10 @@ class YoloPub():
 
         # queue voting
         for idx in range(len(queue_list)):
-            if idx in (1, 2, 3): # (B1, B2, B3)
-                final_check.data.append(self.deliveryB_vote(queue_list[idx]))
-            else:
+            if idx == 0: # find A number
                 final_check.data.append(self.hard_vote(queue_list[idx]))
+            else:
+                final_check.data.append(self.delivery_vote(queue_list[idx]))
 
         self.id_pub.publish(final_check)
         self.callback_flag = False
@@ -92,10 +89,9 @@ class YoloPub():
         # append new bounding boxes data
         for bounding_box in data.bounding_boxes:
             if bounding_box.probability >= self.threshold:
-                if bounding_box.id in (3, 4, 5): # (B1, B2, B3)
-                    self.id_to_queue_list[bounding_box.id].append(bounding_box.xmin)
-                else:
-                    self.id_to_queue_list[bounding_box.id].append(bounding_box.id)
+                self.id_to_queue_list[bounding_box.id+3].append(bounding_box.xmin)
+                if bounding_box.id in (0, 1, 2): # find A number
+                    self.id_to_queue_list[0].append(bounding_box.id)
         
         for queue in self.queue_list:
             if len(queue) == queue_size: # append -1 to an undetected classes
@@ -108,12 +104,15 @@ class YoloPub():
 if __name__ == '__main__':
 
     CLASS_MAP = (
-        ("A1", "A2", "A3"),
+        ("id_0", "id_1", "id_2"),
+        ("A1",),
+        ("A2",),
+        ("A3",),
         ("B1",),
         ("B2",),
         ("B3",)
     )
-    QUEUE_SIZE = 7
+    QUEUE_SIZE = 13
     ACCURACY_THRESHOLD = 0.7
 
     rospy.init_node('side_yolo')
