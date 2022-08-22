@@ -24,7 +24,7 @@ class collision_check_marker():
 
         #Car, Obstacle Array Subscriber
         self.sub_car = rospy.Subscriber('/objects/car_1', Object, self.callback_car)
-        self.sub_obstacle = rospy.Subscriber('/obstacles', ObjectArray, self.callback_obstacle)
+        self.sub_obstacle = rospy.Subscriber('obstacles', ObjectArray, self.callback_obstacle)
         
         #self.car_marker_pub = rospy.Publisher("/objects/marker/car_1", Marker, queue_size=1)
         self.obstacle_marker_pub = rospy.Publisher("/objects/marker/obstacles", MarkerArray, queue_size=1)
@@ -69,16 +69,14 @@ class collision_check_marker():
         m.scale.z = 1.645
 
         if is_collide:
-            # red
             m.color.r = 192 / 255.0
             m.color.g = 57 / 255.0
             m.color.b = 43 / 255.0
             m.color.a = 0.97
         else:
-            # yellow
-            m.color.r = 255 / 255.0
-            m.color.g = 204 / 255.0
-            m.color.b = 102 / 255.0
+            m.color.r = 93 / 255.0
+            m.color.g = 122 / 255.0
+            m.color.b = 177 / 255.0
             m.color.a = 0.97
 
         return m

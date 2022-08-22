@@ -89,7 +89,7 @@ Visualization Manager:
       Marker Topic: /rviz/parking_link_1
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -97,7 +97,7 @@ Visualization Manager:
       Marker Topic: /rviz/parking_link_2
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -105,7 +105,7 @@ Visualization Manager:
       Marker Topic: /rviz/parking_link_3
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -113,7 +113,7 @@ Visualization Manager:
       Marker Topic: /rviz/parking_link_4
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -121,7 +121,7 @@ Visualization Manager:
       Marker Topic: /rviz/parking_link_5
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray

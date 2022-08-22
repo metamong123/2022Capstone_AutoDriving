@@ -29,15 +29,15 @@ WB = 1.04
 # MAX_T = 2.5 # maximum terminal time [s], default = 2
 # DT_T = 0.5 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 
-# # 5km/h
+# 5km/h
 # MIN_T = 2.0 # minimum terminal time [s]
 # MAX_T = 10.0 # maximum terminal time [s], default = 2
 # DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 # DT = 0.5 # timestep for update
 
-# MIN_T = 2.0 # minimum terminal time [s]
-# MAX_T = 10.0 # maximum terminal time [s], default = 2
-# DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+# MIN_T = 0.1 # minimum terminal time [s]
+# MAX_T = 8.1 # maximum terminal time [s], default = 2
+# DT_T = 2 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 # DT = 0.1 # timestep for update
 
 
@@ -52,12 +52,6 @@ MIN_T = 3.0 # minimum terminal time [s]
 MAX_T = 6.0 # maximum terminal time [s], default = 2
 DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 DT = 0.5 # timestep for update
-
-# 10km/h
-# MIN_T = 2.0 # minimum terminal time [s]
-# MAX_T = 4.0 # maximum terminal time [s], default = 2
-# DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
-# DT = 0.5 # timestep for update
 
 
 # MIN_T = 2.0 # minimum terminal time [s]
@@ -101,8 +95,8 @@ K_LON = 1.0 # weight for longitudinal direction (종방향을 위한 웨이트)
 # DF_SET=use_map.DF_SET
 
 
-def next_waypoint(x, y, mapx, mapy):
-	closest_wp = get_closest_waypoints(x, y, mapx, mapy)
+def next_waypoint(x, y, mapx, mapy, prev_wp):
+	closest_wp = get_closest_waypoints(x, y, mapx, mapy, prev_wp)
 
 	map_vec = [mapx[closest_wp + 1] - mapx[closest_wp], mapy[closest_wp + 1] - mapy[closest_wp]]
 	ego_vec = [x - mapx[closest_wp], y - mapy[closest_wp]]
@@ -117,11 +111,11 @@ def next_waypoint(x, y, mapx, mapy):
 	return next_wp
 
 
-def get_closest_waypoints(x, y, mapx, mapy):
+def get_closest_waypoints(x, y, mapx, mapy, prev_wp):
 	min_len = 1e10
 	closest_wp = 0
 
-	for i in range(len(mapx) - 1):
+	for i in range(prev_wp-10, len(mapx) - 1):
 		_mapx = mapx[i]
 		_mapy = mapy[i]
 		dist = get_dist(x, y, _mapx, _mapy)
@@ -134,8 +128,8 @@ def get_closest_waypoints(x, y, mapx, mapy):
 def get_dist(x, y, _x, _y):
 	return np.sqrt((x - _x)**2 + (y - _y)**2)
 
-def get_frenet(x, y, mapx, mapy):
-	next_wp = next_waypoint(x, y, mapx, mapy)
+def get_frenet(x, y, mapx, mapy, prev_wp):
+	next_wp = next_waypoint(x, y, mapx, mapy, prev_wp)
 	prev_wp = next_wp -1
 	print("prev_wp,next_wp: %d, %d"%(prev_wp,next_wp))
 	n_x = mapx[next_wp] - mapx[prev_wp]
@@ -244,6 +238,7 @@ class QuarticPolynomial:
 
 		A = np.array([[3*T**2, 4*T**3], [6*T, 12*T**2]])
 		b = np.array([vf - self.a1 - 2*self.a2*T, af - 2*self.a2])
+
 		x = np.linalg.solve(A, b)
 
 		self.a3 = x[0]
