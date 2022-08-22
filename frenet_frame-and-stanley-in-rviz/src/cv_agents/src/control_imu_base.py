@@ -129,8 +129,8 @@ if __name__ == "__main__":
 
 	state_gps_sub = rospy.Subscriber("/objects/car_1/gps", Object, callback_state_gps, queue_size=1)
 	state_imu_sub = rospy.Subscriber("/objects/car_1/imu", Object, callback_state_imu, queue_size=1)
-	path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=1)
-	# path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
+	#path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=1)
+	path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
 	mode_sub= rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
 	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
 	dir_sub=rospy.Subscriber("/link_direction", StringArray, callback_dir, queue_size=1)

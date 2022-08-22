@@ -369,4 +369,4 @@ def boong():
 	return boong
 
 use_map=boong()
-start_index=2
+start_index=0

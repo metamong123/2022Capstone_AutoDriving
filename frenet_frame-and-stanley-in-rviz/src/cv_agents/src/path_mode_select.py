@@ -117,13 +117,17 @@ if __name__ == "__main__":
 			mode = 'delivery_A'
 		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
 			mode = 'delivery_B'
+		elif (global_wp <= use_map.glo_to_dynamic_finish and global_wp >= use_map.glo_to_dynamic_start):  # delivery mode B
+			mode = 'dynamic_object'
+		
 
         ### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
 		mode_status = rospy.get_param('mission_status')
 		if mode_status == 'end':
 			print('global start')
 			mode = 'global'
-			# mode_status = 'going'
+			mode_status = 'going'
+			rospy.set_param('mission_status', mode_status)
 		else:
 			pass
 		if (mode == 'delivery_A' and mode == 'delivery_B'):
@@ -132,12 +136,8 @@ if __name__ == "__main__":
 			mode_msg.data = mode
 			mode_pub.publish(mode_msg)
 		
-		if mode == 'global':
-			path_msg.x.data = global_path_x
-			path_msg.y.data = global_path_y
-			path_msg.yaw.data = global_path_yaw
 
-		elif mode == 'parking':
+		if mode == 'parking':
 
 			for park_i in range(use_map.diagonal_parking_map_num):
 				
@@ -185,7 +185,11 @@ if __name__ == "__main__":
 			path_msg.y.data = use_map.delivery_path[1][1]
 			path_msg.yaw.data = use_map.delivery_path[1][2]
    
-		
+		else: # mode = 'global' or 'dynamic_object'
+			path_msg.x.data = global_path_x
+			path_msg.y.data = global_path_y
+			path_msg.yaw.data = global_path_yaw
+
 		path_pub.publish(path_msg)
 		
 		rospy.sleep(0.1)

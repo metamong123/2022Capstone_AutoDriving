@@ -12,35 +12,22 @@ from darknet_ros_msgs.msg import BoundingBoxes
 import numpy as np
 
 
-global car_mode, move_mode, parking_yaw
-car_mode = 'default'
-move_mode = 'default'
+global parking_yaw
+
 parking_flag = 'forward'
 delivery_flag = 'default'
 save_speed=[]
 save_angle=[]
-frenet_speed = 0
-frenet_angle = 0 
-frenet_gear = 0
+
 backward_speed = 0
 backward_angle = 0
 backward_gear = 0
 backward_brake = 0
-deliveryA = 0
-deliveryB = 0
-traffic_light = 0 
-person = 0 
-car = 0
-uturnsign = 0
-kidzonesign = 0
-parkingsign = 0
-stopline = 0
-assist_steer=0
+
 waypoint = 0
 w = 0
 z = 0
 parking_yaw = 0
-park_ind = 0
 
 parking_finish_wp=[10,10,10,10,10,10] # 각 parking index마다의 finish waypoint임
 
@@ -66,6 +53,8 @@ def euler_from_quaternion(x, y, z, w):
      
         return yaw_z
 
+car_mode = 'default'
+move_mode = 'default'
 def mode_selector_callback(msg):
 	global mode_selector, car_mode, move_mode, cur_dir_mode, next_dir_mode
     
@@ -76,10 +65,14 @@ def mode_selector_callback(msg):
 	next_dir_mode = mode_selector[3]
 	#print("car_mode = ",car_mode, "move_mode = ", move_mode, "cur_dir_mode = ", cur_dir_mode, "next_dir_mode = ", next_dir_mode)
 
+assist_steer=0
 def lanenet_callback(msg):
     global assist_steer
     assist_steer = msg.data
 
+frenet_speed = 0
+frenet_angle = 0 
+frenet_gear = 0
 def frenet_callback(msg):
     global frenet_speed, frenet_angle, frenet_gear
     frenet_speed = msg.drive.speed
@@ -105,19 +98,16 @@ def waypoint_callback(msg):
 	parking_wp[4] = msg.data[5]
 	parking_wp[5] = msg.data[6]
 
+traffic_light = 0 
+person = 0 
+car = 0
 def yolo_callback(msg):
-	global deliveryA, deliveryB, traffic_light, person, car, uturnsign, kidzonesign, parkingsign, stopline
-	deliveryA = msg.data[0]
-	deliveryB = msg.data[1]
-	traffic_light = msg.data[2]
-	#print(traffic_light)
-	person = msg.data[3]
-	car = msg.data[4]
-	uturnsign = msg.data[5]
-	kidzonesign = msg.data[6]
-	parkingsign = msg.data[7]
-	stopline = msg.data[8]
+	global  traffic_light, person, car
+	traffic_light = msg.data[0]
+	person = msg.data[1]
+	car = msg.data[2]
 
+yaw = 0
 def odometry_callback(msg):
 	global yaw
 	x = msg.pose.pose.orientation.x
@@ -126,10 +116,28 @@ def odometry_callback(msg):
 	w = msg.pose.pose.orientation.w
 	yaw = euler_from_quaternion(x, y, z, w)
 
+park_ind = 0
 def parking_callback(msg):
 	global park_ind
 	park_ind = msg.data
 
+A_number = 0
+A1_x = 0
+A2_x = 0
+A3_x = 0
+B1_x = 0
+B2_x = 0
+B3_x = 0
+def delivery_sign_callback(msg):
+	global A_number, A1_x, A2_x, A3_x, B1_x, B2_x, B3_x
+	A_number = msg.data[0]
+	A1_x = msg.data[1]
+	A2_x = msg.data[2]
+	A3_x = msg.data[3]
+	B1_x = msg[4]
+	B2_x = msg[5]
+	B3_x = msg[6]
+    
 def parking_decision():
 	global parking_flag
 	global back_speed, back_angle
@@ -221,6 +229,9 @@ def traffic_decision():
 	return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
 def delivery_decision():
+	    
+		if 
+
 
 
 if __name__=='__main__':
@@ -229,7 +240,7 @@ if __name__=='__main__':
 	rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
 	rospy.Subscriber("/mode_selector",StringArray,mode_selector_callback,queue_size=10)
 	rospy.Subscriber("/detect_ID", Int32MultiArray, yolo_callback)
-	rospy.Subscriber("/camera1/darknet_ros/bounding_boxes", BoundingBoxes, side_BoundingBoxes_callback)
+	rospy.Subscriber('/side_sign', Int32MultiArray, delivery_sign_callback)
 	rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
 	rospy.Subscriber("/waypoint", Float64, waypoint_callback)
 	rospy.Subscriber("/odom", Odometry, odometry_callback)
@@ -298,8 +309,22 @@ if __name__=='__main__':
 				cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = parking_decision()
 		
 		
-		elif car_mode == 'delivery':
-			
+		elif car_mode == 'delivery_A' or car_mode == 'delivery_B':
+			delivery_flag = delivery_decision()
+			if delivery_flag == 'going':
+				cmd.drive.speed = frenet_speed
+				cmd.drive.steering_angle = frenet_angle
+				cmd.drive.acceleration = frenet_gear
+				cmd.drive.jerk = 0
+			elif delivery_flag == 'end':
+				cmd.drive.speed = 0
+				cmd.drive.steering_angle = 0
+				cmd.drive.acceleration = 0
+				cmd.drive.jerk = 200  #full brake
+				final_cmd_Pub.publish(cmd)
+				print('delivery finish!!! stop!!')
+				rospy.sleep(5) # 4sec
+
 
 		rospy.sleep(0.1)
 		final_cmd_Pub.publish(cmd)

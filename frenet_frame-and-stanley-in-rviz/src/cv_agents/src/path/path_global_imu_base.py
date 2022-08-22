@@ -294,4 +294,4 @@ if __name__ == "__main__":
 		global_path_pub.publish(path_msg)
 		col_pub.publish(col_msg)
 
-		rospy.sleep(1)
+		#rospy.sleep(1)
