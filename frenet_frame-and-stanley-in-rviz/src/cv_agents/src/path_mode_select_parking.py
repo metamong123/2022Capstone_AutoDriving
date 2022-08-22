@@ -112,9 +112,9 @@ if __name__ == "__main__":
 		#print(use_map.glo_to_park_start)
 		######## mode select based waypoint #######
 		if (not use_map.diagonal_parking_map_num==0) and (global_wp <= use_map.glo_to_diagonal_park_finish and global_wp >=use_map.glo_to_diagonal_park_start):  # parking mode
-			mode = 'diagonal_parking'
+			mode = 'diagonal_parking' ## 나중에 parking으로 변경할 것
 		elif (not use_map.horizontal_parking_map_num==0) and (global_wp <= use_map.glo_to_horizontal_park_finish and global_wp >=use_map.glo_to_horizontal_park_start):  # parking mode
-			mode = 'horizontal_parking'
+			mode = 'horizontal_parking' ## 나중에 parking으로 변경할 것
 		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
 			mode = 'delivery_A'
 		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
@@ -177,7 +177,7 @@ if __name__ == "__main__":
 			path_msg.y.data = fp.y
 			path_msg.yaw.data = fp.yaw
 			park_pub.publish(park_msg)
-			
+
 		elif mode=='horizontal_parking':
 
 			for park_i in range(use_map.horizontal_parking_map_num):

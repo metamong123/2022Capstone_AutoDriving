@@ -3,6 +3,7 @@
 	<node name="map_visualizer" pkg="map_server" type="map_visualizer.py" />
 	
 	<node name="path_select" pkg="cv_agents" type="path_mode_select.py"/>
+	
 	<node name="path" pkg="cv_agents" type="path_global_imu_base.py" output="screen"/>
 	<node name="control" pkg="cv_agents" type="control_imu_base.py" output="screen"/>
 
