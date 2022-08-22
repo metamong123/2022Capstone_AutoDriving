@@ -8,16 +8,20 @@ import sys
 import math
 from numpy import *
 from matplotlib import *
-import rospy
+from scipy.interpolate import interp1d
+
 import rospkg
 rospack = rospkg.RosPack()
 path = rospack.get_path("obstacles")
 sys.path.append(path + "/src/")
+path_frenet=rospack.get_path("cv_agents")
+sys.path.append(path_frenet+"/src/path")
 from separation_axis_theorem import *
+from path_map import *
 
 # initialize
 # initialize
-LANE_WIDTH = 3.5  # lane width [m]
+LANE_WIDTH = 3.0  # lane width [m]
 WB = 1.04
 
 ## defalt
@@ -38,7 +42,13 @@ WB = 1.04
 
 
 # ## 10km/h
-MIN_T = 2.0 # minimum terminal time [s]
+# MIN_T = 2.0 # minimum terminal time [s]
+# MAX_T = 6.0 # maximum terminal time [s], default = 2
+# DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+# DT = 0.5 # timestep for update
+
+## 10km/h
+MIN_T = 3.0 # minimum terminal time [s]
 MAX_T = 6.0 # maximum terminal time [s], default = 2
 DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 DT = 0.5 # timestep for update
@@ -68,13 +78,10 @@ DT = 0.5 # timestep for update
 
 
 V_MAX = 20/3.6	  # maximum velocity [m/s]
-# ACC_MAX=2.0
-# ACC_MAX=V_MAX/DT_T
 ACC_MAX=V_MAX/0.1
-#ACC_MAX = V_MAX / MIN_T # maximum acceleration [m/ss]
-#ACC_MAX = 99999999999999999999999999999999999999999999
 
-STEER_MAX = math.radians(20)
+
+STEER_MAX = math.radians(28)
 
 K_MAX = STEER_MAX / WB	 # maximum curvature [1/m]
 #K_MAX = 100
@@ -88,7 +95,10 @@ K_LAT = 1.0 # weight for lateral direction, default = 1.0 (횡방향을 위한 �
 K_LON = 1.0 # weight for longitudinal direction (종방향을 위한 웨이트)
 
 # lateral planning 시 terminal position condition 후보  (양 차선 중앙), default len(DF_SET) = 2
-DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
+# DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -LANE_WIDTH/7*5])
+# 4번째값 +왼, -오
+# DF_SET = np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, 50])
+# DF_SET=use_map.DF_SET
 
 
 def next_waypoint(x, y, mapx, mapy):
@@ -184,7 +194,6 @@ def get_cartesian(s, d, mapx, mapy, maps):
 	return x, y, heading
 
 class QuinticPolynomial:
-
 	def __init__(self, xi, vi, ai, xf, vf, af, T):
 		# calculate coefficient of quintic polynomial
 		# used for lateral trajectory
@@ -290,8 +299,8 @@ class FrenetPath:
 		self.ds = []
 		self.kappa = []
 
-# def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET):
-def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed):
+def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET):
+# def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed):
 	frenet_paths = []
 
 	# generate path to each offset goal
@@ -341,6 +350,7 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 			v_diff = (target_speed - tfp.s_d[-1]) ** 2
 			#cost for global path tracking
 			d_track = (tfp.d[-1]) ** 2 
+			# print("cost for global path tracking",d_track)
 			# lateral cost
 			tfp.c_lat = K_J * J_lat + K_T * T + K_D * d_diff + K_GD * d_track 
 			# logitudinal cost
@@ -427,17 +437,17 @@ def check_path(fplist, obs_info, mapx, mapy, maps):
 			continue
 		ok_ind.append(i)
 	print("v = " + str(vel) + ", a = " + str(a) + ", curv = " + str(curv) + ", col = "+ str(col))
-	print("total = " + str(len(fplist)) + ", selected = " + str(len(fplist) - curv - col - vel - a) + "\n")
-	return [fplist[i] for i in ok_ind]
+	print("total = " + str(len(fplist)) + ", selected = " + str(len(fplist) - curv - col - vel - a))
+	return [fplist[i] for i in ok_ind], col
+	# return fplist, col
 
-# def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed, DF_SET):
-def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed):
-	# t1=rospy.Time.now()
-    # fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed,DF_SET)
-	fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed)
+def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed, DF_SET):
+# def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed):
+	fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed,DF_SET)
+	# fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed)
 	fplist = calc_global_paths(fplist, mapx, mapy, maps)
-
-	fplist = check_path(fplist, obs_info, mapx, mapy, maps)
+	col=0
+	fplist, col = check_path(fplist, obs_info, mapx, mapy, maps)
 	# find minimum cost path
 	min_cost = float("inf")
 	opt_traj = None
@@ -454,5 +464,5 @@ def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d,
 	except NameError:
 		print(" No solution ! ")
 		_opt_ind = -1
-	# print((rospy.Time.now()-t1).to_sec()*1000)
-	return fplist, _opt_ind
+
+	return fplist, _opt_ind, col

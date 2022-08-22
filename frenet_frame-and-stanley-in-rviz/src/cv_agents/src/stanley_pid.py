@@ -1,85 +1,103 @@
 import numpy as np
 
-# paramters
-dt = 0.1
+class Stanley:
+	def __init__(self, k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, yaw_dgain = 0, WB = 1.04):
+		self.WB = WB
+        
+		self.k = k
+		self.speed_gain = speed_gain
+		self.w_yaw = w_yaw
+		self.w_cte = w_cte
 
-# k =0.5
-kp = 0.5 # control gain
-ki=0
-kd=0
-
-# ERP42 PARAMETERS
-LENGTH = 1.600
-WIDTH = 1.160
-
-
-# # GV70 PARAMETERS
-# LENGTH = 4.715
-# WIDTH = 1.910
-
-def normalize_angle(angle):
-	while angle > np.pi:
-		angle -= 2.0 * np.pi
-
-	while angle < -np.pi:
-		angle += 2.0 * np.pi
-
-	return angle
-
-
-def stanley_control(x, y, yaw, v, map_xs, map_ys, map_yaws, L, error_icte, prev_cte):
-	# find nearest point
-	global kp, ki, kd
-	# kp = 0.3 # control gain
-	# # ki=0.01
-	# # kd=0.5
-	# # ki = 0.01
-	# # kd = 0.7
-	# ki=0
-	# kd=0.9
-	error_dcte=0
-	min_dist = 1e9
-	min_index = 0
-	n_points = len(map_xs)
-
-	front_x = x + L * np.cos(yaw)
-	front_y = y + L * np.sin(yaw)
-
-	for i in range(n_points):
-		dx = front_x - map_xs[i]
-		dy = front_y - map_ys[i]
-
-		dist = np.sqrt(dx * dx + dy * dy)
-		if dist < min_dist:
-			min_dist = dist
-			min_index = i
-
-	# compute cte at front axle
-	map_x = map_xs[min_index]
-	map_y = map_ys[min_index]
-	map_yaw = map_yaws[min_index]
-	dx = map_x - front_x
-	dy = map_y - front_y
-
-	perp_vec = [np.cos(yaw + np.pi/2), np.sin(yaw + np.pi/2)]
-	cte = np.dot([dx, dy], perp_vec)
-
-	# control law
-#	yaw_term = normalize_angle(map_yaw - yaw) * np.sin(np.pi/2 / (1+v/5))
-	yaw_term = normalize_angle(map_yaw - yaw) #heading error
-	error_dcte = cte - prev_cte
-	error_icte += cte
-	# cte_term = np.arctan2(kp*cte + ki*error_icte+ kd*error_dcte , (1.39+v)) # cross track error
-	# cte_term = np.arctan2(kp*cte + ki*error_icte+ kd*error_dcte , (2.78+v)) # cross track error
-	# cte_term = np.arctan2(kp*cte + ki*error_icte+ kd*error_dcte , (4.17+v)) # cross track error
-	# cte_term = np.arctan2((kp*cte + ki*error_icte+ kd*error_dcte) , (10+v)) # cross track error
-	print(cte, error_dcte, error_icte)
-	cte_term = np.arctan2(kp*cte + ki*error_icte+ kd*error_dcte , v)
-	w_yaw = 0.9
-	w_cte = 0.8
-	# w_cte = 1
-	# k =0.5
-	# steering
-	steer = w_yaw * yaw_term + w_cte * cte_term
+		# parameter for stanley_control_thresh
+		self.cte_thresh = cte_thresh
 	
-	return steer, cte, [w_yaw, w_cte, kp, ki, kd, yaw_term, cte_term]
+		# parameter for stanley_control_pd
+		self.yaw_dgain = yaw_dgain
+		self.prev_yaw = 0
+
+
+	def normalize_angle(self, angle):
+		while angle > np.pi:
+			angle -= 2.0 * np.pi
+
+		while angle < -np.pi:
+			angle += 2.0 * np.pi
+
+		return angle
+
+
+	def find_nearest_point(self, front_x, front_y, map_xs, map_ys):
+		min_dist = 1e3
+		n_points = len(map_xs)
+
+		for i in range(n_points):
+			dx = front_x - map_xs[i]
+			dy = front_y - map_ys[i]
+
+			dist = np.sqrt(dx * dx + dy * dy)
+			if dist < min_dist:
+				min_dist = dist
+				min_index = i
+		
+		return min_index
+
+    
+	def stanley_control(self, x, y, yaw, v, map_xs, map_ys, map_yaws):
+		front_x = x + self.WB/2*np.cos(yaw)
+		front_y = y + self.WB/2*np.sin(yaw)
+
+		# find nearest point
+		min_index = self.find_nearest_point(front_x, front_y, map_xs, map_ys)
+        
+		map_x = map_xs[min_index]
+		map_y = map_ys[min_index]
+		map_yaw = map_yaws[min_index]
+		dx = map_x - front_x
+		dy = map_y - front_y
+
+		# compute cte at front axle
+		perp_vec = [np.cos(yaw + np.pi/2), np.sin(yaw + np.pi/2)]
+		cte = np.dot([dx, dy], perp_vec)
+
+		# control law
+		yaw_term = self.normalize_angle(map_yaw - yaw) # heading error
+		cte_term = np.arctan2(self.k*cte , (self.speed_gain + v)) # cross track error
+
+		# steering
+		steer = self.w_yaw * yaw_term + self.w_cte * cte_term
+		return steer, yaw_term, cte
+
+
+	def stanley_control_pd(self, x, y, yaw, v, map_xs, map_ys, map_yaws):
+		front_x = x + self.WB/2*np.cos(yaw)
+		front_y = y + self.WB/2*np.sin(yaw)
+
+		# find nearest point
+		min_index = self.find_nearest_point(front_x, front_y, map_xs, map_ys)
+
+		map_x = map_xs[min_index]
+		map_y = map_ys[min_index]
+		map_yaw = map_yaws[min_index]
+		dx = map_x - front_x
+		dy = map_y - front_y
+
+		# compute cte at front axle
+		perp_vec = [np.cos(yaw + np.pi/2), np.sin(yaw + np.pi/2)]
+		cte = np.dot([dx, dy], perp_vec)
+
+		# cte threshold
+		#if -self.cte_thresh < cte < self.cte_thresh: # is this okay?
+		#	cte = cte**3
+
+		# heading error
+		yaw_term = self.normalize_angle(map_yaw - yaw)
+		d_yaw = yaw_term - self.prev_yaw
+		self.prev_yaw = yaw_term
+
+		# cross track error (cte)
+		cte_term = np.arctan2(self.k*cte, (self.speed_gain + v))
+
+		# steering
+		steer = self.w_yaw*yaw_term + self.yaw_dgain*d_yaw + self.w_cte*cte_term
+		return steer, yaw_term, cte, map_yaw

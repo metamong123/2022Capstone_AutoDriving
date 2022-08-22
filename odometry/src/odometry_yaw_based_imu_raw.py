@@ -14,7 +14,7 @@ from nav_msgs.msg import Odometry
 
 import numpy as np
 
-vo_Pub=rospy.Publisher('/odom',Odometry,queue_size=1)
+vo_Pub=rospy.Publisher('/odom_e2boximu',Odometry,queue_size=1)
 
 
 def callback(msg):

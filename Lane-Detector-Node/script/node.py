@@ -52,7 +52,7 @@ class LaneDetectionNode:
         center_x=np.float32((my_lanes_0[0][:,0]+my_lanes_1[0][:,0])/2)
         center_y=np.float32(lanes[0][:,1])	
         center_lane=np.array([center_x,center_y])
-        s_angle=center_x[0]-256
+        s_angle=0.03*(center_x[0]-256)
 
 	#print(center_lane[:,0])
 	#print(len(center_lane[0,:]))

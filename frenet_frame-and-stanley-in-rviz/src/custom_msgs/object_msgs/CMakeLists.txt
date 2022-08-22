@@ -20,6 +20,7 @@ set(MSG_FILES
   "PlanningDebug.msg"
   "Polygon.msg"
   "PolygonArray.msg"
+  "PathArray.msg"
 )
 
 

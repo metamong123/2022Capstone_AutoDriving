@@ -1,10 +1,9 @@
 #!/usr/bin/env python
+#-*- coding: utf-8 -*-
 
-from operator import ne
 import rospy
 import math
-from tokenize import String
-from std_msgs.msg import Int32MultiArray, Float64
+from std_msgs.msg import Int32MultiArray, Float64, String
 from rocon_std_msgs.msg import StringArray 
 from ackermann_msgs.msg import AckermannDriveStamped
 from nav_msgs.msg import Odometry
@@ -16,7 +15,7 @@ import numpy as np
 global car_mode, move_mode, parking_yaw
 car_mode = 'default'
 move_mode = 'default'
-parking_flag = 'default'
+parking_flag = 'forward'
 delivery_flag = 'default'
 save_speed=[]
 save_angle=[]
@@ -41,6 +40,9 @@ waypoint = 0
 w = 0
 z = 0
 parking_yaw = 0
+park_ind = 0
+
+parking_finish_wp=[10,10,10,10,10,10] # 각 parking index마다의 finish waypoint임
 
 def euler_from_quaternion(x, y, z, w):
         """
@@ -91,9 +93,17 @@ def frenet_callback(msg):
 #     backward_gear = msg.drive.acceleration
 #     backward_brake = msg.drive.jerk
 
+global_wp = 0
+parking_wp = []
 def waypoint_callback(msg):
-	global waypoint
-	waypoint = msg.data
+	global global_wp, parking_wp1, parking_wp2, parking_wp3, parking_wp4, parking_wp5, parking_wp6
+	global_wp = msg.data[0]  #global waypoint
+	parking_wp[0] = msg.data[1] #parking waypoint
+	parking_wp[1] = msg.data[2]
+	parking_wp[2] = msg.data[3]
+	parking_wp[3] = msg.data[4]
+	parking_wp[4] = msg.data[5]
+	parking_wp[5] = msg.data[6]
 
 def yolo_callback(msg):
 	global deliveryA, deliveryB, traffic_light, person, car, uturnsign, kidzonesign, parkingsign, stopline
@@ -116,6 +126,9 @@ def odometry_callback(msg):
 	w = msg.pose.pose.orientation.w
 	yaw = euler_from_quaternion(x, y, z, w)
 
+def parking_callback(msg):
+	global park_ind
+	park_ind = msg.data
 
 def parking_decision():
 	global parking_flag
@@ -126,14 +139,7 @@ def parking_decision():
  	
 	if parking_flag == 'backward':
 		if abs(yaw - parking_yaw) < 5: # hyperparameter(degree)
-			parking_speed = 0
-			parking_angle = 0
-			parking_gear = 0
-			parking_brake = 100
-			print('parking end')
-			final_cmd_Pub.publish(cmd)
-			rospy.sleep(2)
-			parking_flag = 'end'
+			parking_flag = 'end'	
 		else:
 			parking_speed = 8/3.6
 			parking_angle = -20*np.pi/180
@@ -141,10 +147,13 @@ def parking_decision():
 			parking_brake = 0
 	
 	else:
-		parking_speed = frenet_speed
-		parking_angle = frenet_angle
-		parking_gear = frenet_gear
-		parking_brake = 0
+		if parking_wp[park_ind] > parking_finish_wp[park_ind]:
+			parking_flag = 'finish'
+		else:
+			parking_speed = frenet_speed
+			parking_angle = frenet_angle
+			parking_gear = frenet_gear
+			parking_brake = 0
 
 	return parking_speed, parking_angle, parking_gear, parking_brake
 
@@ -211,7 +220,7 @@ def traffic_decision():
 			print("traffic mode : go")
 	return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
-def delivery_decision():
+# def delivery_decision():
 
 
 if __name__=='__main__':
@@ -224,8 +233,14 @@ if __name__=='__main__':
 	rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
 	rospy.Subscriber("/waypoint", Float64, waypoint_callback)
 	rospy.Subscriber("/odom", Odometry, odometry_callback)
-	cmd=AckermannDriveStamped()
+	rospy.Subscriber("/park_ind", Float64, parking_callback)
+
+	mission_pub = rospy.Publisher('/mission_status', String, queue_size=1)
 	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
+	
+	cmd=AckermannDriveStamped()
+	end_msg=String()
+	
 	while not rospy.is_shutdown():
 		if car_mode == 'global':
 			if move_mode == 'finish':
@@ -253,29 +268,41 @@ if __name__=='__main__':
 				#print('global mode!!!')
 
 		elif car_mode == 'parking':
-			if move_mode == 'forward': # parking forward -> frenet
-				if parking_yaw == 0:
-					parking_yaw = yaw
-					if parking_yaw+np.pi <= np.pi:
-						parking_yaw = parking_yaw + np.pi
-					else:
-						parking_yaw = parking_yaw - np.pi
-				cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = parking_decision()
-			elif move_mode == 'finish':
+			
+			if parking_flag == 'finish':
 				cmd.drive.speed = 0
 				cmd.drive.steering_angle = 0
 				cmd.drive.acceleration = 0
 				cmd.drive.jerk = 200  #full brake
 				final_cmd_Pub.publish(cmd)
 				print('parking finish!!! stop!!')
-				rospy.sleep(5) # 5sec
+				rospy.sleep(4) # 4sec
 				parking_flag = 'backward'
-
-		elif car_mode == 'delivery':
+			elif parking_flag == 'end':
+				cmd.drive.speed = 0
+				cmd.drive.steering_angle = 0
+				cmd.drive.acceleration = 0
+				cmd.drive.jerk = 50
+				final_cmd_Pub.publish(cmd)
+				end_msg.data = 'end'   # global mode로 바꾸기위한 flag보냄
+				mission_pub.publish(end_msg)
+				print('parking mission end!')
+				rospy.sleep(2) # 2sec
+			else:	
+				if parking_yaw == 0:
+					parking_yaw = yaw
+					if parking_yaw+np.pi <= np.pi:    # gps heading
+						parking_yaw = parking_yaw + np.pi
+					else:
+						parking_yaw = parking_yaw - np.pi
+				cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = parking_decision()
+		
+		
+		# elif car_mode == 'delivery':
 			
 
 		rospy.sleep(0.1)
 		final_cmd_Pub.publish(cmd)
-
+		mission_pub.publish(end_msg)
 
 
