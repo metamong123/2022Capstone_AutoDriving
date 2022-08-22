@@ -92,7 +92,12 @@ def callback3(msg):
 
 def callback_mode(msg):
 	global mode
-	mode = msg.data
+	if (msg.data == 'delivery_A') or (msg.data == 'delivery_B'):
+		mode = 'delivery'
+	elif (msg.data == 'diagonal_parking') or (msg.data == 'horizontal_parking'):
+		mode = 'parking'
+	else:
+		mode = msg.data
 
 def direction_array(current_dir, next_dir):
 	m = StringArray()
@@ -140,7 +145,14 @@ if __name__ == "__main__":
 	col_msg=Int32()
 
 
-	my_wp={'global':0,'parking':{0:0,1:0,2:0,3:0,4:0,5:0}}
+	my_wp={'global':0,'parking':{}}
+	if (not use_map.diagonal_parking_map_num==0):
+		for i in range(use_map.diagonal_parking_map_num):
+			my_wp['parking'][i]=0
+	elif (not use_map.horizontal_parking_map_num==0):
+		for i in range(use_map.horizontal_parking_map_num):
+			my_wp['parking'][i]=0
+
 	link_ind={}
 	link_ind['global']=start_index
 	opt_ind=0
@@ -248,9 +260,14 @@ if __name__ == "__main__":
 		my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
 		if mode=='parking':
-			for park_i in range(use_map.parking_map_num):
-				park_ind=park_i*2
-				my_wp[mode][park_ind] = get_closest_waypoints(state.x, state.y, use_map.waypoints[mode][park_ind]['x'][:use_map.link_len[mode][park_ind]], use_map.waypoints[mode][park_ind]['y'][:use_map.link_len[mode][park_ind]],my_wp[mode][park_i])
+			if (not use_map.diagonal_parking_map_num==0):
+				for park_i in range(use_map.diagonal_parking_map_num):
+					park_ind=park_i*2
+					my_wp[mode][park_i] = get_closest_waypoints(state.x, state.y, use_map.waypoints['diagonal_parking'][park_ind]['x'][:use_map.link_len['diagonal_parking'][park_ind]], use_map.waypoints['diagonal_parking'][park_ind]['y'][:use_map.link_len['diagonal_parking'][park_ind]],my_wp[mode][park_i])
+			elif (not use_map.horizontal_parking_map_num==0):
+				for park_i in range(use_map.horizontal_parking_map_num):
+					park_ind=park_i*2
+					my_wp[mode][park_i] = get_closest_waypoints(state.x, state.y, use_map.waypoints['horizontal_parking'][park_ind]['x'][:use_map.link_len['horizontal_parking'][park_ind]], use_map.waypoints['horizontal_parking'][park_ind]['y'][:use_map.link_len['horizontal_parking'][park_ind]],my_wp[mode][park_i])
 
 		if (my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):
 			if link_ind['global']==len(use_map.link_len['global']):

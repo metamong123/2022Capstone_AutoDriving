@@ -82,10 +82,10 @@ if __name__ == "__main__":
 
 	if not use_map.horizontal_parking_map_num==0:
 		for i in range(use_map.horizontal_parking_map_num):
-			globals()["parking_file_{}".format(i)]=use_map.horizontal_parking_route[i]
+			globals()["horizontal_parking_file_{}".format(i)]=use_map.horizontal_parking_route[i]
 	if not use_map.diagonal_parking_map_num==0:
 		for i in range(use_map.diagonal_parking_map_num):
-			globals()["parking_file_{}".format(i)]=use_map.diagonal_parking_route[i]
+			globals()["diagonal_parking_file_{}".format(i)]=use_map.diagonal_parking_route[i]
 	
 	if not use_map.delivery_map_num==0:
 		for i in range(use_map.delivery_map_num):
@@ -95,10 +95,10 @@ if __name__ == "__main__":
 
 	if not use_map.horizontal_parking_map_num==0:
 		for i in range(use_map.horizontal_parking_map_num):
-			globals()["parking_cv_{}".format(i)]=Converter(globals()["parking_file_{}".format(i)], 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=0.8, scale=0.5)
+			globals()["horizontal_parking_cv_{}".format(i)]=Converter(globals()["horizontal_parking_file_{}".format(i)], 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=0.8, scale=0.5)
 	if not use_map.diagonal_parking_map_num==0:
 		for i in range(use_map.diagonal_parking_map_num):
-			globals()["parking_cv_{}".format(i)]=Converter(globals()["parking_file_{}".format(i)], 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=0.8, scale=0.5)
+			globals()["diagonal_parking_cv_{}".format(i)]=Converter(globals()["diagonal_parking_file_{}".format(i)], 3000, r=228 / 255.0, g=133 / 255.0, b=137 / 255.0, a=0.8, scale=0.5)
 	if not use_map.delivery_map_num==0:
 		for i in range(use_map.delivery_map_num):
 			globals()["delivery_cv_{}".format(i)]=Converter(globals()["delivery_file_{}".format(i)], 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=0.8, scale=0.5)
@@ -107,12 +107,12 @@ if __name__ == "__main__":
 	
 	if not use_map.horizontal_parking_map_num==0:
 		for i in range(use_map.horizontal_parking_map_num):
-			parking_topic="/rviz/parking_link_"+str(i)
-			globals()["parking_pub_{}".format(i)]=rospy.Publisher(parking_topic, MarkerArray, queue_size=1.2, latch=True)
+			horizontal_parking_topic="/rviz/horizontal_parking_link_"+str(i)
+			globals()["horizontal_parking_pub_{}".format(i)]=rospy.Publisher(horizontal_parking_topic, MarkerArray, queue_size=1.2, latch=True)
 	if not use_map.diagonal_parking_map_num==0:
 		for i in range(use_map.diagonal_parking_map_num):
-			parking_topic="/rviz/parking_link_"+str(i)
-			globals()["parking_pub_{}".format(i)]=rospy.Publisher(parking_topic, MarkerArray, queue_size=1.2, latch=True)
+			diagonal_parking_topic="/rviz/diagonal_parking_link_"+str(i)
+			globals()["diagonal_parking_pub_{}".format(i)]=rospy.Publisher(diagonal_parking_topic, MarkerArray, queue_size=1.2, latch=True)
 	if not use_map.delivery_map_num==0:
 		for i in range(use_map.delivery_map_num):
 			delivery_topic="/rviz/delivery_link_"+str(i)
@@ -123,10 +123,10 @@ if __name__ == "__main__":
 		global_pub.publish(global_cv.ma)
 		if not use_map.horizontal_parking_map_num==0:
 			for i in range(use_map.horizontal_parking_map_num):
-				globals()["parking_pub_{}".format(i)].publish(globals()["parking_cv_{}".format(i)].ma)
+				globals()["horizontal_parking_pub_{}".format(i)].publish(globals()["horizontal_parking_cv_{}".format(i)].ma)
 		if not use_map.diagonal_parking_map_num==0:
 			for i in range(use_map.diagonal_parking_map_num):
-				globals()["parking_pub_{}".format(i)].publish(globals()["parking_cv_{}".format(i)].ma)
+				globals()["diagonal_parking_pub_{}".format(i)].publish(globals()["diagonal_parking_cv_{}".format(i)].ma)
 		if not use_map.delivery_map_num==0:
 			for i in range(use_map.delivery_map_num):
 				globals()["delivery_pub_{}".format(i)].publish(globals()["delivery_cv_{}".format(i)].ma)

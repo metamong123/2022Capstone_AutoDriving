@@ -78,6 +78,8 @@ class Path:
 		# 예선 구간의 경우에는 저속 관련 변수를 int로 사용해야할 수도 있음
 		self.low_speed_start_list=[] #curve, 어린이 보호 구역 등 저속 range 시작점
 		self.low_speed_finish_list=[] # 저속 range 끝 점
+		self.glo_to_dynamic_start=0 # 동적 장애물 구간 시작점
+		self.glo_to_dynamic_finish=0 # 동적 장애물 구간 끝 점
 		self.glo_to_horizontal_park_start=0 # global->horizontal_parking 시작 waypoint
 		self.glo_to_horizontal_park_finish=0 # global->horizontal_parking 시작 waypoint range 설정
 		self.glo_to_diagonal_park_start=0 # global->diagonal_parking 시작 waypoint
@@ -197,7 +199,7 @@ class Path:
 						self.w[i][j][k] = np.concatenate(self.w[i][j][k])
 
 			if i == 'global':
-				self.waypoints[i] = interpolate_waypoints(self.w[i]['x'], self.w[i]['y'], space=0.5)
+				self.waypoints[i] = interpolate_waypoints(self.w[i]['x'], self.w[i]['y'], space=0.25)
 			elif i == 'horizontal_parking' or i =='diagonal_parking':
 				for j in range(len(self.nodes[i].keys())):
 					if j%2==0:
@@ -368,5 +370,29 @@ def boong():
 	boong.set_lanewidth()
 	return boong
 
-use_map=boong()
+def delivery_test():
+	delivery_test=Path(path_map + "/src/delivery_test/global.pkl")
+	delivery_test.set_link([0,380,430,660,740,1080,1180,1400,1487])
+	delivery_test.set_dir([0,2,4,6,8,9],[1,3,5,7],[])
+	delivery_test.diagonal_parking_map_num=0
+	delivery_test.delivery_map_num=2
+	for i in range(delivery_test.delivery_map_num):
+		del_route=path_map+"/src/delivery_test/delivery_"+str(i)+".pkl"
+		delivery_test.delivery_route.append(del_route)
+		delivery_test.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
+	
+	delivery_test.glo_to_del_start=[60, 210]
+	delivery_test.glo_to_del_finish=[80, 230]
+	delivery_test.glo_to_dynamic_start=800
+	delivery_test.glo_to_dynamic_finish=1000
+	
+	delivery_test.target_speed={'global':{'straight':10/3.6, 'curve':8/3.6},'parking':8/3.6,'delivery':4/3.6}
+	delivery_test.set_map()
+	delivery_test.delivery_path=delivery_test.make_path('delivery',delivery_test.delivery_map_num)
+
+	delivery_test.lane_width={'none':{3.0:[i for i in range(10)]}}
+	delivery_test.set_lanewidth()
+	return delivery_test
+
+use_map=delivery_test()
 start_index=0

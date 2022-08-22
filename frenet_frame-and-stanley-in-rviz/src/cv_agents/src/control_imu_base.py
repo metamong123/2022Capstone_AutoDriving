@@ -63,7 +63,13 @@ def callback_path(msg):
 mode='global'
 def callback_mode(msg):
 	global mode
-	mode = msg.data
+	# mode = msg.data
+	if (msg.data == 'delivery_A') or (msg.data == 'delivery_B'):
+		mode = 'delivery'
+	elif (msg.data == 'diagonal_parking') or (msg.data == 'horizontal_parking'):
+		mode = 'parking'
+	else:
+		mode = msg.data
 
 link_ind=2
 my_wp=0
@@ -123,19 +129,7 @@ if __name__ == "__main__":
 
 	rospy.init_node("control")
 
-	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
-	accel_pub=rospy.Publisher("/accel", Float64, queue_size=1)
 
-
-	state_gps_sub = rospy.Subscriber("/objects/car_1/gps", Object, callback_state_gps, queue_size=1)
-	state_imu_sub = rospy.Subscriber("/objects/car_1/imu", Object, callback_state_imu, queue_size=1)
-	#path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=1)
-	path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
-	mode_sub= rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
-	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
-	dir_sub=rospy.Subscriber("/link_direction", StringArray, callback_dir, queue_size=1)
-
-	accel_msg = Float64()
 	
 
 	s=0
@@ -157,6 +151,18 @@ if __name__ == "__main__":
 		dir='curve'
 	while not rospy.is_shutdown():
 		
+		control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
+		accel_pub=rospy.Publisher("/accel", Float64, queue_size=1)
+		state_gps_sub = rospy.Subscriber("/objects/car_1/gps", Object, callback_state_gps, queue_size=1)
+		state_imu_sub = rospy.Subscriber("/objects/car_1/imu", Object, callback_state_imu, queue_size=1)
+		#path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=1)
+		path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
+		mode_sub= rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
+		waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
+		dir_sub=rospy.Subscriber("/link_direction", StringArray, callback_dir, queue_size=1)
+
+		accel_msg = Float64()
+
 		state=State(x=obj_msg_imu.x, y=obj_msg_imu.y, yaw=obj_msg_imu.yaw, v=msg.drive.speed, dt=0.05)
 		
 		if not path_x: ## No solution

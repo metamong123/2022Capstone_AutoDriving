@@ -14,7 +14,6 @@ from nav_msgs.msg import Odometry
 
 import numpy as np
 
-vo_Pub=rospy.Publisher('/odom_imu',Odometry,queue_size=1)
 
 
 def callback(msg):
@@ -56,5 +55,6 @@ if __name__=='__main__':
 
 	rospy.Subscriber("/gps/fix",NavSatFix,callback)
 	rospy.Subscriber("/imu/data",Imu, imu_callback)
-	
+
+	vo_Pub=rospy.Publisher('/odom_imu',Odometry,queue_size=1)
 	rospy.spin()

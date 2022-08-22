@@ -143,18 +143,16 @@ def acker_callback(msg):
     #print(gear)
 
 if __name__ == '__main__':
-    rospy.init_node('serial_node')
+	rospy.init_node('serial_node')	
 
-    rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
+	rate = rospy.Rate(10)
 
-    rate = rospy.Rate(10)
-    
-    port = str(rospy.get_param("~robot_port","/dev/ttyUSB6"))
+	port = str(rospy.get_param("~robot_port","/dev/ttyUSB4"))	
+	ser = serial.serial_for_url(port, baudrate=115200, timeout=1)
 
-    ser = serial.serial_for_url(port, baudrate=115200, timeout=1)
-
-    while (ser.isOpen() and (not rospy.is_shutdown())):
+	while (ser.isOpen() and (not rospy.is_shutdown())):
+		rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
     #Send to Controller
-        Send_to_ERP42(gear, speed, steer, brake)
+		Send_to_ERP42(gear, speed, steer, brake)
     #print(speed)
-        rate.sleep()
+		rate.sleep()

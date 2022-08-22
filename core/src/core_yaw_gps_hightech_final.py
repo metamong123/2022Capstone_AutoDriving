@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-from re import A
 import rospy
 import math
 from std_msgs.msg import Int32MultiArray, Float64, String
@@ -236,36 +235,37 @@ def delivery_decision():
 		if A_x[delivery_ind] > 300:
 			delivery_flag = 'end'
 		else:
-			delivery_flag = 'finish'
+			delivery_flag = 'going'
 	elif car_mode == 'delivery_B':
 		if A_x[delivery_ind] > 300:
 			delivery_flag = 'end'
 		else:
-			delivery_flag = 'finish'
-
+			delivery_flag = 'going'
 	return delivery_flag
 
 
 if __name__=='__main__':
 
 	rospy.init_node('core_control')
-	rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
-	rospy.Subscriber("/detect_ID", Int32MultiArray, yolo_callback)
-	rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
-	rospy.Subscriber("/waypoint", Float64, waypoint_callback)
-	rospy.Subscriber("/odom_imu", Odometry, odometry_callback)
-	rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
 
-	rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
-	rospy.Subscriber("/link_direction", StringArray, link_callback)
-
-	mission_pub = rospy.Publisher('/mission_status', String, queue_size=10)
-	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
-	
-	cmd=AckermannDriveStamped()
-	end_msg=String()
 	mode_status = 'going'
 	while not rospy.is_shutdown():
+		rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
+		rospy.Subscriber("/detect_ID", Int32MultiArray, yolo_callback)
+		rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
+		rospy.Subscriber("/waypoint", Float64, waypoint_callback)
+		rospy.Subscriber("/odom_imu", Odometry, odometry_callback)
+		rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
+
+		rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
+		rospy.Subscriber("/link_direction", StringArray, link_callback)
+
+		mission_pub = rospy.Publisher('/mission_status', String, queue_size=10)
+		final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
+
+		cmd=AckermannDriveStamped()
+		end_msg=String()
+
 		if car_mode == 'global':
 			#if move_mode == 'finish':
 			#	cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = traffic_decision()
@@ -325,7 +325,7 @@ if __name__=='__main__':
 				cmd.drive.steering_angle = frenet_angle
 				cmd.drive.acceleration = frenet_gear
 				cmd.drive.jerk = 0
-			elif delivery_flag == 'finish':
+			elif delivery_flag == 'end':
 				cmd.drive.speed = 0
 				cmd.drive.steering_angle = 0
 				cmd.drive.acceleration = 0
