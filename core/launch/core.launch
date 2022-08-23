@@ -1,10 +1,5 @@
 <launch>
-	<node name="parking_backward" pkg="parking_mission" type="parking_backward_copied.py"/>
-	<?ignore <node name="core_control" pkg="core" type="core_based_waypoint.py" output="screen"/> ?>
-	<?ignore <node name="core_control" pkg="core" type="core_based_stopline.py" output="screen"/> ?>
-	<node name="core_control" pkg="core" type="core_copied.py" output="screen"/>
-	<?ignore <node name="core_control" pkg="core" type="core_based_stopline_stech.py" output="screen"/> ?>
-	<?ignore <node name="core_control" pkg="core" type="core_based_waypoint_qualifier.py" output="screen"/> ?>
-	<?ignore <node name="core_control" pkg="core" type="core_based_stopline_qualifier.py" output="screen"/> ?>
+	<param name="mission_status" type="string" value="going" />
+	<node name="core_control" pkg="core" type="core_yaw_imu_final.py" output="screen"/>
 </launch>
  

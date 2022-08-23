@@ -128,11 +128,11 @@ def acceleration(ai):
 	a=Float64()
 	a.data=ai
 
-obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=3.14,v=0,L=1.600,W=1.04)
+# obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=use_map.nodes['global'][start_index]['yaw'][0],v=0,L=1.600,W=1.04)
 
-def callback_state(msg):
-	global obj_msg
-	obj_msg=msg
+# def callback_state(msg):
+# 	global obj_msg
+# 	obj_msg=msg
 
 dir='straight'
 def callback_dir(msg):
@@ -164,9 +164,9 @@ if __name__ == "__main__":
 
 
 	# state_sub = rospy.Subscriber("/objects/car_1", Object, callback_state, queue_size=1)
-	path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=10)
-	# path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
-	mode_sub= rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
+	# path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=10)
+	path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
+	# mode_sub= rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
 	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
 	dir_sub=rospy.Subscriber("/link_direction", StringArray, callback_dir, queue_size=1)
 
@@ -180,7 +180,7 @@ if __name__ == "__main__":
 	park_ind=0
 	v=0
 
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=2, dt=0.1)
+	state=State(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=use_map.nodes['global'][start_index]['yaw'][0],v=1,WB=1.04, dt=0.1)
 	prev_v = state.v
 	error_ia = 0
 	r = rospy.Rate(10)

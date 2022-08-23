@@ -1,0 +1,17 @@
+/*
+*
+* Xsens main
+*
+*/
+
+*
+{
+	font-family: Arial;
+}
+
+#projectname, #projectbrief
+{
+	font-family: Verdana;
+	font-weight: bold;
+	color: #211261
+}

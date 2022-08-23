@@ -78,7 +78,7 @@ class Stanley:
 		# compute cte at front axle
 		dx = map_x - front_x
 		dy = map_y - front_y
-		perp_vec = [np.cos(yaw + np.pi/2), np.sin(yaw + np.pi/2)]
+		perp_vec = [np.cos(map_yaw + np.pi/2), np.sin(map_yaw + np.pi/2)]
 		cte = np.dot([dx, dy], perp_vec)
 
 		# cte threshold

@@ -1,0 +1,56 @@
+=[ Magnetic Field Mapper SDK For Linux ]========================================
+
+-[ Shared Object Examples ]-----------------------------------------------------
+
+Documentation:
+	http://xsens.com/xsens-mti-documentation
+	./doc/magfieldmapper/doc_dll/html/index.html
+
+Prerequisites:
+	- MTSDK
+	- g++ (use build-essential on Ubuntu)
+	- lapacke (use liblapacke on Ubuntu)
+	- libusb-1.0-0
+	- libssh2-1
+	- libcholmod3
+	- libumfpack5
+
+Building:
+	To build the examples run from within the /examples/mfmsdk directory:
+
+		make
+
+	This will create the example binaries
+
+-[ Troubleshooting ]------------------------------------------------------------
+
+	See MTSDK.README section Troubleshooting
+
+
+	- Error during make: /usr/bin/ld: cannot find -lxsensdeviceapi
+	- Error during make: /usr/bin/ld: cannot find -lxstypes
+
+		The files libxstypes.so and libxsensdeviceapi.so are included in
+		the MTSDK package.
+
+		The MFM examples require the MTSDK package to be installed or
+		extracted into the same folder as the MFMSDK package.
+
+
+-[ Known Issues ]---------------------------------------------------------------
+
+	* On Red Hat, and Red Hat derived systems (like Fedora) the
+	installation directory of the shared object (/usr/local/lib) is usually
+	not included in the /etc/ld.so.conf file by default. This will result in
+	that dynamic linker is not able to find the XDA library after a system-wide
+	installation.
+
+	To overcome this you could change the installation directories by changing
+	the LIBDEST and INCLUDEDEST variables (see above) to something ldconfig
+	does search for, or add /usr/local/lib to the /etc/ld.so.conf file and
+	run ldconfig (as admin)
+
+	* The shared object file requires version 3.4.15 or higher of libstdc++.
+	Most current Linux distributions support this but we are aware of a problem
+	with Debian "squeeze" (the stable release) which uses 3.4.13. Currently
+	we have no specific work-around for this

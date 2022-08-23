@@ -14,7 +14,7 @@ from rocon_std_msgs.msg import StringArray
 
 
 from frenet import *
-from stanley_pid import *
+from stanley_pd import *
 
 rospack = rospkg.RosPack()
 path_frenet=rospack.get_path("cv_agents")

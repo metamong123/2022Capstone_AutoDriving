@@ -6,7 +6,7 @@
 	<node name="parking_car" pkg="obstacles" type="parking_car.py" />
 	<node name="collision_check" pkg="obstacles" type="collision_check_with_visualizing_car.py" />
 
-	<node name="path_select" pkg="cv_agents" type="path_mode_select.py"/>
+	<!-- <node name="path_select" pkg="cv_agents" type="path_mode_select.py"/> -->
 
 	<node name="path" pkg="cv_agents" type="path_global.py" output="screen"/>
 	<node name="control" pkg="cv_agents" type="control_sim.py" output="screen"/>

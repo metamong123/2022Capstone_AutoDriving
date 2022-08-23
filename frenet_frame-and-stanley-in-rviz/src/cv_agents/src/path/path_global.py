@@ -27,7 +27,7 @@ from path_map import *
 ## 초기화 지점
 
 mode='global'
-obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=0,v=0,L=1.600,W=1.04)
+obj_msg=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=use_map.nodes['global'][start_index]['yaw'][0],v=0,L=1.600,W=1.04)
 
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
@@ -117,9 +117,14 @@ def path_array(x, y, yaw):
 	p.yaw.data = yaw
 	return p
 
-def my_state_array(ind, wp, wp_p1,wp_p2,wp_p3,wp_p4,wp_p5,wp_p6):
+# def my_state_array(ind, wp, wp_p1,wp_p2,wp_p3,wp_p4,wp_p5,wp_p6):
+# 	m = Int32MultiArray()
+# 	m.data=[ind, wp, wp_p1,wp_p2,wp_p3,wp_p4,wp_p5,wp_p6]
+# 	return m
+
+def my_state_array(ind, wp):
 	m = Int32MultiArray()
-	m.data=[ind, wp, wp_p1,wp_p2,wp_p3,wp_p4,wp_p5,wp_p6]
+	m.data=[ind, wp]
 	return m
 
 if __name__ == "__main__":
@@ -189,8 +194,8 @@ if __name__ == "__main__":
 	opt_d = d
 	prev_opt_d = d
 
-	opt_frenet_path = Converter(r=0, g=255/255.0, b=100/255.0, a=1, scale=0.5)
-	cand_frenet_paths = Converter(r=0, g=100/255.0, b=100/255.0, a=0.4, scale= 0.5)
+	opt_frenet_path = Converter(r=0, g=255/255.0, b=100/255.0, a=1, scale=1)
+	cand_frenet_paths = Converter(r=0, g=100/255.0, b=100/255.0, a=0.4, scale= 1)
 	r = rospy.Rate(1)
 
 	while not rospy.is_shutdown():
@@ -251,8 +256,13 @@ if __name__ == "__main__":
 				}	
 				ways.append(way)
 
-			opt_frenet_path.make_marker_array([ways[opt_ind]])
-			cand_frenet_paths.make_marker_array(ways)
+			opt_frenet_path.make_marker_array(ways[opt_ind])
+			ways_={'x':[], 'y':[]}
+			for way in ways:
+				for i in range(len(way['x'])):
+					ways_['x'].append(way['x'][i])
+					ways_['y'].append(way['y'][i])
+			cand_frenet_paths.make_marker_array(ways_)
 
 			opt_d = path[opt_ind].d[-1]
 			prev_opt_d = path[opt_ind].d[-1]
@@ -299,8 +309,8 @@ if __name__ == "__main__":
 		# df_d = 0
 		# df_dd = 0
 
-		# waypoint_msg=my_state_array(my_wp['global'], my_wp['parking'], link_ind['global'])
-		waypoint_msg=my_state_array(link_ind['global'], my_wp['global'], my_wp['parking'][0], my_wp['parking'][1],my_wp['parking'][2],my_wp['parking'][3],my_wp['parking'][4],my_wp['parking'][5])
+		waypoint_msg=my_state_array(link_ind['global'], my_wp['global'])
+		# waypoint_msg=my_state_array(link_ind['global'], my_wp['global'], my_wp['parking'][0], my_wp['parking'][1],my_wp['parking'][2],my_wp['parking'][3],my_wp['parking'][4],my_wp['parking'][5])
 
 		opt_frenet_pub.publish(opt_frenet_path.ma)
 		cand_frenet_pub.publish(cand_frenet_paths.ma)

@@ -37,20 +37,22 @@ class Converter(object):
 
 	def make_marker_array(self, waypoints):
 		ma = MarkerArray()
-		draw_step = 1
-		if isinstance(self.waypoints, dict):
+		#draw_step = 1
+		#if isinstance(self.waypoints, dict):
 			# for A2_LINK_smoothed_near0.pkl
-			waypoints = self.waypoints.values()
-			draw_step = 5
-		
-		for i, waypoint in enumerate(waypoints):
-			m = Marker()
-			m.id = self.start_id + i
-			m.header.frame_id = "/map"
-			m.type = m.LINE_STRIP
-			m.action = m.ADD
+			#waypoints = self.waypoints.values()
+			#draw_step = 5
 
+		for j in range(len(waypoints["x"])):
+			#if j % draw_step == 0 or j == len(waypoint["x"])-1:
+			m = Marker()
+			m.id = j
+			m.header.frame_id = "/map"
+			m.type = m.SPHERE
 			m.scale.x = self.scale
+			m.scale.y = self.scale
+			m.scale.z = self.scale
+			m.action = m.ADD
 
 			m.color.r = self.r
 			m.color.g = self.g
@@ -62,46 +64,45 @@ class Converter(object):
 			m.pose.orientation.z = 0
 			m.pose.orientation.w = 1
 
-			m.points = []
-			for j in range(len(waypoint["x"])):
-				if j % draw_step == 0 or j == len(waypoint["x"])-1:
-					p = Point()
-					p.x = waypoint["x"][j]
-					p.y = waypoint["y"][j]
-					m.points.append(p)                
+			m.pose.position.x = waypoints["x"][j]
+			m.pose.position.y = waypoints["y"][j]
+			m.pose.position.z = 0
+
 			ma.markers.append(m)
+
 		self.ma = ma
 		
+
 
 if __name__ == "__main__":
 	rospy.init_node("map_rviz_visualizer")
 	path = rospack.get_path("map_server")
 
 	# TODO: AS CONFIGURATION FILE
-	global_file = use_map.global_route
+	global_wayp = use_map.waypoints['global']
 
 	if not use_map.horizontal_parking_map_num==0:
 		for i in range(use_map.horizontal_parking_map_num):
-			globals()["horizontal_parking_file_{}".format(i)]=use_map.horizontal_parking_route[i]
+			globals()["horizontal_parking_wayp{}".format(i)]=use_map.waypoints['horizontal_parking'][i*2]
 	if not use_map.diagonal_parking_map_num==0:
 		for i in range(use_map.diagonal_parking_map_num):
-			globals()["diagonal_parking_file_{}".format(i)]=use_map.diagonal_parking_route[i]
+			globals()["diagonal_parking_wayp{}".format(i)]=use_map.waypoints['diagonal_parking'][i*2]
 	
 	if not use_map.delivery_map_num==0:
 		for i in range(use_map.delivery_map_num):
-			globals()["delivery_file_{}".format(i)]=use_map.delivery_route[i]
+			globals()["delivery_wayp{}".format(i)]=use_map.waypoints['delivery'][i]
 
-	global_cv = Converter(global_file, 2000, r=255/255.0, g=236/255.0, b=139/255.0, a=0.8, scale=0.5)
+	global_cv = Converter(waypoints=global_wayp, r=255/255.0, g=236/255.0, b=139/255.0, a=0.8, scale=0.5)
 
 	if not use_map.horizontal_parking_map_num==0:
 		for i in range(use_map.horizontal_parking_map_num):
-			globals()["horizontal_parking_cv_{}".format(i)]=Converter(globals()["horizontal_parking_file_{}".format(i)], 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=0.8, scale=0.5)
+			globals()["horizontal_parking_cv_{}".format(i)]=Converter(waypoints=globals()["horizontal_parking_wayp{}".format(i)], r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=0.8, scale=0.5)
 	if not use_map.diagonal_parking_map_num==0:
 		for i in range(use_map.diagonal_parking_map_num):
-			globals()["diagonal_parking_cv_{}".format(i)]=Converter(globals()["diagonal_parking_file_{}".format(i)], 3000, r=228 / 255.0, g=133 / 255.0, b=137 / 255.0, a=0.8, scale=0.5)
+			globals()["diagonal_parking_cv_{}".format(i)]=Converter(waypoints=globals()["diagonal_parking_wayp{}".format(i)], r=228 / 255.0, g=133 / 255.0, b=137 / 255.0, a=0.8, scale=0.5)
 	if not use_map.delivery_map_num==0:
 		for i in range(use_map.delivery_map_num):
-			globals()["delivery_cv_{}".format(i)]=Converter(globals()["delivery_file_{}".format(i)], 3000, r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=0.8, scale=0.5)
+			globals()["delivery_cv_{}".format(i)]=Converter(waypoints=globals()["delivery_wayp{}".format(i)], r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=0.8, scale=0.5)
 
 	global_pub = rospy.Publisher("/rviz/global_links", MarkerArray, queue_size=1.2, latch=True)
 	

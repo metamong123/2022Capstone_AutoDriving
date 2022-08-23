@@ -137,7 +137,7 @@ class Path:
 
 	def set_link(self, waypoint_list=[0],mode='global'):
 		
-		nodes_len=len(self.nodes[mode])
+		nodes_len=len(self.nodes[mode][0]['x'])
 		waypoint_list.append(nodes_len)
 		
 		for i in reversed(range(len(waypoint_list)-1)):
@@ -199,14 +199,14 @@ class Path:
 						self.w[i][j][k] = np.concatenate(self.w[i][j][k])
 
 			if i == 'global':
-				self.waypoints[i] = interpolate_waypoints(self.w[i]['x'], self.w[i]['y'], space=0.25)
+				self.waypoints[i] = interpolate_waypoints(self.w[i]['x'], self.w[i]['y'], space=0.5)
 			elif i == 'horizontal_parking' or i =='diagonal_parking':
 				for j in range(len(self.nodes[i].keys())):
 					if j%2==0:
-						self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.2)
+						self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.5)
 			elif i=='delivery':
 				for j in range(len(self.nodes[i].keys())):
-					self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.2)
+					self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.5)
 
 			link_i=-1
 			for j in range(len(self.nodes[i].keys())):
@@ -288,9 +288,11 @@ class Path:
 def frontier():
 	frontier=Path(path_map + "/src/frontier/curve_test.pkl")
 	frontier.set_link([0,100,200,300,400,500,600,700,800,900,1000,1100])
-	frontier.set_dir([0,1],[2],[3,4,5,6,7,8,9,10,11,12])
-	frontier.target_speed={'global':12/3.6,'parking':10/3.6}
+	frontier.set_dir([0,1],[2],[3,4,5,6,7,8,9,10,11,12,13])
+	frontier.target_speed={'global':{'straight':20/3.6, 'curve':20/3.6},'parking':8/3.6,'delivery':10/3.6}
 	frontier.set_map()
+	frontier.lane_width={'none':{3.0:[i for i in range(14)]}}
+	frontier.set_lanewidth()
 	return frontier
 
 def kcity():
@@ -361,7 +363,7 @@ def boong():
 	# boong.glo_to_del_start=[]
 	# boong.glo_to_del_finish=[]
 	
-	boong.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'parking':8/3.6,'delivery':10/3.6}
+	boong.target_speed={'global':{'straight':20/3.6, 'curve':12/3.6},'parking':8/3.6,'delivery':10/3.6}
 	boong.set_map()
 	boong.diagonal_parking_path=boong.make_path('diagonal_parking',boong.diagonal_parking_map_num)
 	# boong.delivery_path=boong.make_path('delivery',boong.delivery_map_num)
