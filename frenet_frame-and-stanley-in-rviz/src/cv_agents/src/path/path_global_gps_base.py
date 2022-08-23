@@ -250,8 +250,13 @@ if __name__ == "__main__":
 				}	
 				ways.append(way)
 
-			opt_frenet_path.make_marker_array([ways[opt_ind]])
-			cand_frenet_paths.make_marker_array(ways)
+			opt_frenet_path.make_marker_array(ways[opt_ind])
+			ways_={'x':[], 'y':[]}
+			for way in ways:
+				for i in range(len(way['x'])):
+					ways_['x'].append(way['x'][i])
+					ways_['y'].append(way['y'][i])
+			cand_frenet_paths.make_marker_array(ways_)
 
 			opt_d = path[opt_ind].d[-1]
 			prev_opt_d = path[opt_ind].d[-1]

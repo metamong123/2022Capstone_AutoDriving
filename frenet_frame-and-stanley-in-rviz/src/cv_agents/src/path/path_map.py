@@ -156,7 +156,7 @@ class Path:
 	
 		return w_s_l, w_f_l
 
-	def set_map(self):
+	def set_map(self, del_space=0.5, glo_space=0.5, park_space=0.5):
 		for i in self.nodes.keys():
 			self.w[i]={}
 			self.waypoints[i]={}
@@ -199,14 +199,14 @@ class Path:
 						self.w[i][j][k] = np.concatenate(self.w[i][j][k])
 
 			if i == 'global':
-				self.waypoints[i] = interpolate_waypoints(self.w[i]['x'], self.w[i]['y'], space=0.5)
+				self.waypoints[i] = interpolate_waypoints(self.w[i]['x'], self.w[i]['y'], space=glo_space)
 			elif i == 'horizontal_parking' or i =='diagonal_parking':
 				for j in range(len(self.nodes[i].keys())):
 					if j%2==0:
-						self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.5)
+						self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=park_space)
 			elif i=='delivery':
 				for j in range(len(self.nodes[i].keys())):
-					self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'], space=0.5)
+					self.waypoints[i][j] = interpolate_waypoints(self.w[i][j]['x'], self.w[i][j]['y'],space=del_space)
 
 			link_i=-1
 			for j in range(len(self.nodes[i].keys())):
@@ -396,5 +396,62 @@ def delivery_test():
 	delivery_test.set_lanewidth()
 	return delivery_test
 
-use_map=delivery_test()
+def delivery_test_cw():
+	del_space = 0.5
+	glo_space=0.5
+	# 0.5 (original) / 0.25 (x2) / 0.125 (x4) / 0.1 (x5)
+	delivery_test_cw=Path(path_map + "/src/delivery_test_cw/global_"+str(glo_space)+".pkl")
+	link_list=list(map(int,list(np.array([0,180,210,340,360,540,570,690,717])*float(0.5/1))))
+	delivery_test_cw.set_link(link_list)
+	delivery_test_cw.set_dir([0,2,4,6,8],[],[1,3,5,7])
+	
+	delivery_test_cw.delivery_map_num=2
+	for i in range(delivery_test_cw.delivery_map_num):
+		del_route=path_map+"/src/delivery_test_cw/delivery_"+str(i)+"_"+str(del_space)+".pkl"
+		delivery_test_cw.delivery_route.append(del_route)
+		delivery_test_cw.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
+	
+	delivery_test_cw.glo_to_del_start=list(np.array([30, 110])*float(0.5/1))
+	delivery_test_cw.glo_to_del_finish=list(np.array([40, 120])*float(0.5/1))
+	delivery_test_cw.glo_to_dynamic_start=400*float(0.5/1)
+	delivery_test_cw.glo_to_dynamic_finish=500*float(0.5/1)
+	
+	delivery_test_cw.target_speed={'global':{'straight':10/3.6, 'curve':8/3.6},'parking':8/3.6,'delivery':4/3.6}
+	delivery_test_cw.set_map(glo_space=1,del_space=1)
+	delivery_test_cw.delivery_path=delivery_test_cw.make_path('delivery',delivery_test_cw.delivery_map_num)
+
+	delivery_test_cw.lane_width={'none':{3.0:[i for i in range(10)]}}
+	delivery_test_cw.set_lanewidth()
+
+	return delivery_test_cw
+
+
+def delivery_test_ccw():
+	space = 0.5
+	# 0.5 (original) / 0.25 (x2) / 0.125 (x4) / 0.1 (x5)
+	delivery_test_ccw=Path(path_map + "/src/delivery_test_ccw/global_"+str(space)+".pkl")
+	delivery_test_ccw.set_link(list(np.array([0,190,215,330,370,540,590,700,744])*int(0.5/space)))
+	delivery_test_ccw.set_dir([0,2,4,6,8,9],[1,3,5,7],[])
+	
+	delivery_test_ccw.delivery_map_num=2
+	for i in range(delivery_test_ccw.delivery_map_num):
+		del_route=path_map+"/src/delivery_test_ccw/delivery_"+str(i)+"_"+str(space)+".pkl"
+		delivery_test_ccw.delivery_route.append(del_route)
+		delivery_test_ccw.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
+	
+	delivery_test_ccw.glo_to_del_start=list(np.array([60, 210])*int(0.5/space))
+	delivery_test_ccw.glo_to_del_finish=list(np.array([80, 230])*int(0.5/space))
+	delivery_test_ccw.glo_to_dynamic_start=400*int(0.5/space)
+	delivery_test_ccw.glo_to_dynamic_finish=500*int(0.5/space)
+
+	delivery_test_ccw.target_speed={'global':{'straight':10/3.6, 'curve':8/3.6},'parking':8/3.6,'delivery':4/3.6}
+	delivery_test_ccw.set_map(space)
+	delivery_test_ccw.delivery_path=delivery_test_ccw.make_path('delivery',delivery_test_ccw.delivery_map_num)
+
+	delivery_test_ccw.lane_width={'none':{3.0:[i for i in range(10)]}}
+	delivery_test_ccw.set_lanewidth()
+
+	return delivery_test_ccw
+
+use_map=delivery_test_cw()
 start_index=0

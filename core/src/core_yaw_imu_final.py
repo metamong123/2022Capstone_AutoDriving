@@ -118,6 +118,7 @@ A_x = [0,0,0]
 B_x = [0,0,0]
 def delivery_sign_callback(msg):
 	global A_number, A_x, B_x
+	print(1)
 	A_number = msg.data[0]
 	A_x = [msg.data[1], msg.data[2], msg.data[3]]
 	B_x = [msg.data[4], msg.data[5], msg.data[6]]
@@ -220,8 +221,11 @@ def traffic_decision():
 			traffic_brake = 0
 			print("traffic mode : go")
 	return traffic_speed, traffic_angle, traffic_gear, traffic_brake
-
+delivery_ind =0 
 def delivery_decision():
+	global delivery_ind
+	
+	print(A_number)
 	if A_number == 0:  # A1
 		delivery_ind = 0
 	elif A_number == 1: # A2
@@ -230,7 +234,7 @@ def delivery_decision():
 		delivery_ind = 2
 	else:
 		pass
-
+	print(A_x[1])
 	if car_mode == 'delivery_A':
 		if A_x[delivery_ind] > 300:
 			delivery_flag = 'end'
@@ -249,6 +253,7 @@ if __name__=='__main__':
 	rospy.init_node('core_control')
 
 	mode_status = 'going'
+	
 	while not rospy.is_shutdown():
 		rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
 		rospy.Subscriber("/detect_ID", Int32MultiArray, yolo_callback)
@@ -256,7 +261,7 @@ if __name__=='__main__':
 		rospy.Subscriber("/waypoint", Float64, waypoint_callback)
 		rospy.Subscriber("/odom_imu", Odometry, odometry_callback)
 		rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
-
+		rospy.Subscriber('/side_sign',Int32MultiArray, delivery_sign_callback)
 		rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
 		rospy.Subscriber("/link_direction", StringArray, link_callback)
 
@@ -291,7 +296,7 @@ if __name__=='__main__':
 					cmd.drive.jerk = 0
 			#print('global mode!!!')
 
-		elif car_mode == 'diagonal_parking':
+		elif car_mode == 'parking':
 			print(parking_yaw)
 			if parking_flag == 'finish':
 				cmd.drive.speed = 0
