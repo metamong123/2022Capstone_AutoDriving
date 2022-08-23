@@ -92,17 +92,17 @@ if __name__ == "__main__":
 		for i in range(use_map.delivery_map_num):
 			globals()["delivery_wayp{}".format(i)]=use_map.waypoints['delivery'][i]
 
-	global_cv = Converter(waypoints=global_wayp, r=255/255.0, g=236/255.0, b=139/255.0, a=0.8, scale=0.5)
+	global_cv = Converter(waypoints=global_wayp, r=255/255.0, g=236/255.0, b=139/255.0, a=0.8, scale=0.1)
 
 	if not use_map.horizontal_parking_map_num==0:
 		for i in range(use_map.horizontal_parking_map_num):
-			globals()["horizontal_parking_cv_{}".format(i)]=Converter(waypoints=globals()["horizontal_parking_wayp{}".format(i)], r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=0.8, scale=0.5)
+			globals()["horizontal_parking_cv_{}".format(i)]=Converter(waypoints=globals()["horizontal_parking_wayp{}".format(i)], r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=0.8, scale=0.1)
 	if not use_map.diagonal_parking_map_num==0:
 		for i in range(use_map.diagonal_parking_map_num):
-			globals()["diagonal_parking_cv_{}".format(i)]=Converter(waypoints=globals()["diagonal_parking_wayp{}".format(i)], r=228 / 255.0, g=133 / 255.0, b=137 / 255.0, a=0.8, scale=0.5)
+			globals()["diagonal_parking_cv_{}".format(i)]=Converter(waypoints=globals()["diagonal_parking_wayp{}".format(i)], r=228 / 255.0, g=133 / 255.0, b=137 / 255.0, a=0.8, scale=0.1)
 	if not use_map.delivery_map_num==0:
 		for i in range(use_map.delivery_map_num):
-			globals()["delivery_cv_{}".format(i)]=Converter(waypoints=globals()["delivery_wayp{}".format(i)], r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=0.8, scale=0.5)
+			globals()["delivery_cv_{}".format(i)]=Converter(waypoints=globals()["delivery_wayp{}".format(i)], r=228 / 255.0, g=233 / 255.0, b=237 / 255.0, a=0.8, scale=0.1)
 
 	global_pub = rospy.Publisher("/rviz/global_links", MarkerArray, queue_size=1.2, latch=True)
 	
