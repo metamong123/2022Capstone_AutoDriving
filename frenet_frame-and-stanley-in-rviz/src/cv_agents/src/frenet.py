@@ -115,14 +115,23 @@ def get_closest_waypoints(x, y, mapx, mapy, prev_wp):
 	min_len = 1e10
 	closest_wp = 0
 
-	for i in range(prev_wp-10, len(mapx) - 1):
-		_mapx = mapx[i]
-		_mapy = mapy[i]
-		dist = get_dist(x, y, _mapx, _mapy)
+	if prev_wp <= 10:
+		for i in range(0, len(mapx) - 1):
+			_mapx = mapx[i]
+			_mapy = mapy[i]
+			dist = get_dist(x, y, _mapx, _mapy)
+			if dist < min_len:
+				min_len = dist
+				closest_wp = i
+	else:
+		for i in range(prev_wp-10, len(mapx) - 1):
+			_mapx = mapx[i]
+			_mapy = mapy[i]
+			dist = get_dist(x, y, _mapx, _mapy)
+			if dist < min_len:
+				min_len = dist
+				closest_wp = i
 
-		if dist < min_len:
-			min_len = dist
-			closest_wp = i
 	return closest_wp
 
 def get_dist(x, y, _x, _y):

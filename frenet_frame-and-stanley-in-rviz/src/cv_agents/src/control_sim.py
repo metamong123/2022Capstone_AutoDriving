@@ -179,10 +179,12 @@ if __name__ == "__main__":
 	road_yaw=0
 	park_ind=0
 	v=0
+	if start_index==0:
+		state=State(x=use_map.waypoints['global']['x'][:use_map.link_len['global'][start_index]][0],y=use_map.waypoints['global']['y'][:use_map.link_len['global'][start_index]][0],yaw=use_map.waypoints['global']['yaw'][:use_map.link_len['global'][start_index]][0],v=1,WB=1.04,dt=0.1)
+	else:
+		state=State(x=use_map.waypoints['global']['x'][use_map.link_len['global'][start_index-1]:use_map.link_len['global'][start_index]][0],y=use_map.waypoints['global']['y'][use_map.link_len['global'][start_index-1]:use_map.link_len['global'][start_index]][0],yaw=use_map.waypoints['global']['yaw'][use_map.link_len['global'][start_index-1]:use_map.link_len['global'][start_index]][0],v=1,WB=1.04,dt=0.1)
 	
-	# state=State(x=use_map.waypoints['global']['x'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],y=use_map.waypoints['global']['y'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],yaw=use_map.waypoints['global']['yaw'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],v=1,WB=1.04,dt=0.1)
-	
-	state=State(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=use_map.nodes['global'][start_index]['yaw'][0],v=1,WB=1.04, dt=0.1)
+	# state=State(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=use_map.nodes['global'][start_index]['yaw'][0],v=1,WB=1.04, dt=0.1)
 	prev_v = state.v
 	error_ia = 0
 	r = rospy.Rate(10)

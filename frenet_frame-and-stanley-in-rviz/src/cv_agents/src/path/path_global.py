@@ -139,7 +139,6 @@ if __name__ == "__main__":
 
 	rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
 
-
 	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
 	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
 	waypoint_pub = rospy.Publisher("/waypoint", Int32MultiArray, queue_size=1)
@@ -228,7 +227,6 @@ if __name__ == "__main__":
 
 		if opt_ind == -1: ## No solution!
 			print("No solution!")
-				
 			my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
 			if(my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):

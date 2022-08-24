@@ -55,6 +55,15 @@ def interpolate_waypoints(wx, wy, space=0.5):
 		"yaw": wyaw,
 		"s": s
 	}
+ 
+def save_waypoints(x,y,yaw,s):
+    return {
+		"x": x,
+		"y": y,
+		"yaw": yaw,
+		"s": s
+	}
+    
 
 class Path:
 	def __init__(self,pc_route):
@@ -465,6 +474,8 @@ def delivery_test_ccw():
 
 def boong_inter():
 	offset_state = ""
+	cm=""
+
 	# offset_state : "", "_offset", "_offset2", "_offset3"
 	# old maps : "_old", "_old_offset", "_old_offset2"
 
@@ -477,9 +488,9 @@ def boong_inter():
 
 	boong.set_dir([0,2,4,5,6,8],[],[1,3,5,7])
 	
-	boong.diagonal_parking_map_num=2
+	boong.diagonal_parking_map_num=6
 	for i in range(boong.diagonal_parking_map_num):
-		park_route=path_map+"/src/boong_interpolated/parking"+offset_state+"_"+str(i)+".pkl"
+		park_route=path_map+"/src/boong_interpolated/parking"+offset_state+"_"+cm+"_"+str(i)+".pkl"
 		boong.diagonal_parking_route.append(park_route)
 		boong.set_other_mode(mode='diagonal_parking', pc_route=park_route,link=2*i)
 	
@@ -507,7 +518,7 @@ def boong_inter():
 	return boong
 
 use_map=boong_inter()
-start_index=2
+start_index=0
 obj_msg=Object(x=use_map.waypoints['global']['x'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],y=use_map.waypoints['global']['y'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],yaw=use_map.waypoints['global']['yaw'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],v=0,L=1.600,W=1.04)
 obj_msg_gps=obj_msg
 obj_msg_imu=obj_msg
