@@ -89,8 +89,8 @@ def acceleration(ai):
 
 # obj_msg_gps=obj_msg
 # obj_msg_imu=obj_msg
-obj_msg_gps=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=use_map.nodes[mode][start_index]['yaw'][0],v=0,L=1.600,W=1.04)
-obj_msg_imu=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=use_map.nodes[mode][start_index]['yaw'][0],v=0,L=1.600,W=1.04)
+# obj_msg_gps=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=use_map.nodes[mode][start_index]['yaw'][0],v=0,L=1.600,W=1.04)
+# obj_msg_imu=Object(x=use_map.nodes[mode][start_index]['x'][0],y=use_map.nodes[mode][start_index]['y'][0],yaw=use_map.nodes[mode][start_index]['yaw'][0],v=0,L=1.600,W=1.04)
 
 
 def callback_state_gps(msg):

@@ -166,8 +166,8 @@ if __name__ == "__main__":
 						fp=fp_1
 						break
 			parking_ind=2
-			state_x=962802.5118152874
-			state_y=1959347.0844059486
+			# state_x=962802.5118152874
+			# state_y=1959347.0844059486
 			park_wp = get_closest_waypoints(state_x, state_y, use_map.waypoints['diagonal_parking'][parking_ind*2]['x'][:use_map.link_len['diagonal_parking'][parking_ind*2]], use_map.waypoints['diagonal_parking'][parking_ind*2]['y'][:use_map.link_len['diagonal_parking'][parking_ind*2]],park_wp)
 			print(park_wp)
 			park_msg.data = [parking_ind, park_wp] #현재 이동하는 parking index, wp보내줌

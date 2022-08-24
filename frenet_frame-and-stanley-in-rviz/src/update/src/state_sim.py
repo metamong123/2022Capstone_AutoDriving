@@ -22,7 +22,7 @@ yaw=0.0
 v=0.0
 id=1
 
-obj_msg=Object(x=use_map.nodes['global'][start_index]['x'][0],y=use_map.nodes['global'][start_index]['y'][0],yaw=use_map.nodes['global'][start_index]['yaw'][0],v=0,L=1.600,W=1.04)
+# obj_msg=Object(x=use_map.nodes['global'][start_index]['x'][0],y=use_map.nodes['global'][start_index]['y'][0],yaw=use_map.nodes['global'][start_index]['yaw'][0],v=0,L=1.600,W=1.04)
 
 class TopicReciver:
 	def __init__(self):

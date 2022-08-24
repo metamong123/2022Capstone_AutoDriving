@@ -6,6 +6,7 @@ import sys
 import rospkg
 import numpy as np
 from scipy.interpolate import interp1d
+from object_msgs.msg import Object
 
 rospack = rospkg.RosPack()
 path_map = rospack.get_path("map_server")
@@ -20,6 +21,8 @@ class MakingPath:
 		self.yaw = []
 
 def interpolate_waypoints(wx, wy, space=0.5):
+	# wx=np.unique(wx)
+	# wy=np.unique(wy)
 	_s = 0
 	s = [0]
 	for i in range(1, len(wx)):
@@ -34,9 +37,13 @@ def interpolate_waypoints(wx, wy, space=0.5):
 		_s = np.hypot(dx, dy)
 		s.append(s[-1] + _s)
 
+	# s=np.array(s)
+	# s=np.unique(s)
 	fx = interp1d(s, wx)
 	fy = interp1d(s, wy)
-	# ss = np.linspace(0, s[-1], num=int(s[-1] / space) + 1, endpoint=True)
+	# fx = interp1d(s, wx, kind='cubic')
+	# fy = interp1d(s, wy, kind='cubic')
+	# s = np.linspace(0, s[-1], num=int(s[-1] / space) + 1, endpoint=True)
 
 	dxds = np.gradient(fx(s), s, edge_order=1)
 	dyds = np.gradient(fy(s), s, edge_order=1)
@@ -178,11 +185,14 @@ class Path:
 				for k in ('x','y'):
 					if i == 'global':
 						self.w[i][k].append(self.nodes[i][j][k][1:])
-					elif i == 'horizontal_parking' or i =='diagonal_parking':
+					elif i == 'horizontal_parking':
 						if j%2==0:
 							self.w[i][j][k].append(self.nodes[i][j][k][1:])
 						else:
 							self.w[i][j-1][k].append(self.nodes[i][j][k][1:])
+					elif i =='diagonal_parking':
+						if j%2==0:
+							self.w[i][j][k].append(self.nodes[i][j][k][1:])
 					elif i == 'delivery':
 						self.w[i][j][k].append(self.nodes[i][j][k][1:])
 
@@ -461,11 +471,11 @@ def boong_inter():
 	boong=Path(path_map + "/src/boong_interpolated/global"+offset_state+".pkl")
 	
 	if offset_state == "_old_offset2":
-		boong.set_link([0,20,190,220,420,460,620,680,800,830])
+		boong.set_link([0,116,400,505,920,1020,1560,1620])
 	else:
-		boong.set_link([0,20,190,220,420,460,620,680,800,838])
+		boong.set_link([0,116,400,505,920,1020,1560,1620])
 
-	boong.set_dir([0,1,3,5,7,9,10],[],[2,4,6,8])
+	boong.set_dir([0,2,4,5,6,8],[],[1,3,5,7])
 	
 	boong.diagonal_parking_map_num=2
 	for i in range(boong.diagonal_parking_map_num):
@@ -479,15 +489,15 @@ def boong_inter():
 	# 	boong.delivery_route.append(del_route)
 	# 	boong.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
 	
-	boong.glo_to_diagonal_park_start=15
-	boong.glo_to_diagonal_park_finish=20
+	boong.glo_to_diagonal_park_start=10
+	boong.glo_to_diagonal_park_finish=11
 	# boong.parking_stop=[]
 	# boong.park_to_glo_start=[]
 	# boong.park_to_glo_finish=[]
 	# boong.glo_to_del_start=[]
 	# boong.glo_to_del_finish=[]
 	
-	boong.target_speed={'global':{'straight':20/3.6, 'curve':12/3.6},'parking':8/3.6,'delivery':10/3.6}
+	boong.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'parking':8/3.6,'delivery':10/3.6}
 	boong.set_map()
 	boong.diagonal_parking_path=boong.make_path('diagonal_parking',boong.diagonal_parking_map_num)
 	# boong.delivery_path=boong.make_path('delivery',boong.delivery_map_num)
@@ -497,5 +507,7 @@ def boong_inter():
 	return boong
 
 use_map=boong_inter()
-start_index=0
-# obj_msg=Object(x=use_map.waypoints['global']['x'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],y=use_map.waypoints['global']['y'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],yaw=use_map.waypoints['global']['yaw'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],v=0,L=1.600,W=1.04)
+start_index=2
+obj_msg=Object(x=use_map.waypoints['global']['x'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],y=use_map.waypoints['global']['y'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],yaw=use_map.waypoints['global']['yaw'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],v=0,L=1.600,W=1.04)
+obj_msg_gps=obj_msg
+obj_msg_imu=obj_msg

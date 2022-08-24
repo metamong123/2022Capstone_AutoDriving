@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /Grid1
+        - /MarkerArray2
         - /MarkerArray4
         - /MarkerArray5
         - /MarkerArray6
@@ -71,7 +72,7 @@ Visualization Manager:
       Marker Topic: /objects/marker/car_1
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -79,7 +80,7 @@ Visualization Manager:
       Marker Topic: /rviz/candidate_frenet_paths
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -87,7 +88,7 @@ Visualization Manager:
       Marker Topic: /rviz/optimal_frenet_path
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -171,7 +172,7 @@ Visualization Manager:
       Marker Topic: /rviz/diagonal_parking_link_2
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -179,7 +180,7 @@ Visualization Manager:
       Marker Topic: /rviz/diagonal_parking_link_3
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -187,7 +188,7 @@ Visualization Manager:
       Marker Topic: /rviz/diagonal_parking_link_4
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -195,7 +196,7 @@ Visualization Manager:
       Marker Topic: /rviz/diagonal_parking_link_5
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -203,7 +204,7 @@ Visualization Manager:
       Marker Topic: /rviz/diagonal_parking_link_6
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -211,7 +212,7 @@ Visualization Manager:
       Marker Topic: /rviz/diagonal_parking_link_7
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -219,7 +220,7 @@ Visualization Manager:
       Marker Topic: /rviz/diagonal_parking_link_8
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
   Enabled: true
@@ -250,16 +251,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 148.2933349609375
+      Distance: 88.93083190917969
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 962779.25
-        Y: 1959360.75
-        Z: -45.07620620727539
+        X: 962798.6875
+        Y: 1959340.25
+        Z: -48.35080337524414
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
