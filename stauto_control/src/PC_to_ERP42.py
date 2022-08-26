@@ -147,7 +147,7 @@ if __name__ == '__main__':
 
 	rate = rospy.Rate(10)
 
-	port = str(rospy.get_param("~robot_port","/dev/ttyUSB4"))	
+	port = str(rospy.get_param("~robot_port","/dev/ttyUSB1"))	
 	ser = serial.serial_for_url(port, baudrate=115200, timeout=1)
 
 	while (ser.isOpen() and (not rospy.is_shutdown())):

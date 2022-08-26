@@ -1,0 +1,7 @@
+<map id="XsControlEx" name="XsControlEx">
+<area shape="rect" id="node1" title="An abstract internal struct of a control object." alt="" coords="34,304,135,331"/>
+<area shape="rect" id="node2" href="$struct_xs_control.html" title="High level Motion Tracker (MT) management class." alt="" coords="42,229,127,256"/>
+<area shape="rect" id="node3" href="$class_callback_manager_xda.html" title="Class that delegates callbacks to registered XsCallbackHandlerItems." alt="" coords="5,155,164,181"/>
+<area shape="rect" id="node4" href="$class_xs_callback.html" title="Structure that contains callback functions for the Xsens Device API." alt="" coords="37,80,132,107"/>
+<area shape="rect" id="node5" href="$struct_xs_callback_plain_c.html" title="Structure that contains callback functions for the Xsens Device API." alt="" coords="17,5,152,32"/>
+</map>

@@ -1,0 +1,33 @@
+<map id="XsArray" name="XsArray">
+<area shape="rect" id="node1" title="Provides generic storage for data in an array and manipulation operations on that data." alt="" coords="5,574,79,601"/>
+<area shape="rect" id="node2" href="$struct_xs_array_impl.html" title="A C++ wrapper for XsArray, this is a template class for the actual specialized classes." alt="" coords="188,13,359,39"/>
+<area shape="rect" id="node4" href="$struct_xs_array_impl.html" title=" " alt="" coords="190,63,357,119"/>
+<area shape="rect" id="node6" href="$struct_xs_array_impl.html" title=" " alt="" coords="168,143,379,199"/>
+<area shape="rect" id="node8" href="$struct_xs_array_impl.html" title=" " alt="" coords="169,223,377,279"/>
+<area shape="rect" id="node10" href="$struct_xs_array_impl.html" title=" " alt="" coords="149,304,397,375"/>
+<area shape="rect" id="node12" href="$struct_xs_array_impl.html" title=" " alt="" coords="135,399,411,455"/>
+<area shape="rect" id="node14" href="$struct_xs_array_impl.html" title=" " alt="" coords="164,479,383,535"/>
+<area shape="rect" id="node16" href="$struct_xs_array_impl.html" title=" " alt="" coords="156,559,391,615"/>
+<area shape="rect" id="node18" href="$struct_xs_array_impl.html" title=" " alt="" coords="164,639,383,695"/>
+<area shape="rect" id="node20" href="$struct_xs_array_impl.html" title=" " alt="" coords="127,719,420,775"/>
+<area shape="rect" id="node22" href="$struct_xs_array_impl.html" title=" " alt="" coords="167,799,380,855"/>
+<area shape="rect" id="node24" href="$struct_xs_array_impl.html" title=" " alt="" coords="156,879,391,935"/>
+<area shape="rect" id="node26" href="$struct_xs_array_impl.html" title=" " alt="" coords="173,959,373,1015"/>
+<area shape="rect" id="node28" href="$struct_xs_array_impl.html" title=" " alt="" coords="136,1039,411,1095"/>
+<area shape="rect" id="node30" href="$struct_xs_array_impl.html" title=" " alt="" coords="154,1119,393,1175"/>
+<area shape="rect" id="node3" href="$struct_xs_string.html" title="A 0&#45;terminated managed string of characters." alt="" coords="473,5,667,47"/>
+<area shape="rect" id="node5" href="$struct_xs_int_array.html" title="A list of XsInt values." alt="" coords="525,78,615,105"/>
+<area shape="rect" id="node7" href="$struct_xs_int64_array.html" title="A list of int64_t values." alt="" coords="517,158,623,185"/>
+<area shape="rect" id="node9" href="$struct_xs_byte_array.html" title="A list of uint8_t values." alt="" coords="519,238,621,265"/>
+<area shape="rect" id="node11" href="$struct_xs_can_output_configuration_array.html" title="A list of XsCanOutputConfiguration values." alt="" coords="473,319,667,360"/>
+<area shape="rect" id="node13" href="$struct_xs_data_packet_ptr_array.html" title="A list of XsDataPacketPtr values." alt="" coords="487,414,653,441"/>
+<area shape="rect" id="node15" href="$struct_xs_device_id_array.html" title="A list of XsDeviceId values." alt="" coords="505,494,635,521"/>
+<area shape="rect" id="node17" href="$struct_xs_filter_profile_array.html" title="A list of XsFilterProfile values." alt="" coords="497,574,643,601"/>
+<area shape="rect" id="node19" href="$struct_xs_message_array.html" title="A list of XsMessage values." alt="" coords="505,654,635,681"/>
+<area shape="rect" id="node21" href="$struct_xs_output_configuration_array.html" title="A list of XsOutputConfiguration values." alt="" coords="468,734,672,761"/>
+<area shape="rect" id="node23" href="$struct_xs_port_info_array.html" title="A list of XsPortInfo values." alt="" coords="508,814,632,841"/>
+<area shape="rect" id="node25" href="$struct_xs_quaternion_array.html" title="A list of XsQuaternion values." alt="" coords="497,894,643,921"/>
+<area shape="rect" id="node27" href="$struct_xs_string_array.html" title="A list of XsString values." alt="" coords="515,974,625,1001"/>
+<area shape="rect" id="node29" href="$struct_xs_string_output_type_array.html" title="A list of XsStringOutputType values." alt="" coords="477,1054,663,1081"/>
+<area shape="rect" id="node31" href="$struct_xs_sync_setting_array.html" title="A list of XsSyncSetting values." alt="" coords="495,1134,645,1161"/>
+</map>

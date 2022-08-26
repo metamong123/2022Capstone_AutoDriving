@@ -1,0 +1,5 @@
+<map id="XsDeviceIdArray" name="XsDeviceIdArray">
+<area shape="rect" id="node1" title="A list of XsDeviceId values." alt="" coords="49,184,180,211"/>
+<area shape="rect" id="node2" href="$struct_xs_array_impl.html" title=" " alt="" coords="5,80,224,136"/>
+<area shape="rect" id="node3" href="$struct_xs_array.html" title="Provides generic storage for data in an array and manipulation operations on that data." alt="" coords="78,5,151,32"/>
+</map>

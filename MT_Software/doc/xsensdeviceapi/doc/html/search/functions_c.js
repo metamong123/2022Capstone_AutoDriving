@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['mag_3084',['mag',['../struct_xs_finger_data.html#a09d1f8de234ad879d8d060647a59be46',1,'XsFingerData']]],
+  ['magx_3085',['magX',['../struct_xs_self_test_result.html#a022ace38a705722661677c15e78fd48e',1,'XsSelfTestResult']]],
+  ['magy_3086',['magY',['../struct_xs_self_test_result.html#a9144d2e4e7c46e37dc265ac5bfd0de95',1,'XsSelfTestResult']]],
+  ['magz_3087',['magZ',['../struct_xs_self_test_result.html#ab0bc35d09d13600c89c396c7363e55c5',1,'XsSelfTestResult']]],
+  ['maindevicecount_3088',['mainDeviceCount',['../struct_xs_control.html#aee7823606be873a98fb93e7e7806c86f',1,'XsControl']]],
+  ['maindeviceids_3089',['mainDeviceIds',['../struct_xs_control.html#a96d2959d63a62b62c0081a1f41984fe4',1,'XsControl']]],
+  ['maindevices_3090',['mainDevices',['../struct_xs_control.html#af7413bb34e766c69e00032b3b8f0c69d',1,'XsControl']]],
+  ['major_3091',['major',['../struct_xs_simple_version.html#a5b93c525560c212f59b793f1be5149f0',1,'XsSimpleVersion::major()'],['../struct_xs_version.html#a983e3966853eb972db612d588a5e28f8',1,'XsVersion::major()']]],
+  ['makeoperational_3092',['makeOperational',['../struct_xs_device.html#aa67501a215db1bfabcf9f9720648dcbc',1,'XsDevice']]],
+  ['makeutc_3093',['makeUtc',['../struct_xs_time_info.html#a79ad4b2f628e94e774edb45492dd9b6f',1,'XsTimeInfo']]],
+  ['master_3094',['master',['../struct_xs_device.html#a1cd782e964db87d8ff7eff19f47b9709',1,'XsDevice']]],
+  ['masterinfo_3095',['masterInfo',['../struct_xs_device_configuration.html#ab33172b7e4d90719b1a9e44ca6047feb',1,'XsDeviceConfiguration::masterInfo()'],['../struct_xs_device_configuration.html#a405b76bfff22ad0b143082807a3e4ad5',1,'XsDeviceConfiguration::masterInfo() const']]],
+  ['maximumupdaterate_3096',['maximumUpdateRate',['../struct_xs_device.html#a8c1c37713d19034b58fe417282de295a',1,'XsDevice']]],
+  ['maxvalue_3097',['maxValue',['../struct_xs_time_stamp.html#a92898c2fe77b6d381037315e5e5fc939',1,'XsTimeStamp']]],
+  ['merge_3098',['merge',['../struct_xs_data_packet.html#a6e6d8303b991337a2922b7e0071ebf05',1,'XsDataPacket']]],
+  ['mid_3099',['mid',['../struct_xs_string.html#a9668bdcf4331837aa9b48e20013b3dad',1,'XsString']]],
+  ['millisecondpart_3100',['milliSecondPart',['../struct_xs_time_stamp.html#a0fe6c409f3b664a0b522a9ea8ff757dc',1,'XsTimeStamp']]],
+  ['minor_3101',['minor',['../struct_xs_simple_version.html#a34e68885fdc70f2d3f9cd7580b97dc88',1,'XsSimpleVersion::minor()'],['../struct_xs_version.html#a98179a0c2e4a2106eea0731edc9baaf1',1,'XsVersion::minor()']]],
+  ['minutepart_3102',['minutePart',['../struct_xs_time_stamp.html#aafebdc5c1eb343cd5fee739f7025e9a8',1,'XsTimeStamp']]],
+  ['msleep_3103',['msleep',['../namespace_xs_time.html#ad1e922e0ad9c415a1c74794ffdf7c618',1,'XsTime']]],
+  ['mstime_3104',['msTime',['../struct_xs_time_stamp.html#a0d856f12c3c80362cc7314fd268bdd9f',1,'XsTimeStamp']]],
+  ['mstimeofday_3105',['msTimeOfDay',['../struct_xs_time_stamp.html#a2e27b18eae7aeeb5e1a777fe1aa73275',1,'XsTimeStamp']]],
+  ['mtcount_3106',['mtCount',['../struct_xs_control.html#a7545fb52835405c0300d909546635080',1,'XsControl']]],
+  ['mtdeviceids_3107',['mtDeviceIds',['../struct_xs_control.html#aef156efa21656cf1cea35444998e4384',1,'XsControl']]],
+  ['multiply_3108',['multiply',['../struct_xs_quaternion.html#ad167a6cbdf62d5e03c18b176f19d6e49',1,'XsQuaternion']]]
+];

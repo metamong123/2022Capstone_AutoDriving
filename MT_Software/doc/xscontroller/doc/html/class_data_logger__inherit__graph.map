@@ -1,0 +1,7 @@
+<map id="DataLogger" name="DataLogger">
+<area shape="rect" id="node1" title="An abstract class for data logging." alt="" coords="36,229,133,256"/>
+<area shape="rect" id="node5" href="$class_mtb_data_logger.html" title="A class for logging the mtb data." alt="" coords="24,304,145,331"/>
+<area shape="rect" id="node2" href="$class_callback_manager_xda.html" title="Class that delegates callbacks to registered XsCallbackHandlerItems." alt="" coords="5,155,164,181"/>
+<area shape="rect" id="node3" href="$class_xs_callback.html" title="Structure that contains callback functions for the Xsens Device API." alt="" coords="37,80,132,107"/>
+<area shape="rect" id="node4" href="$struct_xs_callback_plain_c.html" title="Structure that contains callback functions for the Xsens Device API." alt="" coords="17,5,152,32"/>
+</map>

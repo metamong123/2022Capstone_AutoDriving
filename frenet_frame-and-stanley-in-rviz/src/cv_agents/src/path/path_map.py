@@ -253,8 +253,8 @@ class Path:
 				way.y=self.waypoints[mode][link_ind]['y'][:self.link_len[mode][link_ind]]
 				way.yaw=self.waypoints[mode][link_ind]['yaw'][:self.link_len[mode][link_ind]]
 				path[link_ind]=[way.x, way.y, way.yaw] #짝수 후진 홀수 전진
-		if mode == 'diagonal_parking':
-			for link_ind in range(0,map_num*2,2):
+		elif mode == 'diagonal_parking':
+			for link_ind in range(0,map_num*2, 2):
 				way=MakingPath()
 				way.x=self.waypoints[mode][link_ind]['x'][:self.link_len[mode][link_ind]]
 				way.y=self.waypoints[mode][link_ind]['y'][:self.link_len[mode][link_ind]]
@@ -435,7 +435,7 @@ def delivery_test_cw():
 	delivery_test_cw.glo_to_dynamic_start=400*float(0.5/1)
 	delivery_test_cw.glo_to_dynamic_finish=500*float(0.5/1)
 	
-	delivery_test_cw.target_speed={'global':{'straight':10/3.6, 'curve':8/3.6},'parking':8/3.6,'delivery':4/3.6}
+	delivery_test_cw.target_speed={'global':{'straight':12/3.6, 'curve':12/3.6},'parking':8/3.6,'delivery':6/3.6, 'dynamic_object': 8/3.6}
 	delivery_test_cw.set_map(glo_space=1,del_space=1)
 	delivery_test_cw.delivery_path=delivery_test_cw.make_path('delivery',delivery_test_cw.delivery_map_num)
 
@@ -473,27 +473,29 @@ def delivery_test_ccw():
 	return delivery_test_ccw
 
 def boong_inter():
+	global_state = "10cm"
+	# global_state : "10cm", "1m"
+	parking_state = "20cm"
+	# parking_state : "10cm", "20cm", "30cm"
 	offset_state = ""
-	cm=""
-
 	# offset_state : "", "_offset", "_offset2", "_offset3"
 	# old maps : "_old", "_old_offset", "_old_offset2"
 
-	boong=Path(path_map + "/src/boong_interpolated/global"+offset_state+".pkl")
-	
-	if offset_state == "_old_offset2":
-		boong.set_link([0,116,400,505,920,1020,1560,1620])
-	else:
-		boong.set_link([0,116,400,505,920,1020,1560,1620])
+	boong=Path(path_map + "/src/boong_old/global_"+offset_state+"_"+str(global_state)+".pkl")
 
-	boong.set_dir([0,2,4,5,6,8],[],[1,3,5,7])
+	if offset_state == "_old_offset2":
+		boong.set_link([0,20,190,220,420,460,620,680,800,830])
+	else:
+		boong.set_link([0,20,190,220,420,460,620,680,800,838])
+
+	boong.set_dir([0,1,3,5,7,9,10],[],[2,4,6,8])
 	
 	boong.diagonal_parking_map_num=6
 	for i in range(boong.diagonal_parking_map_num):
-		park_route=path_map+"/src/boong_interpolated/parking"+offset_state+"_"+cm+"_"+str(i)+".pkl"
+		park_route=path_map+"/src/boong_interpolated/parking"+offset_state+"_"+parking_state+"_"+str(i)+".pkl"
 		boong.diagonal_parking_route.append(park_route)
 		boong.set_other_mode(mode='diagonal_parking', pc_route=park_route,link=2*i)
-	
+		
 	# boong.delivery_map_num=2
 	# for i in range(boong.delivery_map_num):
 	# 	del_route=path_map+"/src/boong/delivery_"+str(i)+".pkl"
@@ -508,7 +510,7 @@ def boong_inter():
 	# boong.glo_to_del_start=[]
 	# boong.glo_to_del_finish=[]
 	
-	boong.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'parking':8/3.6,'delivery':10/3.6}
+	boong.target_speed={'global':{'straight':20/3.6, 'curve':12/3.6},'parking':8/3.6,'delivery':10/3.6}
 	boong.set_map()
 	boong.diagonal_parking_path=boong.make_path('diagonal_parking',boong.diagonal_parking_map_num)
 	# boong.delivery_path=boong.make_path('delivery',boong.delivery_map_num)
@@ -519,6 +521,7 @@ def boong_inter():
 
 use_map=boong_inter()
 start_index=0
+# obj_msg=Object(x=use_map.waypoints['global']['x'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],y=use_map.waypoints['global']['y'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],yaw=use_map.waypoints['global']['yaw'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],v=0,L=1.600,W=1.04)
 obj_msg=Object(x=use_map.waypoints['global']['x'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],y=use_map.waypoints['global']['y'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],yaw=use_map.waypoints['global']['yaw'][use_map.link_len['global'][start_index]:use_map.link_len['global'][start_index+1]][0],v=0,L=1.600,W=1.04)
 obj_msg_gps=obj_msg
 obj_msg_imu=obj_msg

@@ -1,0 +1,4 @@
+<map id="xsens::ThreadPoolObjectDeleter&lt; T &gt;" name="xsens::ThreadPoolObjectDeleter&lt; T &gt;">
+<area shape="rect" id="node1" title="Task that will delete its object parameter." alt="" coords="5,80,275,107"/>
+<area shape="rect" id="node2" href="$classxsens_1_1_thread_pool_task.html" title="A generic task implementation for the thread pool." alt="" coords="55,5,225,32"/>
+</map>

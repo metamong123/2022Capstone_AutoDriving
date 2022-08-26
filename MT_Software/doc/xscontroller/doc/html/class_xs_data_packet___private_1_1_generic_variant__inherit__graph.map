@@ -1,0 +1,5 @@
+<map id="XsDataPacket_Private::GenericVariant&lt; T, C &gt;" name="XsDataPacket_Private::GenericVariant&lt; T, C &gt;">
+<area shape="rect" id="node1" title="Generic base class template for Variant subclasses." alt="" coords="9,95,191,136"/>
+<area shape="rect" id="node3" href="$struct_xs_data_packet___private_1_1_complex_variant.html" title="Template base class for complex or multi&#45;value Variants. memcpy is NOT assumed to result in valid obj..." alt="" coords="5,184,195,225"/>
+<area shape="rect" id="node2" href="$class_xs_data_packet___private_1_1_variant.html" title="Abstract Variant class for handling contents of XsDataPacket." alt="" coords="17,5,183,47"/>
+</map>

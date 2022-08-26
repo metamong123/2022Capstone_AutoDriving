@@ -1,0 +1,4 @@
+<map id="xsens::TaskCompletionWaiter" name="xsens::TaskCompletionWaiter">
+<area shape="rect" id="node1" title="A class that allows multiple&#45;dependency waiting." alt="" coords="5,80,220,107"/>
+<area shape="rect" id="node2" href="$classxsens_1_1_thread_pool_task.html" title="A generic task implementation for the thread pool." alt="" coords="27,5,198,32"/>
+</map>

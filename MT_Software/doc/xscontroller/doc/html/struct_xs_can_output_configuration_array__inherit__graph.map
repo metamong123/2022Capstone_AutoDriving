@@ -1,0 +1,5 @@
+<map id="XsCanOutputConfigurationArray" name="XsCanOutputConfigurationArray">
+<area shape="rect" id="node1" title="A list of XsCanOutputConfiguration values." alt="" coords="423,20,617,61"/>
+<area shape="rect" id="node2" href="$struct_xs_array_impl.html" title=" " alt="" coords="127,5,375,76"/>
+<area shape="rect" id="node3" href="$struct_xs_array.html" title="Provides generic storage for data in an array and manipulation operations on that data." alt="" coords="5,27,79,54"/>
+</map>

@@ -14,7 +14,7 @@ from nav_msgs.msg import Odometry
 
 import numpy as np
 
-vo_Pub=rospy.Publisher('/odom_e2boximu',Odometry,queue_size=1)
+vo_Pub=rospy.Publisher('/odom_imu',Odometry,queue_size=1)
 
 
 def callback(msg):
@@ -28,8 +28,8 @@ def callback(msg):
 		a,b=transform(wgs84,kcity,msg.longitude,msg.latitude)
 
 
-	rpose.pose.pose.position.x=a
-	rpose.pose.pose.position.y=b
+	rpose.pose.pose.position.x=a #+ 1.039605553727597 #+ 2.330093553639017
+	rpose.pose.pose.position.y=b #+ 0.17305124481208622 #- 1.2862087551038712
 	rpose.pose.covariance[0]=msg.position_covariance[0]
 	rpose.pose.covariance[7]=msg.position_covariance[4]
 	rpose.pose.covariance[14]=msg.position_covariance[8]

@@ -1,0 +1,4 @@
+<map id="XsException" name="XsException">
+<area shape="rect" id="node1" title="Exception class for Xsens public libraries. Inherits from std::exception." alt="" coords="11,80,114,107"/>
+<area shape="rect" id="node2" title="STL class." alt="" coords="5,5,120,32"/>
+</map>

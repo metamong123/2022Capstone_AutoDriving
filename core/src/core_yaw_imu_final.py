@@ -25,8 +25,8 @@ parking_yaw = 0
 ##########################################################################
 
 # parking 시작하기전에 수정해야할 파라미터 값들 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-parking_finish_wp=[16,16,16,16,16,16] # 각 parking index마다의 finish waypoint임
-parking_straight_back_wp=[17,16,16,16,16,16]
+parking_finish_wp=[60,60,60,60,60,60] # 각 parking index마다의 finish waypoint임
+parking_straight_back_wp=[58,58,58,58,58,58]
 
 ###########################################################################
 
@@ -55,7 +55,7 @@ def euler_from_quaternion(x, y, z, w):
 car_mode = 'global'
 def mode_callback(msg):
 	global car_mode
-	print(1)
+	#print(1)
 	car_mode = msg.data
 
 current_dir = 'straight'
@@ -118,7 +118,7 @@ A_x = [0,0,0]
 B_x = [0,0,0]
 def delivery_sign_callback(msg):
 	global A_number, A_x, B_x
-	print(1)
+	#print(1)
 	A_number = msg.data[0]
 	A_x = [msg.data[1], msg.data[2], msg.data[3]]
 	B_x = [msg.data[4], msg.data[5], msg.data[6]]
@@ -133,18 +133,18 @@ def parking_decision():
 	#print(park_ind_wp[1])
 
 	if parking_flag == 'backward':
-		print(yaw)
+		#print(yaw)
 		if abs(yaw - parking_yaw) < 3*np.pi/180: # hyperparameter(degree)
 			parking_flag = 'end'
 		else:
-			if park_ind_wp[1] > parking_straight_back_wp[park_ind_wp[0]]:
+			if park_ind_wp[1] >= parking_straight_back_wp[park_ind_wp[0]]:
 				parking_speed = 8/3.6
 				parking_angle = 0
 				parking_gear = 2
 				parking_brake = 0	
 			else:
 				parking_speed = 8/3.6
-				parking_angle = -20*np.pi/180
+				parking_angle = -28*np.pi/180
 				parking_gear = 2
 				parking_brake = 0
 	
@@ -225,7 +225,7 @@ delivery_ind =0
 def delivery_decision():
 	global delivery_ind
 	
-	print(A_number)
+	#print(A_number)
 	if A_number == 0:  # A1
 		delivery_ind = 0
 	elif A_number == 1: # A2
@@ -234,14 +234,14 @@ def delivery_decision():
 		delivery_ind = 2
 	else:
 		pass
-	print(A_x[1])
+	#print(A_x[1])
 	if car_mode == 'delivery_A':
-		if A_x[delivery_ind] > 300:
+		if A_x[delivery_ind] > 315:
 			delivery_flag = 'end'
 		else:
 			delivery_flag = 'going'
 	elif car_mode == 'delivery_B':
-		if B_x[delivery_ind] > 300:
+		if B_x[delivery_ind] > 315:
 			delivery_flag = 'end'
 		else:
 			delivery_flag = 'going'
@@ -297,7 +297,7 @@ if __name__=='__main__':
 			#print('global mode!!!')
 
 		elif car_mode == 'parking':
-			print(parking_yaw)
+			#print(parking_yaw)
 			if parking_flag == 'finish':
 				cmd.drive.speed = 0
 				cmd.drive.steering_angle = 0
@@ -305,7 +305,7 @@ if __name__=='__main__':
 				cmd.drive.jerk = 200  #full brake
 				final_cmd_Pub.publish(cmd)
 				print('parking finish!!! stop!!')
-				rospy.sleep(4) # 4sec
+				rospy.sleep(5) # 4sec
 				parking_flag = 'backward'
 			elif parking_flag == 'end':
 				cmd.drive.speed = 0
@@ -315,7 +315,6 @@ if __name__=='__main__':
 				final_cmd_Pub.publish(cmd)
 				mode_status = 'end'   # global mode로 바꾸기위한 flag를 파라미터 서버로 전달
 				rospy.set_param('mission_status',mode_status)
-				mission_pub.publish(end_msg)
 				print('parking mission end!')
 				rospy.sleep(1) # 1sec
 			else:	

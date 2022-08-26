@@ -1,0 +1,4 @@
+<map id="nmea::ProtocolHandler" name="nmea::ProtocolHandler">
+<area shape="rect" id="node1" title="The protocol handler for a different NMEA data types." alt="" coords="5,80,176,107"/>
+<area shape="rect" id="node2" href="$class_i_protocol_handler.html" title="Interface class for protocol handlers." alt="" coords="25,5,156,32"/>
+</map>

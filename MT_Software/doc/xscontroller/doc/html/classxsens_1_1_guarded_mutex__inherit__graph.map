@@ -1,0 +1,4 @@
+<map id="xsens::GuardedMutex" name="xsens::GuardedMutex">
+<area shape="rect" id="node1" title="A two&#45;layer mutex, typically used for status+data protection." alt="" coords="53,80,215,107"/>
+<area shape="rect" id="node2" href="$classxsens_1_1_mutex_read_write_suspendable.html" title="A readers&#45;writer mutex class that is able to be suspended." alt="" coords="5,5,263,32"/>
+</map>

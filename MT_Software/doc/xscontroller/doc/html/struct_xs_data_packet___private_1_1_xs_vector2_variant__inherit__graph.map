@@ -1,0 +1,6 @@
+<map id="XsDataPacket_Private::XsVector2Variant" name="XsDataPacket_Private::XsVector2Variant">
+<area shape="rect" id="node1" title="Variant containing an XsVector value." alt="" coords="31,288,197,329"/>
+<area shape="rect" id="node2" href="$struct_xs_data_packet___private_1_1_complex_variant.html" title=" " alt="" coords="9,184,219,240"/>
+<area shape="rect" id="node3" href="$class_xs_data_packet___private_1_1_generic_variant.html" title=" " alt="" coords="5,95,223,136"/>
+<area shape="rect" id="node4" href="$class_xs_data_packet___private_1_1_variant.html" title="Abstract Variant class for handling contents of XsDataPacket." alt="" coords="31,5,197,47"/>
+</map>

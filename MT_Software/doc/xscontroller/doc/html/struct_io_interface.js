@@ -1,0 +1,38 @@
+var struct_io_interface =
+[
+    [ "PortOptions", "struct_io_interface.html#a24230835a198e4af06866402ac41f22a", [
+      [ "PO_NoFlowControl", "struct_io_interface.html#a24230835a198e4af06866402ac41f22aacde70bc7a166de6ee2b80eda221b7984", null ],
+      [ "PO_RtsCtsFlowControl", "struct_io_interface.html#a24230835a198e4af06866402ac41f22aab14e0cd5bef15aff5a5d99274581ca9e", null ],
+      [ "PO_DtrDsrFlowControl", "struct_io_interface.html#a24230835a198e4af06866402ac41f22aae0ec6685fcdde03159a9a975f56f6487", null ],
+      [ "PO_XonXoffFlowControl", "struct_io_interface.html#a24230835a198e4af06866402ac41f22aa93db5655377d8d7fe31ddebc89a9d709", null ],
+      [ "PO_OneStopBit", "struct_io_interface.html#a24230835a198e4af06866402ac41f22aa6c118a3ed985ae4e2c4e76a85098c6ac", null ],
+      [ "PO_TwoStopBits", "struct_io_interface.html#a24230835a198e4af06866402ac41f22aa3d09cb72cd4bc82be0ea60c98544ae3a", null ],
+      [ "PO_XsensDefaults", "struct_io_interface.html#a24230835a198e4af06866402ac41f22aace9329b3f4332e2929834caee9b39273", null ]
+    ] ],
+    [ "~IoInterface", "struct_io_interface.html#a738a8cb24aa12562b04c5067bd3d99b7", null ],
+    [ "IoInterface", "struct_io_interface.html#a0a4be67f0496efa12593cc69a802d784", null ],
+    [ "appendData", "struct_io_interface.html#ae4f4b165b49c75cb28bc1e4fffaf533d", null ],
+    [ "cancelIo", "struct_io_interface.html#a5dcb4e74f1f2d20df8e629f55c62075c", null ],
+    [ "close", "struct_io_interface.html#a3256915d0f4056dec116d500c9c2382c", null ],
+    [ "closeAndDelete", "struct_io_interface.html#a108ea51f7057bc5f762052777e7baa00", null ],
+    [ "create", "struct_io_interface.html#a3e82060ef66d73b95b383f75867f3e0f", null ],
+    [ "deleteData", "struct_io_interface.html#a2972992234d3d459383608dc1582d0b4", null ],
+    [ "find", "struct_io_interface.html#a6256ce5c2def7b6f6961cedd8199e35e", null ],
+    [ "flushData", "struct_io_interface.html#aac5cc2c3707b24cc15f9ab15914448fa", null ],
+    [ "getFileSize", "struct_io_interface.html#a04e6d45480d647072bf93ba2ef746428", null ],
+    [ "getLastResult", "struct_io_interface.html#a485f560180f2b87912c30c5886f6f922", null ],
+    [ "getName", "struct_io_interface.html#ae82060b99f57ab0c5736745df018deb8", null ],
+    [ "getReadPosition", "struct_io_interface.html#ac933f507be3a263454a39cef1da4efab", null ],
+    [ "getWritePosition", "struct_io_interface.html#a9e176f3bdbdd377edba1e7f39b0e859f", null ],
+    [ "insertData", "struct_io_interface.html#ad0d5e78791e017e06f8beaa6561bd844", null ],
+    [ "isOpen", "struct_io_interface.html#a0587476e04fee9a3f8c90508c00d0335", null ],
+    [ "isReadOnly", "struct_io_interface.html#ae3cb37877bc2458cbf9b85a4f1b44889", null ],
+    [ "open", "struct_io_interface.html#a0931f942d3348b3dd7e37308bd8b223a", null ],
+    [ "open", "struct_io_interface.html#a041ed4c0878f91fa8c41a72aa7b3e802", null ],
+    [ "readData", "struct_io_interface.html#aa94d9ffadcfed8265a4778377ccb0691", null ],
+    [ "setReadPosition", "struct_io_interface.html#a6e75151a26492f0fa9666edabc09d817", null ],
+    [ "setTimeout", "struct_io_interface.html#a895370317c9fde8cf199b9049bef48f0", null ],
+    [ "setWritePosition", "struct_io_interface.html#a115109da1f9f05a36222f00cd569cd52", null ],
+    [ "waitForData", "struct_io_interface.html#ab98d3284e2edebc52ece29f413f42adb", null ],
+    [ "writeData", "struct_io_interface.html#a3ca2be5f66d1c755ca70ade7b7191690", null ]
+];

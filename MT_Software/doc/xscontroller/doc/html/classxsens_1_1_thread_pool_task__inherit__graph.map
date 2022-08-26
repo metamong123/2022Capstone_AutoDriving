@@ -1,0 +1,6 @@
+<map id="xsens::ThreadPoolTask" name="xsens::ThreadPoolTask">
+<area shape="rect" id="node1" title="A generic task implementation for the thread pool." alt="" coords="149,5,319,32"/>
+<area shape="rect" id="node2" title="A class for handling file loading process in a separate thread." alt="" coords="5,80,103,107"/>
+<area shape="rect" id="node3" href="$classxsens_1_1_task_completion_waiter.html" title="A class that allows multiple&#45;dependency waiting." alt="" coords="127,80,341,107"/>
+<area shape="rect" id="node4" href="$classxsens_1_1_thread_pool_object_deleter.html" title="Task that will delete its object parameter." alt="" coords="366,80,635,107"/>
+</map>

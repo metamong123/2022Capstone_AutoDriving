@@ -1,0 +1,7 @@
+<map id="IoInterface" name="IoInterface">
+<area shape="rect" id="node1" title="An abstract IO interface." alt="" coords="89,5,181,32"/>
+<area shape="rect" id="node2" href="$class_io_interface_file.html" title="The low&#45;level file communication class." alt="" coords="5,80,120,107"/>
+<area shape="rect" id="node3" href="$class_stream_interface.html" title="A stream interface." alt="" coords="145,80,271,107"/>
+<area shape="rect" id="node4" href="$class_serial_interface.html" title="The low&#45;level serial communication class." alt="" coords="81,155,199,181"/>
+<area shape="rect" id="node5" href="$class_usb_interface.html" title="An IoInterface for dealing specifically with Xsens USB devices." alt="" coords="222,155,327,181"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="UsbInterface" name="UsbInterface">
+<area shape="rect" id="node1" title="An IoInterface for dealing specifically with Xsens USB devices." alt="" coords="16,155,121,181"/>
+<area shape="rect" id="node2" href="$class_stream_interface.html" title="A stream interface." alt="" coords="5,80,132,107"/>
+<area shape="rect" id="node3" href="$struct_io_interface.html" title="An abstract IO interface." alt="" coords="23,5,115,32"/>
+</map>

@@ -1,0 +1,28 @@
+var class_xs_callback =
+[
+    [ "XsCallback", "class_xs_callback.html#a491695016a32d02a31e2f4bda826ef47", null ],
+    [ "~XsCallback", "class_xs_callback.html#a5c30ab32ed0e8ffc398672117afdd758", null ],
+    [ "onAllBufferedDataAvailable", "group___callbacks.html#ga270ee8957dac53bdf04aee0ba40b3c03", null ],
+    [ "onAllDataAvailable", "group___callbacks.html#gaeb4e17817075f23aa461ecf92bb997ba", null ],
+    [ "onAllLiveDataAvailable", "group___callbacks.html#ga4e7bf7c16f2f8bf70da7150f8a68ac95", null ],
+    [ "onAllRecordedDataAvailable", "group___callbacks.html#ga6c054ebc03662aa3bc88d36916d8d3f6", null ],
+    [ "onBufferedDataAvailable", "group___callbacks.html#ga397146fde21cd36a801206e9b73d8399", null ],
+    [ "onConnectivityChanged", "group___callbacks.html#gacad6280b5dc0c8e458b22e26a50bad40", null ],
+    [ "onDataAvailable", "group___callbacks.html#ga9a65730e9aa35fe9c52c92807741f088", null ],
+    [ "onDataUnavailable", "group___callbacks.html#ga89d308afd509c0325b4cdb622fd9e645", null ],
+    [ "onDeviceStateChanged", "group___callbacks.html#ga24d179eecbcde2ca2f3206cb6f7c05f0", null ],
+    [ "onError", "group___callbacks.html#ga4a31e495dde9ee053c070fbf06cbe89f", null ],
+    [ "onInfoResponse", "group___callbacks.html#ga224586f8f7e0e9f0b57091b7d9a24bc5", null ],
+    [ "onLiveDataAvailable", "group___callbacks.html#gaf94a5a76c3a443255fc53f7a2bf9e076", null ],
+    [ "onMessageDetected", "group___callbacks.html#gaed964edc07fece9546cdd67f64e29f24", null ],
+    [ "onMessageReceivedFromDevice", "group___callbacks.html#gaf7cc6f779fca5b3ced0480a731991b18", null ],
+    [ "onMessageSentToDevice", "group___callbacks.html#gae0b5c78ecbf3e01a754d4591cb88294f", null ],
+    [ "onMissedPackets", "group___callbacks.html#ga32f20ce601f007ba4e571e40a4f8f71e", null ],
+    [ "onNonDataMessage", "group___callbacks.html#ga656b04fa94f7b374dcbda27dba20b835", null ],
+    [ "onProgressUpdated", "group___callbacks.html#ga70ff4796b9bb5e3d79eac2c7cd870e59", null ],
+    [ "onRecordedDataAvailable", "group___callbacks.html#ga882b4ffadbc4ac28c78a9763de623c14", null ],
+    [ "onRestoreCommunication", "group___callbacks.html#gadad70ca84a25f9e01507dde5972262b8", null ],
+    [ "onTransmissionRequest", "group___callbacks.html#gaa584015b7c370591fc66f354968a9ca8", null ],
+    [ "onWakeupReceived", "group___callbacks.html#gac8d7f94d6cb77f5fe56effaa36752e4a", null ],
+    [ "onWriteMessageToLogFile", "group___callbacks.html#ga5d34298b034dda9f344f3eb9fc132290", null ]
+];

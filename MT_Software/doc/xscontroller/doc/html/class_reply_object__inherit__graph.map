@@ -1,0 +1,5 @@
+<map id="ReplyObject" name="ReplyObject">
+<area shape="rect" id="node1" title="Abstract reply object. Blocks on a semaphore when requesting the message until the message has been s..." alt="" coords="131,5,231,32"/>
+<area shape="rect" id="node2" href="$class_mid_and_data_reply_object.html" title="Reply object that checks the message identifier and data in the data field." alt="" coords="5,80,184,107"/>
+<area shape="rect" id="node3" href="$class_mid_reply_object.html" title="Reply object that only checks the message identifier." alt="" coords="208,80,331,107"/>
+</map>

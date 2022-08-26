@@ -1,0 +1,13 @@
+<map id="SerialCommunicator" name="SerialCommunicator">
+<area shape="rect" id="node1" title="A class that uses serial communication." alt="" coords="101,379,256,405"/>
+<area shape="rect" id="node9" href="$class_proxy_communicator.html" title=" " alt="" coords="5,453,160,480"/>
+<area shape="rect" id="node10" href="$class_serial_port_communicator.html" title="A class that uses serial port to communicate." alt="" coords="184,453,365,480"/>
+<area shape="rect" id="node2" href="$class_device_communicator.html" title="A class that is used for the communcation with a device." alt="" coords="21,304,184,331"/>
+<area shape="rect" id="node3" href="$struct_communicator.html" title="A base struct for a communication interface." alt="" coords="35,229,154,256"/>
+<area shape="rect" id="node4" href="$class_callback_manager_xda.html" title="Class that delegates callbacks to registered XsCallbackHandlerItems." alt="" coords="15,155,174,181"/>
+<area shape="rect" id="node5" href="$class_xs_callback.html" title="Structure that contains callback functions for the Xsens Device API." alt="" coords="47,80,142,107"/>
+<area shape="rect" id="node6" href="$struct_xs_callback_plain_c.html" title="Structure that contains callback functions for the Xsens Device API." alt="" coords="27,5,162,32"/>
+<area shape="rect" id="node7" href="$class_data_parser.html" title="A class for the data parsing on a separete thread." alt="" coords="212,304,305,331"/>
+<area shape="rect" id="node8" href="$classxsens_1_1_standard_thread.html" title="A class for a standard thread that has to perform the same action repeatedly." alt="" coords="179,229,349,256"/>
+<area shape="rect" id="node11" href="$class_usb_communicator.html" title="A class that uses USB to communicate." alt="" coords="203,528,346,555"/>
+</map>

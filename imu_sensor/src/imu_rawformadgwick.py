@@ -13,7 +13,7 @@ from std_msgs.msg import Float32
 # before using this code, change imu driver
 ###########################################
 
-port = str(rospy.get_param("~imu_port","/dev/ttyUSB1"))
+port = str(rospy.get_param("~imu_port","/dev/ttyUSB0"))
 rpy=[0,0,0]
 w_speed=[0,0,0]
 accel=[0,0,0]
@@ -49,68 +49,68 @@ def euler_to_quaternion(roll,pitch,yaw):
 #     br.sendTransform(t)
 
 if __name__ == '__main__':
-    rospy.init_node("get_imu")
+	rospy.init_node("get_imu")
 
     #port = rospy.get_param("~GPS_PORT",port)
-    ser = serial.serial_for_url(port,115200, timeout=0)
+	ser = serial.serial_for_url(port,115200, timeout=0)
 
-    imu_pub = rospy.Publisher("/imu/data_raw", Imu, queue_size=1)
-    mag_pub = rospy.Publisher("/imu/mag", MagneticField, queue_size=1)
+	imu_pub = rospy.Publisher("/imu/data_raw", Imu, queue_size=1)
+	mag_pub = rospy.Publisher("/imu/mag", MagneticField, queue_size=1)
 
     #br = tf2_ros.TransformBroadcaster()
 
     #r=rospy.Rate(20)
 
-    imu=Imu()
-    mag=MagneticField()
-    while not rospy.is_shutdown():
-        IMU_message=ser.readline()
+	imu=Imu()
+	mag=MagneticField()
+	while not rospy.is_shutdown():
+		IMU_message=ser.readline()
         
-        if (len(IMU_message)>55):
-            #print(len(IMU_message))
-            imu.header.stamp = rospy.Time.now()
-            imu.header.frame_id = "imu_link"
-            mag.header.stamp = rospy.Time.now()
-            mag.header.frame_id = "mag_link"
-            data=IMU_message.split(",")
-            print(data)
-            rpy[0]=round(float(data[1]),3)
-            rpy[1]=round(float(data[2]),3)
-            rpy[2]=round(float(data[3]),3)
-            #print(rpy[2])
-            if (rpy[2] >= 180):
-                rpy[2] = rpy[2] - 2*180
-            elif (rpy[2] <= -180):
-                rpy[2] = rpy[2] + 2*180
+		if (len(IMU_message)>55):
+			#print(len(IMU_message))
+			imu.header.stamp = rospy.Time.now()
+			imu.header.frame_id = "imu_link"
+			mag.header.stamp = rospy.Time.now()
+			mag.header.frame_id = "mag_link"
+			data=IMU_message.split(",")
+			print(data)
+			rpy[0]=round(float(data[1]),3)
+			rpy[1]=round(float(data[2]),3)
+			rpy[2]=round(float(data[3]),3)
+			#print(rpy[2])
+			if (rpy[2] >= 180):
+				rpy[2] = rpy[2] - 2*180
+			elif (rpy[2] <= -180):
+				rpy[2] = rpy[2] + 2*180
+			rpy[2] = rpy[2]-5
+			roll=rpy[0]*np.pi/180
+			pitch=-rpy[1]*np.pi/180
+			yaw=-rpy[2]*np.pi/180
 
-            roll=rpy[0]*np.pi/180
-            pitch=-rpy[1]*np.pi/180
-            yaw=-rpy[2]*np.pi/180
 
+			np.array([])
+			qx,qy,qz,qw = euler_to_quaternion(roll, pitch, yaw)
 
-            np.array([])
-            qx,qy,qz,qw = euler_to_quaternion(roll, pitch, yaw)
+			imu.orientation.x = qx
+			imu.orientation.y = qy
+			imu.orientation.z = qz
+			imu.orientation.w = qw
 
-            imu.orientation.x = qx
-            imu.orientation.y = qy
-            imu.orientation.z = qz
-            imu.orientation.w = qw
+			w_speed[0]=round(float(data[4]),3)
+			w_speed[1]=round(float(data[5]),3)
+			w_speed[2]=round(float(data[6]),3)
 
-            w_speed[0]=round(float(data[4]),3)
-            w_speed[1]=round(float(data[5]),3)
-            w_speed[2]=round(float(data[6]),3)
+			imu.angular_velocity.y = w_speed[1]
+			imu.angular_velocity.z = w_speed[2]
+			imu.angular_velocity.x = w_speed[0]
 
-            imu.angular_velocity.x = w_speed[0]
-            imu.angular_velocity.y = w_speed[1]
-            imu.angular_velocity.z = w_speed[2]
+			accel[0]=round(float(data[7]),3)
+			accel[1]=round(float(data[8]),3)
+			accel[2]=round(float(data[9]),3)
 
-            accel[0]=round(float(data[7]),3)
-            accel[1]=round(float(data[8]),3)
-            accel[2]=round(float(data[9]),3)
-
-            imu.linear_acceleration.x = accel[0]  #include gravitational acceleration 
-            imu.linear_acceleration.y = accel[1]  
-            imu.linear_acceleration.z = accel[2]
+			imu.linear_acceleration.x = accel[0]  #include gravitational acceleration 
+			imu.linear_acceleration.y = accel[1]  
+			imu.linear_acceleration.z = accel[2]
             
             #mag[0] = round(float(data[10]),3)
             #mag[1] = round(float(data[11]),3)
@@ -121,14 +121,14 @@ if __name__ == '__main__':
             #mag.magnetic_field.z = float(data[12])
             
             #battery=round(float(data[13]),3)
-            imu_pub.publish(imu)
-            mag_pub.publish(mag)
+			imu_pub.publish(imu)
+			mag_pub.publish(mag)
             #pub_tf_transform(roll,pitch,yaw,w_speed,accel)
             #print("roll:",rpy[0],"pitch:",rpy[1],"yaw:",rpy[2],"battery:",battery)
             #r.sleep()
 
-        else:
-            pass
-    else:
-        pass
+		else:
+			pass
+	else:
+		pass
         #mainloop()

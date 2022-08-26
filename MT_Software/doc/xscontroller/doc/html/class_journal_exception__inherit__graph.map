@@ -1,0 +1,5 @@
+<map id="JournalException" name="JournalException">
+<area shape="rect" id="node1" title="An exception class that automatically includes stack dump information." alt="" coords="5,155,136,181"/>
+<area shape="rect" id="node2" href="$class_xs_exception.html" title="Exception class for Xsens public libraries. Inherits from std::exception." alt="" coords="19,80,122,107"/>
+<area shape="rect" id="node3" title="STL class." alt="" coords="13,5,128,32"/>
+</map>

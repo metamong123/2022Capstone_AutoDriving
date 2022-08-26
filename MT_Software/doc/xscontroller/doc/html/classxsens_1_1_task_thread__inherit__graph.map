@@ -1,0 +1,4 @@
+<map id="xsens::TaskThread" name="xsens::TaskThread">
+<area shape="rect" id="node1" title="Class for handling small tasks." alt="" coords="19,80,162,107"/>
+<area shape="rect" id="node2" href="$classxsens_1_1_standard_thread.html" title="A class for a standard thread that has to perform the same action repeatedly." alt="" coords="5,5,176,32"/>
+</map>

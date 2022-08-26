@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$struct_io_interface.html" title="An abstract IO interface." alt="" coords="5,31,97,57"/>
+<area shape="rect" id="node2" href="$class_io_interface_file.html" title="The low&#45;level file communication class." alt="" coords="151,5,266,32"/>
+<area shape="rect" id="node3" href="$class_stream_interface.html" title="A stream interface." alt="" coords="145,56,272,83"/>
+<area shape="rect" id="node4" href="$class_serial_interface.html" title="The low&#45;level serial communication class." alt="" coords="320,31,437,57"/>
+<area shape="rect" id="node5" href="$class_usb_interface.html" title="An IoInterface for dealing specifically with Xsens USB devices." alt="" coords="326,81,431,108"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="MtThread" name="MtThread">
+<area shape="rect" id="node1" title="A class that implements thread for MT." alt="" coords="49,155,132,181"/>
+<area shape="rect" id="node2" href="$class_data_poller.html" title="A class implementing some basic data poller behavior." alt="" coords="45,80,136,107"/>
+<area shape="rect" id="node3" href="$classxsens_1_1_standard_thread.html" title="A class for a standard thread that has to perform the same action repeatedly." alt="" coords="5,5,176,32"/>
+</map>

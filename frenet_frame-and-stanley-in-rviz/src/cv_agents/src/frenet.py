@@ -110,6 +110,21 @@ def next_waypoint(x, y, mapx, mapy, prev_wp):
 
 	return next_wp
 
+def get_closest_waypoints2(x, y, mapx, mapy, prev_wp):
+	min_len = 1e10
+	closest_wp = 0
+	dist_list = []
+	for i in range(len(mapx)):
+		_mapx = mapx[i]
+		_mapy = mapy[i]
+		dist = get_dist(x, y, _mapx, _mapy)
+		dist_list.append(dist)
+		
+		if dist < min_len:
+			min_len = dist
+			closest_wp = i
+	#print(dist_list)
+	return closest_wp
 
 def get_closest_waypoints(x, y, mapx, mapy, prev_wp):
 	min_len = 1e10

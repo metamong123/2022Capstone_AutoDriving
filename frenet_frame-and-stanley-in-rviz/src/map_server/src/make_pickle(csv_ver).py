@@ -48,8 +48,8 @@ way_dict={}
 waypoints=interpolate_waypoints(data_x,data_y,space=0.5)
 way_dict[0]={'x':waypoints['x'],'y':waypoints['y'],'s':waypoints['s'],'yaw':waypoints['yaw']}
 
-with open('hightech_route.pkl', 'wb') as handle:
+with open('/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/boong_old/parking_offset_0_0.5.pkl', 'wb') as handle:
   pickle.dump(way_dict,handle, protocol=0)
   
-# with open('route.pkl', "rb") as f:
-# 	waypoints = pickle.load(f)
+with open('/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/boong_old/parking_offset_0_0.5.pkl', "rb") as f:
+	waypoints = pickle.load(f)

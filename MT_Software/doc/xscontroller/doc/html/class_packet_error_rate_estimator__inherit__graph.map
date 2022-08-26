@@ -1,0 +1,4 @@
+<map id="PacketErrorRateEstimator" name="PacketErrorRateEstimator">
+<area shape="rect" id="node1" title="Thread to periodically estimate packet error rate based on expected packet rate." alt="" coords="5,80,195,107"/>
+<area shape="rect" id="node2" href="$classxsens_1_1_standard_thread.html" title="A class for a standard thread that has to perform the same action repeatedly." alt="" coords="15,5,185,32"/>
+</map>

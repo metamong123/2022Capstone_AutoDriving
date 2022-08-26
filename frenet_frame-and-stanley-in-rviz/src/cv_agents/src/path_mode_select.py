@@ -92,7 +92,7 @@ if __name__ == "__main__":
 	park_wp = 0
 	
 	mode='global'
-	
+	dist = 0
 	#mode_msg.data = 'global'
 	while not rospy.is_shutdown():
 
@@ -117,8 +117,8 @@ if __name__ == "__main__":
 			mode = 'delivery_A'
 		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
 			mode = 'delivery_B'
-		elif (global_wp <= use_map.glo_to_dynamic_finish and global_wp >= use_map.glo_to_dynamic_start):  # delivery mode B
-			mode = 'dynamic_object'
+		#elif (global_wp <= use_map.glo_to_dynamic_finish and global_wp >= use_map.glo_to_dynamic_start):  # delivery mode B
+		#	mode = 'dynamic_object'
 		
 
         ### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
@@ -139,35 +139,50 @@ if __name__ == "__main__":
 
 		if mode == 'parking':
 
-			for park_i in range(use_map.diagonal_parking_map_num):
-				
-				fp = MakingPath()
-				fp.x=use_map.diagonal_parking_path[park_i][0]
-				fp.y=use_map.diagonal_parking_path[park_i][1]
-				fp.yaw=use_map.diagonal_parking_path[park_i][2]
-				print("위치" + str(park_i) + "번 차량존재유무 : " + str(collision_check(fp,obs_info,0,0,0)))
-
-				if collision_check(fp,obs_info,0,0,0)==False:
-					parking_ind=park_i
-					print("parking_choose: "+str(park_i))
-					break
-
-			if collision_check(fp,obs_info,0,0,0)==True:
-				for park_i in range(parking_ind,use_map.diagonal_parking_map_num,1):
-					fp_1=MakingPath()
-					fp_1.x=use_map.diagonal_parking_path[park_i][0]
-					fp_1.y=use_map.diagonal_parking_path[park_i][1]
-					fp_1.yaw=use_map.diagonal_parking_path[park_i][2]
-					print("위치" + str(park_i) + "번 차량존재유무 : " + str(collision_check(fp_1,obs_info,0,0,0)))
-
+			#for park_i in range(use_map.diagonal_parking_map_num):
+			#	
+			#	fp = MakingPath()
+			#	fp.x=use_map.diagonal_parking_path[park_i][0]
+			#	fp.y=use_map.diagonal_parking_path[park_i][1]
+			#	fp.yaw=use_map.diagonal_parking_path[park_i][2]
+			#	print("위치" + str(park_i) + "번 차량존재유무 : " + str(collision_check(fp,obs_info,0,0,0)))
+#
+			#	if collision_check(fp,obs_info,0,0,0)==False:
+			#		parking_ind=park_i
+			#		print("parking_choose: "+str(park_i))
+			#		break
+#
+			#if collision_check(fp,obs_info,0,0,0)==True:
+			#	for park_i in range(parking_ind,use_map.diagonal_parking_map_num,1):
+			#		fp_1=MakingPath()
+			#		fp_1.x=use_map.diagonal_parking_path[park_i][0]
+			#		fp_1.y=use_map.diagonal_parking_path[park_i][1]
+			#		fp_1.yaw=use_map.diagonal_parking_path[park_i][2]
+			#		print("위치" + str(park_i) + "번 차량존재유무 : " + str(collision_check(fp_1,obs_info,0,0,0)))
+#
+			#		if collision_check(fp_1,obs_info,0,0,0)==False:
+			#			parking_ind=park_i
+			#			print("parking_choose: "+str(park_i))
+			#			fp=fp_1
+			#			break
+			parking_ind=2
+			#state_x=962802.5118152874
+			#state_y=1959347.0844059486
+			fp=MakingPath()
+			fp.x=use_map.diagonal_parking_path[parking_ind][0]
+			fp.y=use_map.diagonal_parking_path[parking_ind][1]
+			fp.yaw=use_map.diagonal_parking_path[parking_ind][2]
+			# use_map.waypoints['diagonal_parking'][parking_ind]['x'][:use_map.link_len['diagonal_parking'][parking_ind]]
+			park_wp = get_closest_waypoints2(state_x, state_y, use_map.waypoints['diagonal_parking'][parking_ind*2]['x'][:use_map.link_len['diagonal_parking'][parking_ind*2]], use_map.waypoints['diagonal_parking'][parking_ind*2]['y'][:use_map.link_len['diagonal_parking'][parking_ind*2]],park_wp)
+	
 					if collision_check(fp_1,obs_info,0,0,0)==False:
 						parking_ind=park_i
 						print("parking_choose: "+str(park_i))
 						fp=fp_1
 						break
 			parking_ind=2
-			# state_x=962802.5118152874
-			# state_y=1959347.0844059486
+			state_x=962802.5118152874
+			state_y=1959347.0844059486
 			park_wp = get_closest_waypoints(state_x, state_y, use_map.waypoints['diagonal_parking'][parking_ind*2]['x'][:use_map.link_len['diagonal_parking'][parking_ind*2]], use_map.waypoints['diagonal_parking'][parking_ind*2]['y'][:use_map.link_len['diagonal_parking'][parking_ind*2]],park_wp)
 			print(park_wp)
 			park_msg.data = [parking_ind, park_wp] #현재 이동하는 parking index, wp보내줌

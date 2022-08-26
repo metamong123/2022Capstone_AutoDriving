@@ -13,7 +13,7 @@ class ObstaclePub():
 		self.detection_frame = "car_1"
 		self.msg = MarkerArray()
 		self.pub = rospy.Publisher('obstacles', ObjectArray, queue_size=1)
-		self.sub_cluster = rospy.Subscriber('/adaptive_clustering_v1', MarkerArray, self.cluster_callback)
+		self.sub_cluster = rospy.Subscriber('/adaptive_clustering_v1/markers', MarkerArray, self.cluster_callback)
 		self.listener = tf.TransformListener()
 
 	

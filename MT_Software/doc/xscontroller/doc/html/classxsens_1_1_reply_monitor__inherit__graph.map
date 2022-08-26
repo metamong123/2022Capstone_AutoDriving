@@ -1,0 +1,4 @@
+<map id="xsens::ReplyMonitor" name="xsens::ReplyMonitor">
+<area shape="rect" id="node1" title="A monitor class for receiving replies messages in a thread." alt="" coords="31,80,184,107"/>
+<area shape="rect" id="node2" href="$classxsens_1_1_reply_object_remover.html" title="A class that removes a reply object from the given monitor." alt="" coords="5,5,209,32"/>
+</map>

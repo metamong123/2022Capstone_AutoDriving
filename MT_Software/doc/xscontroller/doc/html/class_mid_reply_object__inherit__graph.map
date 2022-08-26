@@ -1,0 +1,4 @@
+<map id="MidReplyObject" name="MidReplyObject">
+<area shape="rect" id="node1" title="Reply object that only checks the message identifier." alt="" coords="5,80,128,107"/>
+<area shape="rect" id="node2" href="$class_reply_object.html" title="Abstract reply object. Blocks on a semaphore when requesting the message until the message has been s..." alt="" coords="17,5,117,32"/>
+</map>

@@ -111,15 +111,15 @@ def callback_dir(msg):
 if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	control_gain=0.3
-	cte_speed_gain=5
+	control_gain={'global':1,'parking':10}
+	cte_speed_gain=0
 	yaw_weight=1
 	cte_weight=1
 	cte_thresh_hold=0
-	yaw_d_gain=0
+	yaw_d_gain={'global':0,'parking':0.5}
 
-	stanley_gps = Stanley(k=control_gain, speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
-	stanley_imu = Stanley(k=control_gain, speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
+	stanley_gps = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain[mode], WB = 1.04)
+	stanley_imu = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain[mode], WB = 1.04)
 	
 	f_gps = open("/home/mds/stanley/"+"gps_"+time.strftime('%Y%m%d_%H:%M')+"_k"+str(control_gain)+"_sg"+str(cte_speed_gain)+"_wy"+str(yaw_weight)+"_wc"+str(cte_weight)+"_thresh"+str(cte_thresh_hold)+"_dgain"+str(yaw_d_gain)+".csv", "w")
 	f_gps.write('time' + ',' + 'x' + ',' + 'y' + ',' + 'map_yaw' + ',' + 'yaw' + ',' + 'yaw_term(degree)' + ',' + 'cte(cm)' + ',' + 'steering(degree)' + '\n')
@@ -174,8 +174,8 @@ if __name__ == "__main__":
 				s, d = get_frenet(state.x, state.y, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],my_wp)
 				x, y, road_yaw = get_cartesian(s, d, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],use_map.waypoints[mode]['s'][:use_map.link_len[mode][link_ind]])
 				
-				#steer_gps = road_yaw - state.yaw
-				steer_gps, yaw_term_gps, cte_gps, map_yaw_gps = stanley_gps.stanley_control_pd(state.x, state.y, state.yaw, state.v, [x], [y], [road_yaw])
+				steer_gps = road_yaw - state.yaw
+				# steer_gps, yaw_term_gps, cte_gps, map_yaw_gps = stanley_gps.stanley_control_pd(state.x, state.y, state.yaw, state.v, [x], [y], [road_yaw])
 				a = 0
 		else:
 			## PID control

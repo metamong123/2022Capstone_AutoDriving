@@ -1,0 +1,30 @@
+<map id="XsDevicePtr" name="XsDevicePtr">
+<area shape="rect" id="node1" title="A pointer to an XsDevice object." alt="" coords="537,183,639,209"/>
+<area shape="rect" id="node5" href="$class_broadcast_device.html" title="Intimately entangled class with XsControl that allows broadcasting to all main devices." alt="" coords="687,157,819,184"/>
+<area shape="rect" id="node6" href="$struct_xs_device_ex.html" title="An abstract internal struct of a device." alt="" coords="703,208,802,235"/>
+<area shape="rect" id="node2" href="$class_callback_manager_xda.html" title="Class that delegates callbacks to registered XsCallbackHandlerItems." alt="" coords="331,183,489,209"/>
+<area shape="rect" id="node3" href="$class_xs_callback.html" title="Structure that contains callback functions for the Xsens Device API." alt="" coords="188,183,283,209"/>
+<area shape="rect" id="node4" href="$struct_xs_callback_plain_c.html" title="Structure that contains callback functions for the Xsens Device API." alt="" coords="5,183,140,209"/>
+<area shape="rect" id="node7" href="$class_mt_device.html" title="MT device base class." alt="" coords="867,208,949,235"/>
+<area shape="rect" id="node8" href="$struct_mt_device_ex.html" title="An abstract struct of MT device." alt="" coords="997,208,1096,235"/>
+<area shape="rect" id="node9" href="$class_mti_base_device.html" title="The generic class for MTi devices." alt="" coords="1144,208,1263,235"/>
+<area shape="rect" id="node10" href="$struct_mti_base_device_ex.html" title="The internal base class for MTi devices." alt="" coords="1311,208,1445,235"/>
+<area shape="rect" id="node11" href="$class_dot_device.html" title="The MTi device used for the Xsens DOT." alt="" coords="1516,5,1607,32"/>
+<area shape="rect" id="node13" href="$class_mti3_x0_device.html" title="The MTi device used for the X&#45;series." alt="" coords="1505,56,1617,83"/>
+<area shape="rect" id="node15" href="$class_mti6_x0_device.html" title="The MTi device used for the 6X0&#45;series." alt="" coords="1505,107,1617,133"/>
+<area shape="rect" id="node17" href="$class_m_ti7___m_ti8_device.html" title="A class used for the MTi&#45;7&#45;and MTi&#45;8 types." alt="" coords="1493,157,1629,184"/>
+<area shape="rect" id="node19" href="$class_mti8_x0_device.html" title="The MTi device used for the 8X0&#45;series." alt="" coords="1505,208,1617,235"/>
+<area shape="rect" id="node21" href="$class_mtig_device.html" title="The MTi device used for the 7X0&#45;series." alt="" coords="1514,259,1609,285"/>
+<area shape="rect" id="node23" href="$class_mti_x00_device.html" title="The MTi device used for the X00&#45;series." alt="" coords="1505,309,1617,336"/>
+<area shape="rect" id="node25" href="$class_mti_x0_device.html" title="The MTi device used for the X0&#45;series." alt="" coords="1509,360,1613,387"/>
+<area shape="rect" id="node27" href="$class_mti_x_device.html" title="The MTi device used for the X&#45;series." alt="" coords="1513,411,1609,437"/>
+<area shape="rect" id="node12" href="$struct_dot_device_ex.html" title="The internal base class for MTi&#45;3X0 series devices." alt="" coords="1699,5,1805,32"/>
+<area shape="rect" id="node14" href="$struct_mti3_x0_device_ex.html" title="The internal base class for MTi&#45;3X0 series devices." alt="" coords="1688,56,1816,83"/>
+<area shape="rect" id="node16" href="$struct_mti6_x0_device_ex.html" title="The internal base class for MTi&#45;6X0 series devices." alt="" coords="1688,107,1816,133"/>
+<area shape="rect" id="node18" href="$struct_mti7___m_ti8_device_ex.html" title="The internal base class for MTi&#45;7 and MTi&#45;8 devices." alt="" coords="1677,157,1827,184"/>
+<area shape="rect" id="node20" href="$struct_mti8_x0_device_ex.html" title="The internal base class for MTi&#45;8X0 series devices." alt="" coords="1688,208,1816,235"/>
+<area shape="rect" id="node22" href="$struct_mtig_device_ex.html" title="The internal base class for MTi&#45;7X0 series devices." alt="" coords="1697,259,1807,285"/>
+<area shape="rect" id="node24" href="$struct_mti_x00_device_ex.html" title="The internal base class for MTi&#45;X00 series devices." alt="" coords="1688,309,1816,336"/>
+<area shape="rect" id="node26" href="$struct_mti_x0_device_ex.html" title="The internal base class for MTi&#45;X0 series devices." alt="" coords="1692,360,1812,387"/>
+<area shape="rect" id="node28" href="$struct_mti_x_device_ex.html" title="The internal base class for MTi&#45;X series devices." alt="" coords="1696,411,1808,437"/>
+</map>

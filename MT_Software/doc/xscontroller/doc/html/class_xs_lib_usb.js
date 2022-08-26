@@ -1,0 +1,27 @@
+var class_xs_lib_usb =
+[
+    [ "XsLibUsb", "class_xs_lib_usb.html#af70610784942958703f87ef407f15478", null ],
+    [ "~XsLibUsb", "class_xs_lib_usb.html#ae629e4f05c178f30595f4872472c388d", null ],
+    [ "attach_kernel_driver", "class_xs_lib_usb.html#a63f7e311184f366dfa14b8872015186e", null ],
+    [ "bulk_transfer", "class_xs_lib_usb.html#ae167617662623ba66bb9d5d9c5da484a", null ],
+    [ "claim_interface", "class_xs_lib_usb.html#a93686eccc1747804efbd884e6b494c66", null ],
+    [ "close", "class_xs_lib_usb.html#a186254f1a5dc9a1ec4a111fe0c412447", null ],
+    [ "detach_kernel_driver", "class_xs_lib_usb.html#aa171b447a26e0ea30eb9ab7a2da7c52f", null ],
+    [ "exit", "class_xs_lib_usb.html#a1b8461f10b2fa01b0a9527dfa59d3d57", null ],
+    [ "free_config_descriptor", "class_xs_lib_usb.html#afa6de6e705d2a2c88e613217efc456a0", null ],
+    [ "free_device_list", "class_xs_lib_usb.html#afcd06f7b6d744921261cea2cd0734bf0", null ],
+    [ "get_active_config_descriptor", "class_xs_lib_usb.html#a265aa3c5a9642d1d44afd41f40ba87aa", null ],
+    [ "get_bus_number", "class_xs_lib_usb.html#aff83b63e39032132306c14ba8688b3f0", null ],
+    [ "get_device", "class_xs_lib_usb.html#a1faf120c17ff09eeefa07a2dfe7085de", null ],
+    [ "get_device_address", "class_xs_lib_usb.html#a4f71d3c4c8d45f8a4aecf5be4c9c0c48", null ],
+    [ "get_device_descriptor", "class_xs_lib_usb.html#ae6c03b6c6b2f2c3a5734374a8c6578c5", null ],
+    [ "get_device_list", "class_xs_lib_usb.html#a415e57bfd0df44ca373806a807f32dfa", null ],
+    [ "get_string_descriptor_ascii", "class_xs_lib_usb.html#ad28b4715809e38ebc76df38e21c05f0f", null ],
+    [ "init", "class_xs_lib_usb.html#ab3b2b3f91794dade79e7e50eac2567f9", null ],
+    [ "kernel_driver_active", "class_xs_lib_usb.html#a1c29088eee24800cf5b6dc5fc26c6ba4", null ],
+    [ "open", "class_xs_lib_usb.html#a601f8c6d443e6edff0eea2b1c5020abe", null ],
+    [ "ref_device", "class_xs_lib_usb.html#ad3b52b976fa093434a72f481c1601186", null ],
+    [ "release_interface", "class_xs_lib_usb.html#abd9551b095a157d2b2f7acc7a9a2ba29", null ],
+    [ "set_debug", "class_xs_lib_usb.html#a0f2927577fa0dfc0b7e4f582fa6943fc", null ],
+    [ "unref_device", "class_xs_lib_usb.html#a3c15f15d305c839594738dc402c56793", null ]
+];

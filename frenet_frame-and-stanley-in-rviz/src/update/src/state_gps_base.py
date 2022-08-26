@@ -34,7 +34,8 @@ class TopicReciver:
 		self.odom_gps_sub=rospy.Subscriber("/odom_gps", Odometry,self.odometry_gps_callback)
 		self.odom_imu_sub=rospy.Subscriber("/odom_imu", Odometry,self.odometry_imu_callback)
 	def check_all_connections(self):
-		return (self.odom_gps_sub.get_num_connections()+self.odom_imu_sub.get_num_connections())==2
+		# return (self.odom_gps_sub.get_num_connections()+self.odom_imu_sub.get_num_connections())==2
+		return 1
 	def odometry_gps_callback(self, data):
 		if self.check_all_connections():
 			global x_gps, y_gps, v_gps, yaw_gps

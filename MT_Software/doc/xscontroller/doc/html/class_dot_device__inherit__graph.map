@@ -1,0 +1,13 @@
+<map id="DotDevice" name="DotDevice">
+<area shape="rect" id="node1" title="The MTi device used for the Xsens DOT." alt="" coords="39,677,130,704"/>
+<area shape="rect" id="node11" href="$struct_dot_device_ex.html" title="The internal base class for MTi&#45;3X0 series devices." alt="" coords="31,752,138,779"/>
+<area shape="rect" id="node2" href="$struct_mti_base_device_ex.html" title="The internal base class for MTi devices." alt="" coords="17,603,152,629"/>
+<area shape="rect" id="node3" href="$class_mti_base_device.html" title="The generic class for MTi devices." alt="" coords="25,528,144,555"/>
+<area shape="rect" id="node4" href="$struct_mt_device_ex.html" title="An abstract struct of MT device." alt="" coords="35,453,134,480"/>
+<area shape="rect" id="node5" href="$class_mt_device.html" title="MT device base class." alt="" coords="43,379,126,405"/>
+<area shape="rect" id="node6" href="$struct_xs_device_ex.html" title="An abstract internal struct of a device." alt="" coords="35,304,134,331"/>
+<area shape="rect" id="node7" href="$struct_xs_device.html" title="A pointer to an XsDevice object." alt="" coords="34,229,135,256"/>
+<area shape="rect" id="node8" href="$class_callback_manager_xda.html" title="Class that delegates callbacks to registered XsCallbackHandlerItems." alt="" coords="5,155,164,181"/>
+<area shape="rect" id="node9" href="$class_xs_callback.html" title="Structure that contains callback functions for the Xsens Device API." alt="" coords="37,80,132,107"/>
+<area shape="rect" id="node10" href="$struct_xs_callback_plain_c.html" title="Structure that contains callback functions for the Xsens Device API." alt="" coords="17,5,152,32"/>
+</map>
