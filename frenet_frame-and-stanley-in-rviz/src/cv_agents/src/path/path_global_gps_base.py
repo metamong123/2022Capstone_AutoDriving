@@ -122,8 +122,8 @@ def my_state_array(ind, wp):
 	m.data=[ind, wp]
 	return m
 
-if __name__ == "__main__":
-    
+def sub_and_pub():
+	global opt_frenet_pub,cand_frenet_pub,waypoint_pub,dir_pub,global_path_pub,col_pub,col_msg,s,d,x,y,road_yaw,dir,state,si,si_d,si_dd,sf_d,sf_dd,di,di_d,df_dd,di_dd,df_d,opt_d,prev_opt_d,obstacle_sub,state_sub,accel_sub,mode_sub
 	rospy.init_node("path")
 
 	#topic_receiver=TopicReciver()
@@ -132,7 +132,7 @@ if __name__ == "__main__":
 	state_sub = rospy.Subscriber("/objects/car_1/gps", Object, callback2, queue_size=1)
 	accel_sub = rospy.Subscriber("/accel", Float64, callback3, queue_size=1)
 
-	rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=10)
+	mode_sub=rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=10)
 
 
 	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
@@ -143,6 +143,51 @@ if __name__ == "__main__":
 	col_pub=rospy.Publisher("/col", Int32, queue_size=1)
 
 	col_msg=Int32()
+
+	dir=find_dir(use_map.link_dir, link_ind['global'])
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
+
+	s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
+	x, y, road_yaw = get_cartesian(s, d, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],use_map.waypoints['global']['s'][:use_map.link_len['global'][link_ind['global']]])
+
+	yawi = state.yaw - road_yaw
+	si = s
+	si_d = state.v * math.cos(yawi)
+	si_dd = ai * math.cos(yawi)
+	sf_d = use_map.target_speed['global'][dir]
+	sf_dd = 0
+
+	di = d
+	di_d = state.v * math.sin(yawi)
+	di_dd = ai * math.sin(yawi)
+	df_d = 0
+	df_dd = 0
+
+	opt_d = d
+	prev_opt_d = d
+
+if __name__ == "__main__":
+    
+	    
+	# rospy.init_node("path")
+
+	# #topic_receiver=TopicReciver()
+
+	# obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
+	# state_sub = rospy.Subscriber("/objects/car_1", Object, callback2, queue_size=1)
+	# accel_sub = rospy.Subscriber("/accel", Float64, callback3, queue_size=1)
+
+	# rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=10)
+
+
+	# opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
+	# cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
+	# waypoint_pub = rospy.Publisher("/waypoint", Int32MultiArray, queue_size=1)
+	# dir_pub=rospy.Publisher("/link_direction", StringArray, queue_size=1)
+	# global_path_pub=rospy.Publisher("/optimal_frenet_path_global", PathArray, queue_size=1)
+	# col_pub=rospy.Publisher("/col", Int32, queue_size=1)
+
+	# col_msg=Int32()
 
 	my_wp={'global':0,'diagonal_parking':{},'horizontal_parking':[]}
 	# if (not use_map.diagonal_parking_map_num==0):
@@ -160,14 +205,14 @@ if __name__ == "__main__":
 	if dir == 'right' or dir == 'left':
 		dir='curve'
 
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.05)
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 
 	my_wp['global']=get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
 	mode_msg=direction_array(find_dir(use_map.link_dir, link_ind['global']), find_dir(use_map.link_dir, (link_ind['global']+1)))
 
 	path_msg=path_array([],[],[])
-	print("현재 링크 번호: "+ str(link_ind['global'])+", 링크 방향: "+str(find_dir(use_map.link_dir, link_ind['global'])))
+	# print("현재 링크 번호: "+ str(link_ind['global'])+", 링크 방향: "+str(find_dir(use_map.link_dir, link_ind['global'])))
 
 	s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 	x, y, road_yaw = get_cartesian(s, d, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],use_map.waypoints[mode]['s'][:use_map.link_len[mode][link_ind[mode]]])
@@ -190,27 +235,28 @@ if __name__ == "__main__":
 
 	opt_frenet_path = Converter(r=0, g=255/255.0, b=100/255.0, a=1, scale=0.5)
 	cand_frenet_paths = Converter(r=0, g=100/255.0, b=100/255.0, a=0.4, scale= 0.5)
-	r = rospy.Rate(1)
+	# r = rospy.Rate(1)
 
 	while not rospy.is_shutdown():
-		state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.05)
+		# state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 
+		sub_and_pub()
 
-		s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
-		x, y, road_yaw = get_cartesian(s, d, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],use_map.waypoints['global']['s'][:use_map.link_len['global'][link_ind['global']]])
+		# s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
+		# x, y, road_yaw = get_cartesian(s, d, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],use_map.waypoints['global']['s'][:use_map.link_len['global'][link_ind['global']]])
 
-		yaw_diff = state.yaw - road_yaw
-		si = s
-		si_d = state.v * math.cos(yaw_diff)
-		si_dd = ai * math.cos(yaw_diff)
-		sf_d = use_map.target_speed['global'][dir]
-		sf_dd = 0
+		# yaw_diff = state.yaw - road_yaw
+		# si = s
+		# si_d = state.v * math.cos(yaw_diff)
+		# si_dd = ai * math.cos(yaw_diff)
+		# sf_d = use_map.target_speed['global'][dir]
+		# sf_dd = 0
 		
-		di = d
-		di_d = state.v * math.sin(yaw_diff)
-		di_dd = ai * math.sin(yaw_diff)
-		df_d = 0
-		df_dd = 0
+		# di = d
+		# di_d = state.v * math.sin(yaw_diff)
+		# di_dd = ai * math.sin(yaw_diff)
+		# df_d = 0
+		# df_dd = 0
 		
 		path, opt_ind, col = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints['global']['x'], use_map.waypoints['global']['y'],use_map.waypoints['global']['s'], opt_d, use_map.target_speed['global'][dir], use_map.DF_SET[link_ind['global']])
 		col_msg.data=col

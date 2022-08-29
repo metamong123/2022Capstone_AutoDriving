@@ -446,10 +446,10 @@ def check_path(fplist, obs_info, mapx, mapy, maps):
 			a += 1
 			#print("a:" + str(a))
 			continue
-		if any([abs(kappa) > K_MAX for kappa in fplist[i].kappa]):  # Max curvature check
-			#print("curv:"+str(abs(kappa)))
-			curv += 1
-			continue
+		#if any([abs(kappa) > K_MAX for kappa in fplist[i].kappa]):  # Max curvature check
+		#	#print("curv:"+str(abs(kappa)))
+		#	curv += 1
+		#	continue
 		elif collision_check(_path, obs_info, mapx, mapy, maps):
 			#print("col")
 			col += 1

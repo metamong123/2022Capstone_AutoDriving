@@ -34,11 +34,11 @@ def callback(msg):
 	rpose.pose.covariance[14]=msg.position_covariance[8]
 		
 def imu_callback(msg):
-	#print(msg.orientation.x)
-	rpose.pose.pose.orientation.x=msg.orientation.x
-	rpose.pose.pose.orientation.y=msg.orientation.y
-	rpose.pose.pose.orientation.z=msg.orientation.z
-	rpose.pose.pose.orientation.w=msg.orientation.w
+	#print(msg.quaternion.x)
+	rpose.pose.pose.orientation.x=msg.quaternion.x
+	rpose.pose.pose.orientation.y=msg.quaternion.y
+	rpose.pose.pose.orientation.z=msg.quaternion.z
+	rpose.pose.pose.orientation.w=msg.quaternion.w
 	vo_Pub.publish(rpose)
 
 if __name__=='__main__':
@@ -54,7 +54,7 @@ if __name__=='__main__':
 	rpose.header.frame_id="odom"
 
 	rospy.Subscriber("/gps/fix",NavSatFix,callback)
-	rospy.Subscriber("/imu/data",Imu, imu_callback)
+	rospy.Subscriber("/filter/quaternion",QuaternionStamped, imu_callback)
 
 	vo_Pub=rospy.Publisher('/odom_imu',Odometry,queue_size=1)
 	rospy.spin()

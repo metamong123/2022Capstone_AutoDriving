@@ -30,8 +30,8 @@ class ObstaclePub():
 
 		result = np.array(np.dot(tf_matrix, pose))
 		euler = tf.transformations.euler_from_matrix(result)
-
-		return result[0, 3], result[1, 3], euler[2]
+		
+		return float(result[0, 3]), float(result[1, 3]), euler[2]
 
 
 	def msg_pub(self):
