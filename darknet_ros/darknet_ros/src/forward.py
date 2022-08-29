@@ -78,11 +78,7 @@ class YoloPub():
 if __name__ == '__main__':
 
     CLASS_MAP = (
-        ("green", "left", "red", "straightleft", "yellow"),
-        ("person",),
-        ("car",),
-        ("uturn", "kidzone"),
-        ("stopline")
+        ("green", "left", "red", "straightleft", "yellow")
     )
     QUEUE_SIZE = 13
     ACCURACY_THRESHOLD = 0.7
