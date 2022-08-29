@@ -1,0 +1,17 @@
+yolo_model:
+
+  config_file:
+    name: forward_ver3_tiny.cfg
+  weight_file:
+    name: forward_ver3_tiny.weights
+  threshold:
+    value: 0.3
+  detection_classes:
+    names:
+      - green
+      - left
+      - red
+      - straightleft
+      - yellow
+      - person
+      - car

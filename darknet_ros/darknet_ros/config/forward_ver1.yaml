@@ -1,0 +1,20 @@
+yolo_model:
+
+  config_file:
+    name: forward.cfg
+  weight_file:
+    name: forward.weights
+  threshold:
+    value: 0.3
+  detection_classes:
+    names:
+      - green
+      - left
+      - red
+      - straightleft
+      - yellow
+      - person
+      - car
+      - uturn
+      - kidzone
+      - stopline
