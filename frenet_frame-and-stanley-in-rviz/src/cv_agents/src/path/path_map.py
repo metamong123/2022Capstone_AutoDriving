@@ -29,14 +29,16 @@ def interpolate_waypoints(wx, wy, s_init, space=0.5):
 		_s = np.hypot(dx, dy)
 		s.append(s[-1] + _s)
 
-	fx = interp1d(s, wx)
-	fy = interp1d(s, wy)
-	s = np.linspace(s_init, s[-1], num=int(s[-1] / space) + 1, endpoint=True)
+	fx = interp1d(s, wx,bounds_error=False)
+	fy = interp1d(s, wy,bounds_error=False)
+	# s = np.linspace(s_init, s[-1], num=int(s[-1] / space) + 1, endpoint=True)
+	s=np.arange(s_init, s[-1], step=space)
+	# print(s)
 
-	dxds = np.gradient(fx(s), s, edge_order=1)
+	dxds = np.gradient(fx(s), s, edge_order=1,)
 	dyds = np.gradient(fy(s), s, edge_order=1)
 	wyaw = np.arctan2(dyds, dxds)
-
+	# print(fx(s))
 	return {
 		"x": fx(s),
 		"y": fy(s),
@@ -139,6 +141,7 @@ class Path:
 	def set_global_link(self, waypoint_list=[0],mode='global'):
 		wayp_len=len(self.waypoints[mode]['x'])
 		waypoint_list.append(wayp_len)
+		# waypoint_list.append(wayp_len)
 		waypoint_list.remove(0)
 		self.link_len['global']=waypoint_list
 
@@ -481,9 +484,9 @@ def boong():
 	boong.set_other_link()
 	boong.diagonal_parking_path=boong.make_path('diagonal_parking',boong.diagonal_parking_map_num)
 	# boong.delivery_path=boong.make_path('delivery',boong.delivery_map_num)
-	# for link_int in [1,3,5,7]:
-		# boong.interpolate_map(mode='global', space=10,link=link_int)
-	boong.interpolate_map(mode='global', space=100,link=7)
+	for link_int in [1,3,5,7]:
+		boong.interpolate_map(mode='global', space=1,link=link_int) # space는 m 단위로 넣기
+	# boong.interpolate_map(mode='global', space=1,link=7)
 	boong.lane_width={'none':{3.0:[i for i in range(11)]}}
 	boong.set_lanewidth()
 	return boong

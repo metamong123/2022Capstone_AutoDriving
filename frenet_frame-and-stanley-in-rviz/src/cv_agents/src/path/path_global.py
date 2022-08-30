@@ -154,9 +154,11 @@ def sub_and_pub():
 		dir='curve'
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 
+	my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
+
 	if(my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):
-		if link_ind['global']==len(use_map.link_len['global']):
-			link_ind['global']=len(link_ind['global'])
+		if link_ind['global']==(len(use_map.link_len['global'])-1):
+			pass
 		else:
 			link_ind['global']+=1
 

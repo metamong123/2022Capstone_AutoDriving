@@ -187,7 +187,7 @@ def get_frenet(x, y, mapx, mapy, prev_wp):
 		frenet_s = frenet_s + get_dist(mapx[i],mapy[i],mapx[i+1],mapy[i+1])
 
 	frenet_s = frenet_s + get_dist(0,0,proj_x,proj_y)
-	print(get_dist(0,0,proj_x,proj_y),proj_x,proj_y,proj_norm,x_x,x_y,n_x,n_y)
+	# print(get_dist(0,0,proj_x,proj_y),proj_x,proj_y,proj_norm,x_x,x_y,n_x,n_y)
 	# (nan, nan, nan, nan, 3.5368640741799027, -0.5265787104144692, 0.0, 0.0)
 	return frenet_s, frenet_d
 
