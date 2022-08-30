@@ -198,9 +198,9 @@ if __name__ == "__main__":
 
 		if not path_x: ## No solution
 			if mode == 'global':
-				s, d = get_frenet(state.x, state.y, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],my_wp)
-				x, y, road_yaw = get_cartesian(s, d, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],use_map.waypoints[mode]['s'][:use_map.link_len[mode][link_ind]])
-				
+				s, d = get_frenet(state.x, state.y, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind+1]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind+1]],my_wp)
+				x, y, road_yaw = get_cartesian(s, d, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind+1]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind+1]],use_map.waypoints[mode]['s'][:use_map.link_len[mode][link_ind+1]])
+				# print(s)
 				steer = road_yaw - state.yaw
 				a = 0
 		else:

@@ -150,14 +150,21 @@ def get_closest_waypoints(x, y, mapx, mapy, prev_wp):
 	return closest_wp
 
 def get_dist(x, y, _x, _y):
+	# print(np.sqrt((x - _x)**2 + (y - _y)**2))
 	return np.sqrt((x - _x)**2 + (y - _y)**2)
 
 def get_frenet(x, y, mapx, mapy, prev_wp):
 	next_wp = next_waypoint(x, y, mapx, mapy, prev_wp)
 	prev_wp = next_wp -1
 	print("prev_wp,next_wp: %d, %d"%(prev_wp,next_wp))
-	n_x = mapx[next_wp] - mapx[prev_wp]
-	n_y = mapy[next_wp] - mapy[prev_wp]
+	if mapx[next_wp] == mapx[prev_wp]:
+		n_x = mapx[next_wp+1] - mapx[prev_wp]
+	else:
+		n_x = mapx[next_wp] - mapx[prev_wp]
+	if mapy[next_wp] == mapy[prev_wp]:
+		n_y = mapy[next_wp+1] - mapy[prev_wp]
+	else:
+		n_y = mapy[next_wp] - mapy[prev_wp]
 	x_x = x - mapx[prev_wp]
 	x_y = y - mapy[prev_wp]
 
@@ -180,7 +187,8 @@ def get_frenet(x, y, mapx, mapy, prev_wp):
 		frenet_s = frenet_s + get_dist(mapx[i],mapy[i],mapx[i+1],mapy[i+1])
 
 	frenet_s = frenet_s + get_dist(0,0,proj_x,proj_y)
-
+	print(get_dist(0,0,proj_x,proj_y),proj_x,proj_y,proj_norm,x_x,x_y,n_x,n_y)
+	# (nan, nan, nan, nan, 3.5368640741799027, -0.5265787104144692, 0.0, 0.0)
 	return frenet_s, frenet_d
 
 
@@ -191,9 +199,9 @@ def get_cartesian(s, d, mapx, mapy, maps):
 
 	while(s > maps[prev_wp+1]) and (prev_wp < len(maps)-2):
 		prev_wp = prev_wp + 1
-
+	
 	next_wp = np.mod(prev_wp+1,len(mapx))
-
+	# print(prev_wp,next_wp)
 	dx = (mapx[next_wp]-mapx[prev_wp])
 	dy = (mapy[next_wp]-mapy[prev_wp])
 

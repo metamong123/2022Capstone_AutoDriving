@@ -145,6 +145,8 @@ def sub_and_pub():
 	col_msg=Int32()
 
 	dir=find_dir(use_map.link_dir, link_ind['global'])
+	if dir == 'right' or dir == 'left':
+		dir='curve'
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 
 	s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
