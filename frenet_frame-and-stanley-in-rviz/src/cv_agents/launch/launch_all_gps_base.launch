@@ -4,11 +4,13 @@
 
 	<node name="state" pkg="update" type="state_gps_base.py"/>
 	
-	<node name="path_select" pkg="cv_agents" type="path_mode_select.py" output="screen"/>
+	<node name="path_select" pkg="cv_agents" type="path_mode_select_all.py" output="screen"/>
 
 	<node name="path" pkg="cv_agents" type="path_global_gps_base.py" output="screen"/>
 	<node name="control" pkg="cv_agents" type="control_gps_base.py" output="screen"/>
 	
-	<node type="rviz" name="rviz" pkg="rviz" args="-d /home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/cv_agents/rviz/boong.rviz" />
+	<!-- <node type="rviz" name="rviz" pkg="rviz" args="-d /home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/cv_agents/rviz/boong.rviz" /> -->
+	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find cv_agents)/rviz/boong.rviz" />
 	
+
 </launch>
