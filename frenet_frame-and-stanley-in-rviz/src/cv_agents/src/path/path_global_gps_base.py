@@ -144,9 +144,13 @@ def sub_and_pub():
 
 	col_msg=Int32()
 
-	dir=find_dir(use_map.link_dir, link_ind['global'])
-	if dir == 'right' or dir == 'left':
-		dir='curve'
+	if mode == 'global':
+		dir=find_dir(use_map.link_dir, link_ind['global'])
+		if dir == 'right' or dir == 'left':
+			dir='curve'
+	else:
+		dir = 'straight'
+		
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 
 	s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
@@ -156,7 +160,7 @@ def sub_and_pub():
 	si = s
 	si_d = state.v * math.cos(yawi)
 	si_dd = ai * math.cos(yawi)
-	sf_d = use_map.target_speed['global'][dir]
+	sf_d = use_map.target_speed[mode][dir]
 	sf_dd = 0
 
 	di = d
@@ -203,9 +207,12 @@ if __name__ == "__main__":
 	link_ind['global']=start_index
 	opt_ind=0
 	
-	dir=find_dir(use_map.link_dir, link_ind['global'])
-	if dir == 'right' or dir == 'left':
-		dir='curve'
+	if mode == 'global':
+		dir=find_dir(use_map.link_dir, link_ind['global'])
+		if dir == 'right' or dir == 'left':
+			dir='curve'
+	else:
+		dir = 'straight'
 
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 
@@ -260,7 +267,7 @@ if __name__ == "__main__":
 		# df_d = 0
 		# df_dd = 0
 		
-		path, opt_ind, col = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints['global']['x'], use_map.waypoints['global']['y'],use_map.waypoints['global']['s'], opt_d, use_map.target_speed['global'][dir], use_map.DF_SET[link_ind['global']])
+		path, opt_ind, col = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints['global']['x'], use_map.waypoints['global']['y'],use_map.waypoints['global']['s'], opt_d, use_map.target_speed[mode][dir], use_map.DF_SET[link_ind['global']])
 		col_msg.data=col
 
 		if opt_ind == -1:
@@ -281,9 +288,12 @@ if __name__ == "__main__":
 
 			mode_msg=direction_array(find_dir(use_map.link_dir, link_ind['global']), find_dir(use_map.link_dir, (link_ind['global']+1)))
 
-			dir=find_dir(use_map.link_dir, link_ind['global'])
-			if dir == 'right' or dir == 'left':
-				dir='curve'
+			if mode == 'global':
+				dir=find_dir(use_map.link_dir, link_ind['global'])
+				if dir == 'right' or dir == 'left':
+					dir='curve'
+			else:
+				dir = 'straight'
 
 			s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 			x, y, road_yaw = get_cartesian(s, d, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],use_map.waypoints['global']['s'][:use_map.link_len['global'][link_ind['global']]])
@@ -330,9 +340,12 @@ if __name__ == "__main__":
 
 		mode_msg=direction_array(find_dir(use_map.link_dir, link_ind['global']), find_dir(use_map.link_dir, (link_ind['global']+1)))
 
-		dir=find_dir(use_map.link_dir, link_ind['global'])
-		if dir == 'right' or dir == 'left':
-			dir='curve'
+		if mode == 'global':
+			dir=find_dir(use_map.link_dir, link_ind['global'])
+			if dir == 'right' or dir == 'left':
+				dir='curve'
+		else:
+			dir = 'straight'
 
 		print("현재 링크 번호: "+ str(link_ind['global'])+", 링크 방향: "+str(find_dir(use_map.link_dir, link_ind['global'])))
 

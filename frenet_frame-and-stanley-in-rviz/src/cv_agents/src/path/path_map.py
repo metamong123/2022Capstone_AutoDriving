@@ -72,8 +72,9 @@ class Path:
 		self.link_len={'global':[],'horizontal_parking':[],'diagonal_parking':[],'delivery':[]}
 		self.link_dir={'straight':[],'left':[],'right':[]}
 		self.target_speed={}
-		self.stopline_start_list=[] #stopline range 시작점
-		self.stopline_finish_list=[] #stopline camera 인식 마지노선
+		self.trafficlight_list=[]
+		self.notrafficlight_list=[]
+		self.uturn_list=[]
 		# 예선 구간의 경우에는 저속 관련 변수를 int로 사용해야할 수도 있음
 		self.low_speed_start_list=[] #curve, 어린이 보호 구역 등 저속 range 시작점
 		self.low_speed_finish_list=[] # 저속 range 끝 점
@@ -85,6 +86,8 @@ class Path:
 		self.glo_to_diagonal_park_finish=0 # global->diagonal_parking 시작 waypoint range 설
 		self.glo_to_del_start=[]
 		self.glo_to_del_finish=[]
+		self.del_to_glo_start=[]
+		self.del_to_glo_finish=[]
 		self.horizontal_parking_stop=[] # 주차 구역마다 주차 정지 waypoint 설정
 		self.horizontal_park_to_glo=[] # parking->global 변경 waypoint 지점
 		self.diagonal_parking_stop=[] # 주차 구역마다 주차 정지 waypoint 설정
@@ -106,10 +109,10 @@ class Path:
 			elif mode == 'horizontal_parking':
 				with open(pc_route, 'rb') as f:
 					file=pickle.load(f)
+					self.waypoints[mode][link]=file[0]
 					self.waypoints[mode][link+1]={}
-					self.waypoints[mode][link+1]=file[0]
-					for i in self.waypoints[mode][link+1].keys():
-						self.waypoints[mode][link][i]=list(reversed(self.waypoints[mode][link+1][i]))
+					for i in self.waypoints[mode][link].keys():
+						self.waypoints[mode][link+1][i]=list(reversed(self.waypoints[mode][link][i]))
 			
 			else:
 				for i in range(self.delivery_map_num):
@@ -128,11 +131,10 @@ class Path:
 			
 			elif mode == 'horizontal_parking':
 				with open(pc_route, 'rb') as f:
+					self.waypoints[mode][0]=pickle.load(f)
 					self.waypoints[mode][1]={}
-					self.waypoints[mode][1]=pickle.load(f)
-					for i in self.waypoints[mode][1].keys():
-						self.waypoints[mode][0][i]=list(reversed(self.waypoints[mode][1][i]))
-			
+					for i in self.waypoints[mode][0].keys():
+						self.waypoints[mode][1][i]=list(reversed(self.waypoints[mode][0][i]))
 			else:
 				for i in range(self.delivery_map_num):
 					with open(pc_route, 'rb') as f:
@@ -223,7 +225,7 @@ class Path:
 	def make_path(self, mode, map_num):
 		path={}
 		if mode == 'horizontal_parking':
-			for link_ind in range(0,map_num*2,2):
+			for link_ind in range(0,map_num*2):
 				way=MakingPath()
 				way.x=self.waypoints[mode][link_ind]['x']
 				way.y=self.waypoints[mode][link_ind]['y']
@@ -267,74 +269,6 @@ class Path:
 					for l in self.lane_width[i][j]: # l = link_index
 						self.DF_SET[l]=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2])
 
-def frontier():
-	frontier=Path(path_map + "/src/frontier/curve_test.pkl")
-	frontier.set_global_link([0,100,200,300,400,500,600,700,800,900,1000,1100])
-	frontier.set_dir([0,1],[2],[3,4,5,6,7,8,9,10,11,12,13])
-	frontier.target_speed={'global':{'straight':20/3.6, 'curve':20/3.6},'parking':8/3.6,'delivery':10/3.6}
-	frontier.set_other_link()
-	frontier.lane_width={'none':{3.0:[i for i in range(14)]}}
-	frontier.set_lanewidth()
-	return frontier
-
-def kcity():
-	kcity=Path(path_map + "/src/kcity/route.pkl")
-	kcity.set_global_link([0,110,190,280,390,530,600,670,720,780,880,940,970,1010,1190,1220,1260,1300,1360,1450,1580,1600,1640,1730,1780,1850,1910,2060,2140,2190,2260,2400,2510,2670,2760,2880,2960,3138])
-	kcity.set_dir([0,1,2,3,4,6,7,8,9,11,13,15,17,18,19,20,22,24,26,30,31,33,34,35,36,37],[21,23,25,27],[5,10,12,14,16,28,29,32])    
-	kcity.stopline_start_list,kcity.stopline_finish_list=kcity.set_waypoint_range(waypoint_finish_list=[190,280,390,670,880,970,1260,1450,1730,2060,2190,2400,2670,2760,2880])
-	
-	kcity.diagonal_parking_map_num=6
-	park_ver="v1"
-	for i in range(kcity.diagonal_parking_map_num):
-		park_route=path_map+"/src/kcity/diagonal_parking_"+park_ver+"_"+str(i)+".pkl"
-		kcity.diagonal_parking_route.append(park_route)
-		kcity.set_other_mode(mode='diagonal_parking', pc_route=park_route,link=2*i)
-
-	kcity.delivery_map_num=2
-	for i in range(kcity.delivery_map_num):
-		del_route=path_map+"/src/kcity/delivery_"+str(i)+".pkl"
-		kcity.delivery_route.append(del_route)
-		kcity.set_other_mode(mode='delivery', pc_route=del_route,link=i)
-
-	kcity.glo_to_diagonal_park_start=110
-	kcity.glo_to_diagonal_park_finish=120
-	# kcity.diagonal_parking_stop=[]
-	# kcity.park_to_glo_start=[]
-	# kcity.park_to_glo_finish=[]
-	kcity.glo_to_del_start=[720, 1360]
-	kcity.glo_to_del_finish=[730, 1370]
-	
-	kcity.target_speed={'global':20/3.6,'parking':10/3.6, 'delivery':10/3.6}
-	kcity.lane_width={'3.3':[4,7,8,9,10,15,16,17,18,19,20,21,22,23,24,25,27,29,30,31,32],'3.8':[0,1,2,3,33,34,35,36],'4.1':[11,12,28], '6.6':[13,14,26], '7.1':[5,6]}
-	kcity.set_other_link()
-	kcity.diagonal_parking_path=kcity.make_path('diagonal_parking',kcity.diagonal_parking_map_num)
-	kcity.delivery_path=kcity.make_path('delivery',kcity.delivery_map_num)
-	return kcity
-
-def delivery_test():
-	delivery_test=Path(path_map + "/src/delivery_test/global.pkl")
-	delivery_test.set_global_link([0,380,430,660,740,1080,1180,1400,1487])
-	delivery_test.set_dir([0,2,4,6,8,9],[1,3,5,7],[])
-	delivery_test.diagonal_parking_map_num=0
-	delivery_test.delivery_map_num=2
-	for i in range(delivery_test.delivery_map_num):
-		del_route=path_map+"/src/delivery_test/delivery_"+str(i)+".pkl"
-		delivery_test.delivery_route.append(del_route)
-		delivery_test.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
-	
-	delivery_test.glo_to_del_start=[60, 210]
-	delivery_test.glo_to_del_finish=[80, 230]
-	delivery_test.glo_to_dynamic_start=800
-	delivery_test.glo_to_dynamic_finish=1000
-	
-	delivery_test.target_speed={'global':{'straight':10/3.6, 'curve':8/3.6},'parking':8/3.6,'delivery':4/3.6}
-	delivery_test.set_other_link()
-	delivery_test.delivery_path=delivery_test.make_path('delivery',delivery_test.delivery_map_num)
-
-	delivery_test.lane_width={'none':{3.0:[i for i in range(10)]}}
-	delivery_test.set_lanewidth()
-	return delivery_test
-
 def delivery_test_cw():
 	del_space = 0.5
 	glo_space=0.5
@@ -355,7 +289,7 @@ def delivery_test_cw():
 	delivery_test_cw.glo_to_dynamic_start=400*float(0.5/1)
 	delivery_test_cw.glo_to_dynamic_finish=500*float(0.5/1)
 	
-	delivery_test_cw.target_speed={'global':{'straight':10/3.6, 'curve':8/3.6},'parking':8/3.6,'delivery':4/3.6}
+	delivery_test_cw.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
 	delivery_test_cw.set_other_link(glo_space=1,del_space=1)
 	delivery_test_cw.delivery_path=delivery_test_cw.make_path('delivery',delivery_test_cw.delivery_map_num)
 
@@ -364,75 +298,8 @@ def delivery_test_cw():
 
 	return delivery_test_cw
 
-
-def delivery_test_ccw():
-	space = 0.5
-	# 0.5 (original) / 0.25 (x2) / 0.125 (x4) / 0.1 (x5)
-	delivery_test_ccw=Path(path_map + "/src/delivery_test_ccw/global_"+str(space)+".pkl")
-	delivery_test_ccw.set_global_link(list(np.array([0,190,215,330,370,540,590,700,744])*int(0.5/space)))
-	delivery_test_ccw.set_dir([0,2,4,6,8,9],[1,3,5,7],[])
-	
-	delivery_test_ccw.delivery_map_num=2
-	for i in range(delivery_test_ccw.delivery_map_num):
-		del_route=path_map+"/src/delivery_test_ccw/delivery_"+str(i)+"_"+str(space)+".pkl"
-		delivery_test_ccw.delivery_route.append(del_route)
-		delivery_test_ccw.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
-	
-	delivery_test_ccw.glo_to_del_start=list(np.array([60, 210])*int(0.5/space))
-	delivery_test_ccw.glo_to_del_finish=list(np.array([80, 230])*int(0.5/space))
-	delivery_test_ccw.glo_to_dynamic_start=400*int(0.5/space)
-	delivery_test_ccw.glo_to_dynamic_finish=500*int(0.5/space)
-
-	delivery_test_ccw.target_speed={'global':{'straight':10/3.6, 'curve':8/3.6},'parking':8/3.6,'delivery':4/3.6}
-	delivery_test_ccw.set_other_link(space)
-	delivery_test_ccw.delivery_path=delivery_test_ccw.make_path('delivery',delivery_test_ccw.delivery_map_num)
-
-	delivery_test_ccw.lane_width={'none':{3.0:[i for i in range(10)]}}
-	delivery_test_ccw.set_lanewidth()
-
-	return delivery_test_ccw
-
-def boong_inter():
-	offset_state = ""
-	# offset_state : "", "_offset", "_offset2", "_offset3"
-	# old maps : "_old", "_old_offset", "_old_offset2"
-
-	boong=Path(path_map + "/src/boong_interpolated/global"+offset_state+".pkl")
-	
-	if offset_state == "_old_offset2":
-		boong.set_global_link([0,116,400,505,920,1020,1560,1620])
-	else:
-		boong.set_global_link([0,116,400,505,920,1020,1560,1620])
-
-	boong.set_dir([0,2,4,5,6,8],[],[1,3,5,7])
-	
-	boong.diagonal_parking_map_num=2
-	for i in range(boong.diagonal_parking_map_num):
-		park_route=path_map+"/src/boong_interpolated/parking"+offset_state+"_"+str(i)+".pkl"
-		boong.diagonal_parking_route.append(park_route)
-		boong.set_other_mode(mode='diagonal_parking', pc_route=park_route,link=2*i)
-	
-	boong.glo_to_diagonal_park_start=10
-	boong.glo_to_diagonal_park_finish=12
-	# boong.parking_stop=[]
-	# boong.park_to_glo_start=[]
-	# boong.park_to_glo_finish=[]
-	# boong.glo_to_del_start=[]
-	# boong.glo_to_del_finish=[]
-	
-	boong.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'parking':8/3.6,'delivery':10/3.6}
-	boong.set_other_link()
- 
-	# boong.interpolate_map(mode='global', space=0.5,link=1)
-	boong.diagonal_parking_path=boong.make_path('diagonal_parking',boong.diagonal_parking_map_num)
-	# boong.delivery_path=boong.make_path('delivery',boong.delivery_map_num)
-
-	boong.lane_width={'none':{3.0:[i for i in range(11)]}}
-	boong.set_lanewidth()
-	return boong
-
 def boong():
-	global_state = "30cm"
+	global_state = "10cm"
 	# global_state : "10cm", "30cm", "1m"
 	parking_state = "20cm"
 	# parking_state : "10cm", "20cm", "30cm"
@@ -480,22 +347,94 @@ def boong():
 	# boong.glo_to_del_start=[]
 	# boong.glo_to_del_finish=[]
 	
-	boong.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'parking':7/3.6,'delivery':10/3.6}
+	boong.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
 	boong.set_other_link()
 	boong.diagonal_parking_path=boong.make_path('diagonal_parking',boong.diagonal_parking_map_num)
 	# boong.delivery_path=boong.make_path('delivery',boong.delivery_map_num)
-	for link_int in [1,3,5,7]:
-		boong.interpolate_map(mode='global', space=1,link=link_int) # space는 m 단위로 넣기
-	# boong.interpolate_map(mode='global', space=1,link=7)
+	# for link_int in [1,3,5,7]:
+	# 	boong.interpolate_map(mode='global', space=1,link=link_int) # space는 m 단위로 넣기
+	# # boong.interpolate_map(mode='global', space=1,link=7)
 	boong.lane_width={'none':{3.0:[i for i in range(11)]}}
 	boong.set_lanewidth()
 	return boong
 
+def kcity():
+	kcity=Path(path_map + "/src/kcity/global.pkl")
+	kcity.set_global_link([0,155,209,279,341,663,742,772,829,1214,1243,1678,1957,2120,2365,2738,2833,3000,3058,3133])
+	kcity.set_dir([0,1,2,3,6,7,9,15,16,17,18,19,20],[8,10,11,12],[4,5,13,14])
+
+	kcity.horizontal_parking_map_num=2
+	for i in range(kcity.horizontal_parking_map_num):
+		park_route=path_map+"/src/kcity/parking_"+str(i)+".pkl"
+		kcity.horizontal_parking_route.append(park_route)
+		kcity.set_other_mode(mode='horizontal_parking', pc_route=park_route,link=2*i)
+	
+	kcity.delivery_map_num=2
+	for i in range(kcity.delivery_map_num):
+		del_route=path_map+"/src/kcity/delivery_"+str(i)+".pkl"
+		kcity.delivery_route.append(del_route)
+		kcity.set_other_mode(mode='delivery', pc_route=del_route,link=i)
+
+	kcity.notrafficlight_list=[2339,2608]
+	kcity.trafficlight_list=[205,275,738,1221,2829,2996,3054]
+	kcity.uturn_list=[1991]
+
+	kcity.glo_to_horizontal_park_start=3201
+	kcity.glo_to_horizontal_park_finish=3211
+	kcity.horizontal_parking_stop=[]
+	kcity.horizontal_park_to_glo=[] 
+
+	kcity.glo_to_del_start=[773, 2739]
+	kcity.glo_to_del_finish=[775, 2741]
+	kcity.del_to_glo_start=[809,2825]
+	kcity.del_to_glo_finish=[811,2827]
+
+	kcity.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6},'parking':{'straight':10/3.6}, 'delivery':{'straight':10/3.6}}
+	kcity.lane_width={'left':{3.3:{3.3:[7]}, 3.8:{3.3:[5]}}, 'right':{}, 'none':{3.3:[3,4,6,8,9,10,11,12,14,15,16], 3.8:[0,1,2,17,18,19,20], 4.1:[13]}}
+
+	kcity.set_lanewidth()
+	kcity.set_other_link()
+	kcity.horizontal_parking_path=kcity.make_path('horizontal_parking',kcity.horizontal_parking_map_num)
+	kcity.delivery_path=kcity.make_path('delivery',kcity.delivery_map_num)
+	return kcity
+
+def qualifier():
+	qualifier=Path(path_map + "/src/qualifier/global.pkl")
+	qualifier.set_global_link([0,96,124,154,219,457,480,654,754,901,1054])
+	qualifier.set_dir([0,2,3,9,10],[4,5,6,7],[1,8])
+
+	qualifier.diagonal_parking_map_num=6
+	for i in range(qualifier.diagonal_parking_map_num):
+		park_route=path_map+"/src/qualifier/parking_"+str(i)+".pkl"
+		qualifier.diagonal_parking_route.append(park_route)
+		qualifier.set_other_mode(mode='diagonal_parking', pc_route=park_route,link=2*i)
+
+	qualifier.notrafficlight_list=[477,750]
+	qualifier.trafficlight_list=[202]
+
+	qualifier.glo_to_dynamic_start=662
+	qualifier.glo_to_dynamic_finish=742
+
+	qualifier.glo_to_diagonal_park_start=99
+	qualifier.glo_to_diagonal_park_finish=102
+	qualifier.diagonal_parking_stop=[]
+	qualifier.diagonal_park_to_glo=[] 
+	
+	qualifier.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6},'parking':{'straight':10/3.6}, 'delivery':{'straight':10/3.6}}
+	qualifier.lane_width={'left':{3.3:{3.3:[5]}}, 'right':{}, 'none':{3.3:[4,6,7,8], 3.8:[0,1,2,3,9,10]}}
+
+	qualifier.set_lanewidth()
+	qualifier.set_other_link()
+	qualifier.diagonal_parking_path=qualifier.make_path('diagonal_parking',qualifier.diagonal_parking_map_num)
+	return qualifier
+
 use_map=boong()
 start_index=0
+
 if start_index==0:
     obj_msg=Object(x=use_map.waypoints['global']['x'][:use_map.link_len['global'][start_index]][0],y=use_map.waypoints['global']['y'][:use_map.link_len['global'][start_index]][0],yaw=use_map.waypoints['global']['yaw'][:use_map.link_len['global'][start_index]][0],v=0,L=1.600,W=1.04)
 else:
 	obj_msg=Object(x=use_map.waypoints['global']['x'][use_map.link_len['global'][start_index-1]:use_map.link_len['global'][start_index]][0],y=use_map.waypoints['global']['y'][use_map.link_len['global'][start_index-1]:use_map.link_len['global'][start_index]][0],yaw=use_map.waypoints['global']['yaw'][use_map.link_len['global'][start_index-1]:use_map.link_len['global'][start_index]][0],v=0,L=1.600,W=1.04)
+
 obj_msg_gps=obj_msg
 obj_msg_imu=obj_msg

@@ -22,6 +22,12 @@ path_frenet=rospack.get_path("cv_agents")
 sys.path.append(path_frenet+"/src/path/")
 from path_map import *
 
+def backward_yaw(yaw):
+    if yaw <= 0:
+        yaw = yaw + math.pi
+    else:
+        yaw = yaw - math.pi
+    return yaw
 
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
@@ -144,7 +150,7 @@ if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
 	
-	control_gain=0.9
+	control_gain=10
 	cte_speed_gain=5
 	yaw_weight=0.8
 	cte_weight=0.9

@@ -20,6 +20,12 @@ path_frenet=rospack.get_path("cv_agents")
 sys.path.append(path_frenet+"/src/path/")
 from path_map import *
 
+def backward_yaw(yaw):
+    if yaw <= 0:
+        yaw = yaw + math.pi
+    else:
+        yaw = yaw - math.pi
+    return yaw
 
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
@@ -111,20 +117,20 @@ def callback_dir(msg):
 if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	control_gain=0.5
+	control_gain={'global':1,'parking':10, 'delivery':10}
 	cte_speed_gain=5
 	yaw_weight=0.8
 	cte_weight=0.8
 	cte_thresh_hold=0
 	yaw_d_gain=0
 
-	stanley_gps = Stanley(k=control_gain, speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
-	stanley_imu = Stanley(k=control_gain, speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
+	stanley_gps = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
+	stanley_imu = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
 	
-	f_gps = open("/home/mds/stanley/"+"gps_"+time.strftime('%Y%m%d_%H:%M')+"_k"+str(control_gain)+"_sg"+str(cte_speed_gain)+"_wy"+str(yaw_weight)+"_wc"+str(cte_weight)+"_thresh"+str(cte_thresh_hold)+"_dgain"+str(yaw_d_gain)+".csv", "w")
+	f_gps = open("/home/mds/stanley/"+"gps_"+time.strftime('%Y%m%d_%H:%M')+"_k"+str(control_gain[mode])+"_sg"+str(cte_speed_gain)+"_wy"+str(yaw_weight)+"_wc"+str(cte_weight)+"_thresh"+str(cte_thresh_hold)+"_dgain"+str(yaw_d_gain)+".csv", "w")
 	f_gps.write('time' + ',' + 'x' + ',' + 'y' + ',' + 'map_yaw' + ',' + 'yaw' + ',' + 'yaw_term(degree)' + ',' + 'cte(cm)' + ',' + 'steering(degree)' + '\n')
 
-	f_imu = open("/home/mds/stanley/"+"imu_"+time.strftime('%Y%m%d_%H:%M')+"_k"+str(control_gain)+"_sg"+str(cte_speed_gain)+"_wy"+str(yaw_weight)+"_wc"+str(cte_weight)+"_thresh"+str(cte_thresh_hold)+"_dgain"+str(yaw_d_gain)+".csv", "w")
+	f_imu = open("/home/mds/stanley/"+"imu_"+time.strftime('%Y%m%d_%H:%M')+"_k"+str(control_gain[mode])+"_sg"+str(cte_speed_gain)+"_wy"+str(yaw_weight)+"_wc"+str(cte_weight)+"_thresh"+str(cte_thresh_hold)+"_dgain"+str(yaw_d_gain)+".csv", "w")
 	f_imu.write('time' + ',' + 'x' + ',' + 'y' + ',' + 'map_yaw' + ',' + 'yaw' + ',' + 'yaw_term(degree)' + ',' + 'cte(cm)' + ',' + 'steering(degree)' + '\n')
 	
 	t1 = time.time()
@@ -144,6 +150,13 @@ if __name__ == "__main__":
 	v=0
 
 	state=State(x=obj_msg_imu.x, y=obj_msg_imu.y, yaw=obj_msg_imu.yaw, v=2, dt=0.05)
+	# 수평 주차 할 때만 사용할 것.
+	if mode == 'parking':
+		yaw_reversed=backward_yaw(obj_msg_gps.yaw)
+		state=State(x=obj_msg_gps.x, y=obj_msg_gps.y, yaw=yaw_reversed, v=2, dt=0.05)
+	else:
+		state=State(x=obj_msg_gps.x, y=obj_msg_gps.y, yaw=obj_msg_gps.yaw, v=2, dt=0.05)
+
 	prev_v = state.v
 	error_ia = 0
 	r = rospy.Rate(20)
@@ -168,6 +181,14 @@ if __name__ == "__main__":
 
 		state=State(x=obj_msg_imu.x, y=obj_msg_imu.y, yaw=obj_msg_imu.yaw, v=msg.drive.speed, dt=0.05)
 		
+		# 수평 주차 할 때만 사용할 것.
+		if mode == 'parking':
+			yaw_reversed=backward_yaw(obj_msg_gps.yaw)
+			state=State(x=obj_msg_gps.x, y=obj_msg_gps.y, yaw=yaw_reversed, v=2, dt=0.05)
+		else:
+			state=State(x=obj_msg_gps.x, y=obj_msg_gps.y, yaw=obj_msg_gps.yaw, v=2, dt=0.05)
+
+
 		if not path_x: ## No solution
 			if mode == 'global':
 				s, d = get_frenet(state.x, state.y, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],my_wp)

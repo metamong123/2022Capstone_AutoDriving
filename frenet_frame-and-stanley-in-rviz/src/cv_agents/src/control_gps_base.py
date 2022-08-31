@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 
+from turtle import back
 import rospy
 import math
 import rospkg
@@ -21,6 +22,12 @@ path_frenet=rospack.get_path("cv_agents")
 sys.path.append(path_frenet+"/src/path/")
 from path_map import *
 
+def backward_yaw(yaw):
+    if yaw <= 0:
+        yaw = yaw + math.pi
+    else:
+        yaw = yaw - math.pi
+    return yaw
 
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
@@ -111,7 +118,7 @@ def callback_dir(msg):
 if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	control_gain={'global':1,'parking':10}
+	control_gain={'global':1,'parking':10,'delivery':10}
 	cte_speed_gain=0
 	yaw_weight=1
 	cte_weight=1
@@ -156,6 +163,14 @@ if __name__ == "__main__":
 	v=0
 
 	state=State(x=obj_msg_gps.x, y=obj_msg_gps.y, yaw=obj_msg_gps.yaw, v=2, dt=0.05)
+
+	# # 수평 주차 할 때만 사용할 것.
+	# if mode == 'parking':
+	# 	yaw_reversed=backward_yaw(obj_msg_gps.yaw)
+	# 	state=State(x=obj_msg_gps.x, y=obj_msg_gps.y, yaw=yaw_reversed, v=2, dt=0.05)
+	# else:
+	# 	state=State(x=obj_msg_gps.x, y=obj_msg_gps.y, yaw=obj_msg_gps.yaw, v=2, dt=0.05)
+
 	prev_v = state.v
 	error_ia = 0
 	r = rospy.Rate(20)
@@ -167,8 +182,16 @@ if __name__ == "__main__":
 
 	while not rospy.is_shutdown():
 		
+		
 		state=State(x=obj_msg_gps.x, y=obj_msg_gps.y, yaw=obj_msg_gps.yaw, v=msg.drive.speed, dt=0.05)
 		
+		# 수평 주차 할 때만 사용할 것.
+		if mode == 'parking':
+			yaw_reversed=backward_yaw(obj_msg_gps.yaw)
+			state=State(x=obj_msg_gps.x, y=obj_msg_gps.y, yaw=yaw_reversed, v=2, dt=0.05)
+		else:
+			state=State(x=obj_msg_gps.x, y=obj_msg_gps.y, yaw=obj_msg_gps.yaw, v=2, dt=0.05)
+
 		if not path_x: ## No solution
 			if mode == 'global':
 				s, d = get_frenet(state.x, state.y, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],my_wp)
