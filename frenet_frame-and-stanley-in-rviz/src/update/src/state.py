@@ -1,71 +1,13 @@
 #! /usr/bin/python
 #-*- coding: utf-8 -*-
 
-import time
-import math
 import rospy
-#from shapely.geometry import LineString, Point, Polygon
-#import geopandas as gpd
-import numpy as np
 import tf
 from tf.transformations import euler_from_quaternion
-from visualization_msgs.msg import Marker, MarkerArray
+from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Quaternion
 from object_msgs.msg import Object
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Float32, UInt32, Bool
-
-x_gps=0.0
-y_gps=0.0
-yaw_gps=0.0
-v_gps=0.0
-
-x_imu=0.0
-y_imu=0.0
-yaw_imu=0.0
-v_imu=0.0
-
-id=1
-
-class TopicReciver:
-	def __init__(self):
-		self.odom_gps_sub=rospy.Subscriber("/odom_gps", Odometry,self.odometry_gps_callback)
-		self.odom_imu_sub=rospy.Subscriber("/odom_imu", Odometry,self.odometry_imu_callback)
-	def check_all_connections(self):
-		return (self.odom_gps_sub.get_num_connections()+self.odom_imu_sub.get_num_connections())>=1
-	def odometry_gps_callback(self, data):
-		if self.check_all_connections():
-			global x_gps, y_gps, v_gps, yaw_gps
-			# sensor_msgs/Imu.msg 
-			x_gps = data.pose.pose.position.x
-			y_gps = data.pose.pose.position.y
-
-			v_gps = data.twist.twist.linear.x
-			# vy = data.twist.twist.linear.y
-			# vz = data.twist.twist.linear.z
-			# v = np.sqrt(vx**2+vy**2+vz**2)
-
-			orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
-			roll, pitch, yaw_gps = euler_from_quaternion (orientation_list) 
-			# imu_theta=yaw*(180/np.pi) 
-			# print("lap: %f" %cur_gps_position[0])
-
-	def odometry_imu_callback(self, data):
-		if self.check_all_connections():
-			global x_imu, y_imu, v_imu, yaw_imu
-			# sensor_msgs/Imu.msg 
-			x_imu = data.pose.pose.position.x 
-			y_imu = data.pose.pose.position.y 
-
-			v_imu = data.twist.twist.linear.x
-			# vy = data.twist.twist.linear.y
-			# vz = data.twist.twist.linear.z
-			# v = np.sqrt(vx**2+vy**2+vz**2)
-
-			orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
-			roll, pitch, yaw_imu = euler_from_quaternion (orientation_list) 
-			# imu_theta=yaw*(180/np.pi) 
-			# print("lap: %f" %cur_gps_position[0])
 
 class ImuPub:
 	def __init__(self):
@@ -165,13 +107,13 @@ class ImuPub:
 
 
 	def odometry_imu_callback(self, data):
-			# sensor_msgs/Imu.msg 
-			self.x_imu = data.pose.pose.position.x 
-			self.y_imu = data.pose.pose.position.y 
-			self.v_imu = data.twist.twist.linear.x
+		# sensor_msgs/Imu.msg 
+		self.x_imu = data.pose.pose.position.x 
+		self.y_imu = data.pose.pose.position.y 
+		self.v_imu = data.twist.twist.linear.x
 
-			orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
-			roll, pitch, self.yaw_imu = euler_from_quaternion(orientation_list) 
+		orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
+		roll, pitch, self.yaw_imu = euler_from_quaternion(orientation_list) 
 
 
 if __name__ == "__main__":
