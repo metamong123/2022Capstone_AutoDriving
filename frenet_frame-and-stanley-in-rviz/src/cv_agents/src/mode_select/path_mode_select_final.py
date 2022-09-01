@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
 	parking_ind = 0
 	park_wp = 0
-	
+	r = rospy.Rate(10)
 	mode='global'
 	dist = 0
 	#mode_msg.data = 'global'
@@ -140,4 +140,4 @@ if __name__ == "__main__":
 
 		path_pub.publish(path_msg)
 		
-		rospy.sleep(0.1)
+		r.sleep()

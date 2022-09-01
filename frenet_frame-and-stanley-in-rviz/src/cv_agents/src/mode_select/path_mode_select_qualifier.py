@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
 	parking_ind = 0
 	park_wp = 0
-	
+	r = rospy.Rate(10)
 	mode='global'
 	dist = 0
 	#mode_msg.data = 'global'
@@ -106,6 +106,8 @@ if __name__ == "__main__":
 			mode = 'parking'
 		elif (global_wp <= use_map.glo_to_dynamic_finish and global_wp >= use_map.glo_to_dynamic_start):  # dynamic_object
 			mode = 'dynamic_object'
+			if global_wp >= (use_map.glo_to_dynamic_finish-5):
+				mode = 'global'
 		
 
         ### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
@@ -177,4 +179,4 @@ if __name__ == "__main__":
 
 		path_pub.publish(path_msg)
 		
-		rospy.sleep(0.1)
+		r.sleep()

@@ -124,12 +124,12 @@ def my_state_array(ind, wp):
 
 def sub_and_pub():
 	global opt_frenet_pub,cand_frenet_pub,waypoint_pub,dir_pub,global_path_pub,col_pub,col_msg,s,d,x,y,road_yaw,dir,state,si,si_d,si_dd,sf_d,sf_dd,di,di_d,df_dd,di_dd,df_d,opt_d,prev_opt_d,obstacle_sub,state_sub,accel_sub,mode_sub
-	rospy.init_node("path")
+	
 
 	#topic_receiver=TopicReciver()
 
 	obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
-	state_sub = rospy.Subscriber("/objects/car_1/gps", Object, callback2, queue_size=1)
+	state_sub = rospy.Subscriber("/objects/car_1/imu", Object, callback2, queue_size=1)
 	accel_sub = rospy.Subscriber("/accel", Float64, callback3, queue_size=1)
 
 	mode_sub=rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=10)
@@ -194,7 +194,7 @@ if __name__ == "__main__":
 	# col_pub=rospy.Publisher("/col", Int32, queue_size=1)
 
 	# col_msg=Int32()
-
+	rospy.init_node("path")
 	my_wp={'global':0,'diagonal_parking':{},'horizontal_parking':[]}
 	# if (not use_map.diagonal_parking_map_num==0):
 	# 	for i in range(use_map.diagonal_parking_map_num):

@@ -65,5 +65,5 @@ waypoints[0]=read_shp('/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/fren
 with open('/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/boong_interpolated/parking_0.pkl', 'wb') as handle:
   pickle.dump(waypoints,handle, protocol=0)
   
-with open('/home/nsclmds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/boong_interpolated/parking_2.pkl', "rb") as f:
+with open('/home/mds/catkin_ws/src/2022Capstone_AutoDriving/frenet_frame-and-stanley-in-rviz/src/map_server/src/kcity/parking_0.pkl', "rb") as f:
 	file = pickle.load(f)

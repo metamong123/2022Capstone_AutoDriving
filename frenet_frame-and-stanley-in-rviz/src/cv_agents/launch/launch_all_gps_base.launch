@@ -1,10 +1,13 @@
 <launch>
-
-	<node name="map_visualizer" pkg="map_server" type="map_visualizer.py" />
-
+	<param name="mission_status" type="string" value="going"/>
 	<node name="state" pkg="update" type="state_gps_base.py"/>
+
+	<node name="map_visualizer" pkg="map_server" type="map_visualizer.py" />	
 	
-	<node name="path_select" pkg="cv_agents" type="path_mode_select_all.py" output="screen"/>
+	<node name="parking_car" pkg="obstacles" type="parking_car.py" />
+	<node name="collision_check" pkg="obstacles" type="collision_check_with_visualizing_car_gps_base.py" />
+
+	<node name="path_select" pkg="cv_agents" type="path_mode_select_qualifier.py" output="screen"/>
 
 	<node name="path" pkg="cv_agents" type="path_global_gps_base.py" output="screen"/>
 	<node name="control" pkg="cv_agents" type="control_gps_base.py" output="screen"/>

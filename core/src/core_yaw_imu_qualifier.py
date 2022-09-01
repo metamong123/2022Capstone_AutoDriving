@@ -215,12 +215,12 @@ if __name__=='__main__':
 	rospy.init_node('core_control')
 
 	mode_status = 'going'
-	
+	r=rospy.Rate(10)
 	while not rospy.is_shutdown():
 		rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
 		rospy.Subscriber("/forward_sign", Int32MultiArray, forward_callback)
 		rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
-		rospy.Subscriber("/waypoint", Float64, waypoint_callback)
+		rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
 		rospy.Subscriber("/odom_imu", Odometry, odometry_callback)
 		rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
 		rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
@@ -308,7 +308,7 @@ if __name__=='__main__':
 
 		final_cmd_Pub.publish(cmd)
 
-		rospy.sleep(0.1)
+		r.sleep()
 
 
 

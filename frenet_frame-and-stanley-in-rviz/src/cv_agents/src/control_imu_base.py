@@ -117,10 +117,10 @@ def callback_dir(msg):
 if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	control_gain={'global':1,'parking':10, 'delivery':10}
-	cte_speed_gain=5
+	control_gain={'global':10,'parking':10, 'delivery':10}
+	cte_speed_gain=0
 	yaw_weight=0.8
-	cte_weight=0.8
+	cte_weight=1
 	cte_thresh_hold=0
 	yaw_d_gain=0
 
@@ -151,20 +151,22 @@ if __name__ == "__main__":
 
 	state=State(x=obj_msg_imu.x, y=obj_msg_imu.y, yaw=obj_msg_imu.yaw, v=2, dt=0.05)
 	# 수평 주차 할 때만 사용할 것.
-	if mode == 'parking':
-		yaw_reversed=backward_yaw(obj_msg_gps.yaw)
-		state=State(x=obj_msg_gps.x, y=obj_msg_gps.y, yaw=yaw_reversed, v=2, dt=0.05)
-	else:
-		state=State(x=obj_msg_gps.x, y=obj_msg_gps.y, yaw=obj_msg_gps.yaw, v=2, dt=0.05)
+	# if mode == 'parking':
+	# 	yaw_reversed=backward_yaw(obj_msg_imu.yaw)
+	# 	state=State(x=obj_msg_imu.x, y=obj_msg_imu.y, yaw=yaw_reversed, v=2, dt=0.05)
+	# else:
+	# 	state=State(x=obj_msg_imu.x, y=obj_msg_imu.y, yaw=obj_msg_imu.yaw, v=2, dt=0.05)
 
 	prev_v = state.v
 	error_ia = 0
-	r = rospy.Rate(20)
+	r = rospy.Rate(10)
 	a = 0
 	steer_imu=0
 	msg = state.get_ros_msg(a, steer_imu, id=id)
+
 	if dir == 'right' or dir == 'left':
 		dir='curve'
+	
 	while not rospy.is_shutdown():
 		
 		control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
@@ -182,11 +184,11 @@ if __name__ == "__main__":
 		state=State(x=obj_msg_imu.x, y=obj_msg_imu.y, yaw=obj_msg_imu.yaw, v=msg.drive.speed, dt=0.05)
 		
 		# 수평 주차 할 때만 사용할 것.
-		if mode == 'parking':
-			yaw_reversed=backward_yaw(obj_msg_gps.yaw)
-			state=State(x=obj_msg_gps.x, y=obj_msg_gps.y, yaw=yaw_reversed, v=2, dt=0.05)
-		else:
-			state=State(x=obj_msg_gps.x, y=obj_msg_gps.y, yaw=obj_msg_gps.yaw, v=2, dt=0.05)
+		# if mode == 'parking':
+		# 	yaw_reversed=backward_yaw(obj_msg_imu.yaw)
+		# 	state=State(x=obj_msg_imu.x, y=obj_msg_imu.y, yaw=yaw_reversed, v=2, dt=0.05)
+		# else:
+		# 	state=State(x=obj_msg_imu.x, y=obj_msg_imu.y, yaw=obj_msg_imu.yaw, v=2, dt=0.05)
 
 
 		if not path_x: ## No solution
@@ -195,20 +197,21 @@ if __name__ == "__main__":
 				x, y, road_yaw = get_cartesian(s, d, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind]],use_map.waypoints[mode]['s'][:use_map.link_len[mode][link_ind]])
 				
 				#steer_imu = road_yaw - state.yaw
-				steer_gps, yaw_term_gps, cte_gps, map_yaw_gps = stanley_gps.stanley_control_pd(state.x, state.y, state.yaw, state.v, [x], [y], [road_yaw])
+				steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu.stanley_control_pd(state.x, state.y, state.yaw, state.v, [x], [y], [road_yaw])
 				a = 0
 		else:
 			## PID control
 			if dir == 'right' or dir == 'left':
 				dir='curve'
+			
 			if mode == 'global':
 				error_pa = use_map.target_speed[mode][dir] - state.v
 				error_da = state.v - prev_v
 				error_ia += use_map.target_speed[mode][dir] - state.v
 			else:
-				error_pa = use_map.target_speed[mode] - state.v
+				error_pa = use_map.target_speed[mode][dir] - state.v
 				error_da = state.v - prev_v
-				error_ia += use_map.target_speed[mode] - state.v
+				error_ia += use_map.target_speed[mode][dir] - state.v
 			kp_a = 0.5
 			kd_a = 0.7
 			ki_a = 0.01

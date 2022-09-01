@@ -32,7 +32,7 @@ class TopicReciver:
 		self.odom_gps_sub=rospy.Subscriber("/odom_gps", Odometry,self.odometry_gps_callback)
 		self.odom_imu_sub=rospy.Subscriber("/odom_imu", Odometry,self.odometry_imu_callback)
 	def check_all_connections(self):
-		return (self.odom_gps_sub.get_num_connections()+self.odom_imu_sub.get_num_connections())==2
+		return (self.odom_gps_sub.get_num_connections()+self.odom_imu_sub.get_num_connections())>=1
 	def odometry_gps_callback(self, data):
 		if self.check_all_connections():
 			global x_gps, y_gps, v_gps, yaw_gps
@@ -67,7 +67,34 @@ class TopicReciver:
 			# imu_theta=yaw*(180/np.pi) 
 			# print("lap: %f" %cur_gps_position[0])
 
+def odometry_gps_callback(data):
+	global x_gps, y_gps, v_gps, yaw_gps
+	# sensor_msgs/Imu.msg 
+	x_gps = data.pose.pose.position.x
+	y_gps = data.pose.pose.position.y
+	v_gps = data.twist.twist.linear.x
+	# vy = data.twist.twist.linear.y
+	# vz = data.twist.twist.linear.z
+	# v = np.sqrt(vx**2+vy**2+vz**2)
 
+	orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
+	roll, pitch, yaw_gps = euler_from_quaternion (orientation_list) 
+	# imu_theta=yaw*(180/np.pi) 
+	# print("lap: %f" %cur_gps_position[0])
+
+def odometry_imu_callback(data):
+	global x_imu, y_imu, v_imu, yaw_imu
+	# sensor_msgs/Imu.msg 
+	x_imu = data.pose.pose.position.x 
+	y_imu = data.pose.pose.position.y 
+
+	v_imu = data.twist.twist.linear.x
+	# vy = data.twist.twist.linear.y
+	# vz = data.twist.twist.linear.z
+	# v = np.sqrt(vx**2+vy**2+vz**2)
+
+	orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
+	roll, pitch, yaw_imu = euler_from_quaternion (orientation_list) 
 # def speed_callback(data): 
 # 	global speed 
 # 	speed = data.data/36 
@@ -76,10 +103,12 @@ if __name__ == "__main__":
     
 	rospy.init_node("state")
 	#state_pub=rospy.Publisher("/state",Object,queue_size=1)
-	topic_receiver=TopicReciver()
-	object_gps_pub=rospy.Publisher("/objects/car_1/gps", Object,queue_size=1)
-	object_imu_pub=rospy.Publisher("/objects/car_1/imu", Object,queue_size=1)
-	marker_pub=rospy.Publisher("/objects/marker/car_1", Marker,queue_size=1)
+	#topic_receiver=TopicReciver()
+	#object_gps_pub=rospy.Publisher("/objects/car_1/gps", Object,queue_size=1)
+	#object_imu_pub=rospy.Publisher("/objects/car_1/imu", Object,queue_size=1)
+	#marker_pub=rospy.Publisher("/objects/marker/car_1", Marker,queue_size=1)
+	#odom_gps_sub=rospy.Subscriber("/odom_gps", Odometry,odometry_gps_callback)
+	#odom_imu_sub=rospy.Subscriber("/odom_imu", Odometry,odometry_imu_callback)
 	
 	r = rospy.Rate(10)
 
@@ -90,7 +119,13 @@ if __name__ == "__main__":
 	
 	# speed=0
 	while not rospy.is_shutdown():
-
+		#state_pub=rospy.Publisher("/state",Object,queue_size=1)
+		#topic_receiver=TopicReciver()
+		object_gps_pub=rospy.Publisher("/objects/car_1/gps", Object,queue_size=1)
+		object_imu_pub=rospy.Publisher("/objects/car_1/imu", Object,queue_size=1)
+		marker_pub=rospy.Publisher("/objects/marker/car_1", Marker,queue_size=1)
+		odom_gps_sub=rospy.Subscriber("/odom_gps", Odometry,odometry_gps_callback)
+		odom_imu_sub=rospy.Subscriber("/odom_imu", Odometry,odometry_imu_callback)
 		# position=[0,0]
 		# position[0] = cur_gps_position[0]  # 위도
 		# position[1] = cur_gps_position[1]  # 경도

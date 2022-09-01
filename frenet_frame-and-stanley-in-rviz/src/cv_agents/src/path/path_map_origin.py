@@ -494,7 +494,7 @@ def boong():
 		boong.set_link([0,110,220,320,460,560,740,800])	
 	elif global_state == "1m":
 		boong.set_link([0,110,150,250,300,380,430,500])
-	boong.set_dir([0,1,3,4,5],[],[2,4,6])
+	boong.set_dir([0,1,3,4,5,8,9],[],[2,4,6,7])
 	
 	boong.diagonal_parking_map_num=6
 	for i in range(boong.diagonal_parking_map_num):
@@ -527,11 +527,13 @@ def boong():
 	# boong.glo_to_del_start=[]
 	# boong.glo_to_del_finish=[]
 	
-	boong.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'parking':7/3.6,'delivery':10/3.6}
+	boong.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
 	boong.set_map()
 	boong.diagonal_parking_path=boong.make_path('diagonal_parking',boong.diagonal_parking_map_num)
 	# boong.delivery_path=boong.make_path('delivery',boong.delivery_map_num)
-
+	# for link_int in [1,3,5,7]:
+	# 	boong.interpolate_map(mode='global', space=1,link=link_int) # space는 m 단위로 넣기
+	# # boong.interpolate_map(mode='global', space=1,link=7)
 	boong.lane_width={'none':{3.0:[i for i in range(11)]}}
 	boong.set_lanewidth()
 	return boong

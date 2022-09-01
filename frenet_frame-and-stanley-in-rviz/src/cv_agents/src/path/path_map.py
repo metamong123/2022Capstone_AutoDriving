@@ -299,7 +299,7 @@ def delivery_test_cw():
 	return delivery_test_cw
 
 def boong():
-	global_state = "10cm"
+	global_state = "30cm"
 	# global_state : "10cm", "30cm", "1m"
 	parking_state = "20cm"
 	# parking_state : "10cm", "20cm", "30cm"
@@ -428,7 +428,53 @@ def qualifier():
 	qualifier.diagonal_parking_path=qualifier.make_path('diagonal_parking',qualifier.diagonal_parking_map_num)
 	return qualifier
 
-use_map=boong()
+def uturn_test():
+	uturn_test=Path(path_map + "/src/uturn_test/uturn_test.pkl")
+	uturn_test.set_global_link([0,250,375,600])
+	uturn_test.set_dir([0,3,4],[1,2],[])
+	
+	uturn_test.target_speed={'global':{'straight':5/3.6, 'curve':5/3.6},'parking':5/3.6, 'delivery':5/3.6}
+	uturn_test.lane_width={'none':{3.3:[0,1,2,3,4]}}
+
+	# uturn_test=Path(path_map + "/src/uturn_test/uturn_test2.pkl")
+	# uturn_test.set_global_link([0,100,200,300,400])
+	# uturn_test.set_dir([0,1,2,3,4,5],[],[])
+	
+	# uturn_test.target_speed={'global':{'straight':5/3.6, 'curve':5/3.6},'parking':5/3.6, 'delivery':5/3.6}
+	# uturn_test.lane_width={'none':{3.3:[0,1,2,3,4,5]}}
+
+
+	uturn_test.set_lanewidth()
+	uturn_test.set_other_link()
+
+	return uturn_test
+
+def playground():
+
+	playground=Path(path_map + "/src/playground/global.pkl")
+	
+	playground.set_global_link([0,48,152,198])
+	playground.set_dir([0,2,4],[1,3],[])
+	
+	# playground.delivery_map_num=2
+	# for i in range(playground.delivery_map_num):
+	# 	del_route=path_map+"/src/playground/delivery_"+str(i)+".pkl"
+	# 	playground.delivery_route.append(del_route)
+	# 	playground.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
+
+	# playground.glo_to_del_start=[12,169]
+	# playground.glo_to_del_finish=[14,171]
+	
+	playground.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6},'parking':8/3.6,'delivery':5/3.6}
+	
+	playground.set_other_link()
+	playground.delivery_path=playground.make_path('delivery',playground.delivery_map_num)
+
+	playground.lane_width={'none':{3.0:[i for i in range(5)]}}
+	playground.set_lanewidth()
+	return playground
+
+use_map=playground()
 start_index=0
 
 if start_index==0:

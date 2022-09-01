@@ -11,6 +11,6 @@
 	<node name="path" pkg="cv_agents" type="path_global.py" output="screen"/>
 	<node name="control" pkg="cv_agents" type="control_sim.py" output="screen"/>
 
-	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find cv_agents)/rviz/boong.rviz" />
+	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find cv_agents)/rviz/frontier.rviz" />
 	
 </launch>

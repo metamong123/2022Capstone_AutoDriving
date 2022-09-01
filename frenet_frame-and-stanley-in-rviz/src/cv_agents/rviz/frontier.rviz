@@ -69,7 +69,7 @@ Visualization Manager:
       Marker Topic: /objects/marker/car_1
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -77,7 +77,7 @@ Visualization Manager:
       Marker Topic: /rviz/candidate_frenet_paths
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -85,7 +85,7 @@ Visualization Manager:
       Marker Topic: /rviz/optimal_frenet_path
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -200,16 +200,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.3361666202545166
+      Distance: 69.74005126953125
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 962583.6875
-        Y: 1959229.75
-        Z: 9.692594528198242
+        X: 962724.5625
+        Y: 1958990.125
+        Z: -9.024593353271484
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
