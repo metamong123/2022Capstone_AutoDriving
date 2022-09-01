@@ -129,7 +129,7 @@ def my_state_array(ind, wp):
 	
 def sub_and_pub():
 	global opt_frenet_pub,cand_frenet_pub,waypoint_pub,dir_pub,global_path_pub,col_pub,col_msg,s,d,x,y,road_yaw,dir,state,si,si_d,si_dd,sf_d,sf_dd,di,di_d,df_dd,di_dd,df_d,opt_d,prev_opt_d,obstacle_sub,state_sub,accel_sub,mode_sub
-	rospy.init_node("path")
+	
 
 	#topic_receiver=TopicReciver()
 
@@ -158,13 +158,13 @@ def sub_and_pub():
 	
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
 
-	my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
+	# my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
-	if(my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):
-		if link_ind['global']==(len(use_map.link_len['global'])-1):
-			pass
-		else:
-			link_ind['global']+=1
+	# if(my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):
+	# 	if link_ind['global']==(len(use_map.link_len['global'])-1):
+	# 		pass
+	# 	else:
+	# 		link_ind['global']+=1
 
 	s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 	x, y, road_yaw = get_cartesian(s, d, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],use_map.waypoints['global']['s'][:use_map.link_len['global'][link_ind['global']]])
@@ -184,7 +184,7 @@ def sub_and_pub():
 
 if __name__ == "__main__":
     
-	# rospy.init_node("path")
+	rospy.init_node("path")
 
 	# #topic_receiver=TopicReciver()
 
@@ -233,7 +233,7 @@ if __name__ == "__main__":
 	# print("현재 링크 번호: "+ str(link_ind['global'])+", 링크 방향: "+str(find_dir(use_map.link_dir, link_ind['global'])))
 
 	s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
-	x, y, road_yaw = get_cartesian(s, d, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],use_map.waypoints[mode]['s'][:use_map.link_len[mode][link_ind[mode]]])
+	x, y, road_yaw = get_cartesian(s, d, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],use_map.waypoints['global']['s'][:use_map.link_len['global'][link_ind['global']]])
 
 	yawi = state.yaw - road_yaw
 	si = s
@@ -288,6 +288,11 @@ if __name__ == "__main__":
 			print("No solution!")
 			my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
+			if(my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):
+				if link_ind['global']==(len(use_map.link_len['global'])-1):
+					pass
+				else:
+					link_ind['global']+=1
 			# if(my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):
 			# 	if link_ind['global']==len(use_map.link_len['global']):
 			# 		link_ind['global']=len(link_ind['global'])
@@ -326,6 +331,11 @@ if __name__ == "__main__":
 
 		my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
+		if (my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):
+			if link_ind['global']==(len(use_map.link_len['global'])-1):
+				pass
+			else:
+				link_ind['global']+=1
 		# if mode=='parking':
 		# 	if (not use_map.diagonal_parking_map_num==0):
 		# 		for park_i in range(use_map.diagonal_parking_map_num):

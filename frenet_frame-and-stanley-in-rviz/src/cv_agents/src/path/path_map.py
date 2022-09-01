@@ -456,6 +456,9 @@ def playground():
 	playground.set_global_link([0,48,152,198])
 	playground.set_dir([0,2,4],[],[],[1,3])
 	
+	playground.glo_to_dynamic_start=160
+	playground.glo_to_dynamic_finish=190
+
 	# playground.delivery_map_num=2
 	# for i in range(playground.delivery_map_num):
 	# 	del_route=path_map+"/src/playground/delivery_"+str(i)+".pkl"
