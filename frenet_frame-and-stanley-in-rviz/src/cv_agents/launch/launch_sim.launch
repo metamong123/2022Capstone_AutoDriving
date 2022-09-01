@@ -1,5 +1,5 @@
 <launch>
-
+	<param name="mission_status" type="string" value="going" />
 	<node name="map_visualizer" pkg="map_server" type="map_visualizer.py" />
 
 	<node name="state" pkg="update" type="state_sim.py"/>

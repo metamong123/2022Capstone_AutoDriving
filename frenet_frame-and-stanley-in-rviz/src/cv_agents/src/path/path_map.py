@@ -178,8 +178,8 @@ class Path:
 				self.waypoints[mode][link]=interpolate_waypoints(self.waypoints[mode][link]['x'], self.waypoints[mode][link]['y'], 0,space=space)
 				self.set_other_link()
 	
-	def set_dir(self, straight, left, right):
-		self.link_dir={'straight':straight,'left':left,'right':right}
+	def set_dir(self, straight, left, right, uturn):
+		self.link_dir={'straight':straight,'left':left,'right':right,'uturn':uturn}
 	
 	def set_waypoint_range(self, waypoint_start_list=None, waypoint_finish_list=None):
 		w_f_l=waypoint_finish_list
@@ -276,7 +276,7 @@ def delivery_test_cw():
 	delivery_test_cw=Path(path_map + "/src/delivery_test_cw/global_"+str(glo_space)+".pkl")
 	link_list=list(map(int,list(np.array([0,180,210,340,360,540,570,690,717])*float(0.5/1))))
 	delivery_test_cw.set_global_link(link_list)
-	delivery_test_cw.set_dir([0,2,4,6,8],[],[1,3,5,7])
+	delivery_test_cw.set_dir([0,2,4,6,8],[],[1,3,5,7],[])
 	
 	delivery_test_cw.delivery_map_num=2
 	for i in range(delivery_test_cw.delivery_map_num):
@@ -314,7 +314,7 @@ def boong():
 		boong.set_global_link([0,110,220,320,460,560,740,800])	
 	elif global_state == "1m":
 		boong.set_global_link([0,110,150,250,300,380,430,500])
-	boong.set_dir([0,1,3,4,5,8,9],[],[2,4,6,7])
+	boong.set_dir([0,1,3,4,5,8,9],[],[2,4,6,7],[])
 	
 	boong.diagonal_parking_map_num=6
 	for i in range(boong.diagonal_parking_map_num):
@@ -361,7 +361,7 @@ def boong():
 def kcity():
 	kcity=Path(path_map + "/src/kcity/global.pkl")
 	kcity.set_global_link([0,155,209,279,341,663,742,772,829,1214,1243,1678,1957,2120,2365,2738,2833,3000,3058,3133])
-	kcity.set_dir([0,1,2,3,6,7,9,15,16,17,18,19,20],[8,10,11,12],[4,5,13,14])
+	kcity.set_dir([0,1,2,3,6,7,9,15,16,17,18,19,20],[8,10,11],[4,5,13,14],[12]) #마지막에 유턴링크 넣으세요
 
 	kcity.horizontal_parking_map_num=2
 	for i in range(kcity.horizontal_parking_map_num):
@@ -389,7 +389,7 @@ def kcity():
 	kcity.del_to_glo_start=[809,2825]
 	kcity.del_to_glo_finish=[811,2827]
 
-	kcity.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6},'parking':{'straight':10/3.6}, 'delivery':{'straight':10/3.6}}
+	kcity.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6, 'uturn':8/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
 	kcity.lane_width={'left':{3.3:{3.3:[7]}, 3.8:{3.3:[5]}}, 'right':{}, 'none':{3.3:[3,4,6,8,9,10,11,12,14,15,16], 3.8:[0,1,2,17,18,19,20], 4.1:[13]}}
 
 	kcity.set_lanewidth()
@@ -401,7 +401,7 @@ def kcity():
 def qualifier():
 	qualifier=Path(path_map + "/src/qualifier/global.pkl")
 	qualifier.set_global_link([0,96,124,154,219,457,480,654,754,901,1054])
-	qualifier.set_dir([0,2,3,9,10],[4,5,6,7],[1,8])
+	qualifier.set_dir([0,2,3,9,10],[4,5,6,7],[1,8],[])
 
 	qualifier.diagonal_parking_map_num=6
 	for i in range(qualifier.diagonal_parking_map_num):
@@ -420,7 +420,7 @@ def qualifier():
 	qualifier.diagonal_parking_stop=[]
 	qualifier.diagonal_park_to_glo=[] 
 	
-	qualifier.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6},'parking':{'straight':10/3.6}, 'delivery':{'straight':10/3.6}}
+	qualifier.target_speed={'global':{'straight':12/3.6, 'curve':10/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
 	qualifier.lane_width={'left':{3.3:{3.3:[5]}}, 'right':{}, 'none':{3.3:[4,6,7,8], 3.8:[0,1,2,3,9,10]}}
 
 	qualifier.set_lanewidth()
@@ -431,9 +431,9 @@ def qualifier():
 def uturn_test():
 	uturn_test=Path(path_map + "/src/uturn_test/uturn_test.pkl")
 	uturn_test.set_global_link([0,250,375,600])
-	uturn_test.set_dir([0,3,4],[1,2],[])
+	uturn_test.set_dir([0,3,4],[1,2],[],[])
 	
-	uturn_test.target_speed={'global':{'straight':5/3.6, 'curve':5/3.6},'parking':5/3.6, 'delivery':5/3.6}
+	uturn_test.target_speed={'global':{'straight':8/3.6, 'curve':8/3.6, 'uturn':8/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
 	uturn_test.lane_width={'none':{3.3:[0,1,2,3,4]}}
 
 	# uturn_test=Path(path_map + "/src/uturn_test/uturn_test2.pkl")
@@ -454,7 +454,7 @@ def playground():
 	playground=Path(path_map + "/src/playground/global.pkl")
 	
 	playground.set_global_link([0,48,152,198])
-	playground.set_dir([0,2,4],[1,3],[])
+	playground.set_dir([0,2,4],[],[],[1,3])
 	
 	# playground.delivery_map_num=2
 	# for i in range(playground.delivery_map_num):
@@ -465,7 +465,7 @@ def playground():
 	# playground.glo_to_del_start=[12,169]
 	# playground.glo_to_del_finish=[14,171]
 	
-	playground.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6},'parking':8/3.6,'delivery':5/3.6}
+	playground.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6,'uturn':8/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
 	
 	playground.set_other_link()
 	playground.delivery_path=playground.make_path('delivery',playground.delivery_map_num)
