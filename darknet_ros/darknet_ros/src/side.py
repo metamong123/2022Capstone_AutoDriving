@@ -112,7 +112,7 @@ if __name__ == '__main__':
 		("B3",)
 	)
 	QUEUE_SIZE = 13
-	ACCURACY_THRESHOLD = 0.7
+	ACCURACY_THRESHOLD = 0.88
 
 	rospy.init_node('side_yolo')
 	node = YoloPub(CLASS_MAP, QUEUE_SIZE, ACCURACY_THRESHOLD)

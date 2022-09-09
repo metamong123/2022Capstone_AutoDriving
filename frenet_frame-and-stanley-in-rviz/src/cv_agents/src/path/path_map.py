@@ -389,7 +389,7 @@ def kcity():
 	kcity.del_to_glo_start=[809,2825]
 	kcity.del_to_glo_finish=[811,2827]
 
-	kcity.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6, 'uturn':8/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
+	kcity.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6, 'uturn':8/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':8/3.6},'dynamic_object':{'straight':10/3.6}}
 	kcity.lane_width={'left':{3.3:{3.3:[7]}, 3.8:{3.3:[5]}}, 'right':{}, 'none':{3.3:[3,4,6,8,9,10,11,12,14,15,16], 3.8:[0,1,2,17,18,19,20], 4.1:[13]}}
 
 	kcity.set_lanewidth()
@@ -420,7 +420,7 @@ def qualifier():
 	qualifier.diagonal_parking_stop=[]
 	qualifier.diagonal_park_to_glo=[] 
 	
-	qualifier.target_speed={'global':{'straight':12/3.6, 'curve':10/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
+	qualifier.target_speed={'global':{'straight':7/3.6, 'curve':7/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':7/3.6}}
 	qualifier.lane_width={'left':{3.3:{3.3:[5]}}, 'right':{}, 'none':{3.3:[4,6,7,8], 3.8:[0,1,2,3,9,10]}}
 
 	qualifier.set_lanewidth()
@@ -477,8 +477,8 @@ def playground():
 	playground.set_lanewidth()
 	return playground
 
-use_map=playground()
-start_index=0
+use_map=kcity()
+start_index=14
 
 if start_index==0:
     obj_msg=Object(x=use_map.waypoints['global']['x'][:use_map.link_len['global'][start_index]][0],y=use_map.waypoints['global']['y'][:use_map.link_len['global'][start_index]][0],yaw=use_map.waypoints['global']['yaw'][:use_map.link_len['global'][start_index]][0],v=0,L=1.600,W=1.04)

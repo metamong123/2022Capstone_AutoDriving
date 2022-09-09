@@ -12,21 +12,20 @@ from darknet_ros_msgs.msg import BoundingBoxes
 import numpy as np
 
 
-global parking_yaw
-
 parking_flag = 'forward'
 
 waypoint = 0
-w = 0
+x = 0
+y = 0
 z = 0
+w = 0
 yaw = 0
-parking_yaw = 0
 
 ##########################################################################
 
 # parking 시작하기전에 수정해야할 파라미터 값들 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-parking_finish_wp=[20,20,20,20,20,20] # 각 parking index마다의 finish waypoint임
-parking_straight_back_wp=[15,15,15,15,15,15]
+parking_finish_wp=[110,110,110,110,110,110] # 각 parking index마다의 finish waypoint임
+parking_straight_back_wp=[108,108,108,108,108,108]
 
 ###########################################################################
 
@@ -100,7 +99,7 @@ def forward_callback(msg):
 	car = msg.data[2]
 
 def odometry_callback(msg):
-	global yaw
+	global x, y, z, w, yaw
 	x = msg.pose.pose.orientation.x
 	y = msg.pose.pose.orientation.y
 	z = msg.pose.pose.orientation.z
@@ -116,6 +115,12 @@ col = 0
 def col_callback(msg):
 	global col
 	col = msg.data
+
+parking_angle = 0
+parking_speed = 0
+parking_brake = 0 
+parking_yaw = 0
+parking_gear = 0
 
 def parking_decision():
 	global parking_flag
@@ -182,7 +187,7 @@ def traffic_decision():
 			traffic_brake = 50
 			print("traffic mode : stop")
 		elif traffic_light == -1:
-			traffic_speed = frenet_speed/2
+			traffic_speed = frenet_speed/4
 			traffic_angle = frenet_angle
 			traffic_gear = 0
 			traffic_brake = 0
@@ -201,7 +206,7 @@ def traffic_decision():
 			traffic_brake = 50
 			print("traffic mode : stop")
 		elif traffic_light == -1:
-			traffic_speed = frenet_speed/2
+			traffic_speed = frenet_speed/4
 			traffic_angle = frenet_angle
 			traffic_gear = 0
 			traffic_brake = 0
@@ -218,9 +223,9 @@ def traffic_decision():
 if __name__=='__main__':
 
 	rospy.init_node('core_control')
-
+	r = rospy.Rate(10)
 	mode_status = 'going'
-	
+	notraffic_status =  False
 	while not rospy.is_shutdown():
 		rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
 		rospy.Subscriber("/forward_sign", Int32MultiArray, forward_callback)
@@ -248,7 +253,7 @@ if __name__=='__main__':
 					cmd.drive.speed = 0
 					cmd.drive.steering_angle = 0
 					cmd.drive.acceleration = 0
-					cmd.drive.jerk = 50
+					cmd.drive.jerk = 100
 					notraffic_status = True
 					final_cmd_Pub.publish(cmd)
 					print('no traffic mode')
@@ -292,13 +297,13 @@ if __name__=='__main__':
 				cmd.drive.jerk = 200  #full brake
 				final_cmd_Pub.publish(cmd)
 				print('parking finish!!! stop!!')
-				rospy.sleep(10) # 10sec
+				rospy.sleep(5) # 10sec
 				parking_flag = 'backward'
 			elif parking_flag == 'end':
 				cmd.drive.speed = 0
 				cmd.drive.steering_angle = 0
 				cmd.drive.acceleration = 0
-				cmd.drive.jerk = 50
+				cmd.drive.jerk = 80
 				final_cmd_Pub.publish(cmd)
 				mode_status = 'end'   # global mode로 바꾸기위한 flag를 파라미터 서버로 전달
 				rospy.set_param('mission_status',mode_status)
@@ -331,4 +336,4 @@ if __name__=='__main__':
 
 		final_cmd_Pub.publish(cmd)
 
-		rospy.sleep(0.1)
+		r.sleep()

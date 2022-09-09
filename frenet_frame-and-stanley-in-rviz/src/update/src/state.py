@@ -70,7 +70,7 @@ class ImuPub:
 		m = Marker()
 		m.header.frame_id = "/map"
 		m.header.stamp = rospy.Time.now()
-		m.id = id
+		m.id = 1
 		m.type = m.CUBE
 
 		#m.pose.position.x = x + 1.3 * math.cos(yaw)

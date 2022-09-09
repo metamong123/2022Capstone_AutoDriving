@@ -107,17 +107,23 @@ def callback_state_imu(msg):
 dir='straight'
 def callback_dir(msg):
 	global dir
-	dir=msg.strings[0]
+	if mode=='global':
+		if msg.strings[0] == 'right' or msg.strings[0] == 'left':
+			dir='curve'
+		else:
+			dir=msg.strings[0]
+	else:
+		dir ='straight'
 
 if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	control_gain={'global':10,'parking':10, 'delivery':10}
-	cte_speed_gain=0
+	control_gain={'global':1,'parking':10, 'delivery':10}
+	cte_speed_gain=5
 	yaw_weight=0.8
 	cte_weight=1
 	cte_thresh_hold=0
-	yaw_d_gain=0
+	yaw_d_gain=0.5
 
 	stanley_imu = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
 	
@@ -200,6 +206,7 @@ if __name__ == "__main__":
 				error_da = state.v - prev_v
 				error_ia += use_map.target_speed[mode][dir] - state.v
 			else:
+				dir='straight'
 				error_pa = use_map.target_speed[mode][dir] - state.v
 				error_da = state.v - prev_v
 				error_ia += use_map.target_speed[mode][dir] - state.v

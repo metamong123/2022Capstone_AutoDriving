@@ -253,7 +253,7 @@ if __name__ == "__main__":
 
 	opt_frenet_path = Converter(r=0, g=255/255.0, b=100/255.0, a=1, scale=0.5)
 	cand_frenet_paths = Converter(r=0, g=100/255.0, b=100/255.0, a=0.4, scale= 0.5)
-	# r = rospy.Rate(1)
+	r = rospy.Rate(10)
 
 	while not rospy.is_shutdown():
 		# state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
@@ -389,4 +389,4 @@ if __name__ == "__main__":
 		global_path_pub.publish(path_msg)
 		col_pub.publish(col_msg)
 
-		rospy.sleep(0.1)
+		r.sleep()

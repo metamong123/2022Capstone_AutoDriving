@@ -21,6 +21,10 @@ from path_map import *
 # diagonal parking mission
 # dynamic object mission
 
+mode='global'
+dist = 0
+parking_ind = 0
+park_wp = 0
 ##################### load path ###############################
 
 global_path_x=[]
@@ -80,11 +84,9 @@ if __name__ == "__main__":
 
 	rospy.init_node("path_select")
 
-	parking_ind = 0
-	park_wp = 0
-	
-	mode='global'
-	dist = 0
+
+	r = rospy.Rate(10)
+
 	#mode_msg.data = 'global'
 	while not rospy.is_shutdown():
 
@@ -93,8 +95,8 @@ if __name__ == "__main__":
 		rospy.Subscriber("/link_direction", StringArray, link_callback)
 		rospy.Subscriber("/obstacles", ObjectArray, obstacle_callback)
 		rospy.Subscriber("/mission_status", String, end_callback)
-		rospy.Subscriber("/objects/car_1/gps", Object, state_callback, queue_size=1)
-		mode_pub = rospy.Publisher("/mode_selector", String, queue_size=10)
+		rospy.Subscriber("/objects/car_1", Object, state_callback, queue_size=1)
+		mode_pub = rospy.Publisher("/mode_selector", String, queue_size=1)
 		path_pub = rospy.Publisher("/final_path", PathArray, queue_size=1)
 		park_pub = rospy.Publisher("/park_ind_wp", Int32MultiArray, queue_size=1)
 		traffic_pub = rospy.Publisher("/traffic_mode", String, queue_size=1)
@@ -115,7 +117,7 @@ if __name__ == "__main__":
 		######### traffic light mode ################
 		super_break = False
 		for number in range(len(use_map.trafficlight_list)):
-			if (global_wp <= use_map.trafficlight_list[number]) and (global_wp >= use_map.trafficlight_list[number]-3):
+			if (global_wp <= use_map.trafficlight_list[number]) and (global_wp >= use_map.trafficlight_list[number]-5):
 				traffic_mode = 'traffic'
 				break
 			else:
@@ -174,8 +176,8 @@ if __name__ == "__main__":
 			#			fp=fp_1
 			#			break
 			parking_ind=2
-			#state_x=962802.5118152874
-			#state_y=1959347.0844059486
+			##state_x=935534.3834419694
+			#state_y=1915849.688457914
 			fp=MakingPath()
 			fp.x=use_map.diagonal_parking_path[parking_ind][0]
 			fp.y=use_map.diagonal_parking_path[parking_ind][1]
@@ -187,14 +189,18 @@ if __name__ == "__main__":
 			path_msg.x.data = fp.x  # parking final path
 			path_msg.y.data = fp.y
 			path_msg.yaw.data = fp.yaw
-			park_pub.publish(park_msg)
+			#park_pub.publish(park_msg)
 
 		else: # mode = 'global' or 'dynamic_object'
 			path_msg.x.data = global_path_x
 			path_msg.y.data = global_path_y
 			path_msg.yaw.data = global_path_yaw
 
+			park_msg.data=[0,0]
+
+
 		path_pub.publish(path_msg)
 		traffic_pub.publish(traffic_msg)
-		
-		rospy.sleep(0.1)
+		park_pub.publish(park_msg)
+
+		r.sleep()

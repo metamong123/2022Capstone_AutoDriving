@@ -21,6 +21,13 @@ from path_map import *
 # delivery mission
 # horizonal parking mission
 
+
+parking_ind = 0
+park_wp = 0
+mode='global'
+traffic_mode = 'no'
+dist = 0
+
 ##################### load path ###############################
 
 global_path_x=[]
@@ -79,13 +86,7 @@ def state_callback(msg):
 if __name__ == "__main__":
 
 	rospy.init_node("path_select")
-
-	parking_ind = 0
-	park_wp = 0
-	
-	mode='global'
-	traffic_mode = 'no'
-	dist = 0
+	r = rospy.Rate(10)
 	#mode_msg.data = 'global'
 	while not rospy.is_shutdown():
 
@@ -106,12 +107,12 @@ if __name__ == "__main__":
 		traffic_msg = String()
 
 		######## mode select based waypoint #######
-		if (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
-			mode = 'delivery_A'
-		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
-			mode = 'delivery_B'
-		elif (not use_map.horizontal_parking_map_num==0) and (global_wp <= use_map.glo_to_horizontal_park_finish) and (global_wp >= use_map.glo_to_horizontal_park_start):  # horizontal mode
-			mode = 'horizontal_parking'
+		#if (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
+		#	mode = 'delivery_A'
+		#elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
+		#	mode = 'delivery_B'
+		#elif (not use_map.horizontal_parking_map_num==0) and (global_wp <= use_map.glo_to_horizontal_park_finish) and (global_wp >= use_map.glo_to_horizontal_park_start):  # horizontal mode
+		#	mode = 'horizontal_parking'
 		
 		if mode == 'delivery_A' and (global_wp >= use_map.del_to_glo_start[0]):
 			mode = 'global'
@@ -171,4 +172,4 @@ if __name__ == "__main__":
 
 		path_pub.publish(path_msg)
 		traffic_pub.publish(traffic_msg)		
-		rospy.sleep(0.1)
+		r.sleep()

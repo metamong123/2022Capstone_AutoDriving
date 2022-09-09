@@ -15,7 +15,7 @@ import numpy as np
 global parking_yaw
 
 parking_flag = 'forward'
-
+notraffic_status =  False
 waypoint = 0
 w = 0
 z = 0
