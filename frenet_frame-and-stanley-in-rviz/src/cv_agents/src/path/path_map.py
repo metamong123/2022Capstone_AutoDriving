@@ -171,9 +171,83 @@ class Path:
 						new_waypoints[i]=np.append(new_waypoints[i],interpol_wayp[i])
 						new_waypoints[i]=np.append(new_waypoints[i],self.waypoints[mode][i][self.link_len[mode][link]:])
 				link_diff=len(interpol_wayp['x'])-(self.link_len[mode][link]-self.link_len[mode][link-1])
+				link_rate=len(interpol_wayp['x'])/(self.link_len[mode][link]-self.link_len[mode][link-1])
+				for i in range(len(self.low_speed_finish_list)):
+					if self.low_speed_finish_list[i] >= self.link_len['global'][link]:
+						self.low_speed_finish_list[i]+=link_diff
+					elif self.low_speed_finish_list[i] >= self.link_len['global'][link-1]:
+						self.low_speed_finish_list[i]=self.link_len['global'][link-1]+int((self.low_speed_finish_list[i]-self.link_len['global'][link-1])*link_rate)
+				for i in range(len(self.low_speed_start_list)):
+					if self.low_speed_start_list[i] >= self.link_len['global'][link]:
+						self.low_speed_start_list[i]+=link_diff
+					elif self.low_speed_start_list[i] >= self.link_len['global'][link-1]:
+						self.low_speed_start_list[i]=self.link_len['global'][link-1]+int((self.low_speed_start_list[i]-self.link_len['global'][link-1])*link_rate)
+				for i in range(len(self.uturn_list)):
+					if self.uturn_list[i] >= self.link_len['global'][link]:
+						self.uturn_list[i]+=link_diff
+					elif self.uturn_list[i] >= self.link_len['global'][link-1]:
+						self.uturn_list[i]=self.link_len['global'][link-1]+int((self.uturn_list[i]-self.link_len['global'][link-1])*link_rate)
+				for i in range(len(self.notrafficlight_list)):
+					if self.notrafficlight_list[i] >= self.link_len['global'][link]:
+						self.notrafficlight_list[i]+=link_diff
+					elif self.notrafficlight_list[i] >= self.link_len['global'][link-1]:
+						# print("here")
+						# print(link)
+						# print(link_rate)
+						self.notrafficlight_list[i]=self.link_len['global'][link-1]+int((self.notrafficlight_list[i]-self.link_len['global'][link-1])*link_rate)
+				if self.glo_to_dynamic_start >= self.link_len['global'][link]:
+					self.glo_to_dynamic_start+=link_diff
+				elif self.glo_to_dynamic_start >= self.link_len['global'][link-1]:
+					self.glo_to_dynamic_start=self.link_len['global'][link-1]+int((self.glo_to_dynamic_start-self.link_len['global'][link-1])*link_rate)
+				if self.glo_to_dynamic_finish >= self.link_len['global'][link]:
+					self.glo_to_dynamic_finish+=link_diff
+				elif self.glo_to_dynamic_finish >= self.link_len['global'][link-1]:
+					self.glo_to_dynamic_finish=self.link_len['global'][link-1]+int((self.glo_to_dynamic_finish-self.link_len['global'][link-1])*link_rate)
+				if self.glo_to_horizontal_park_start >= self.link_len['global'][link]:
+					self.glo_to_horizontal_park_start+=link_diff
+				elif self.glo_to_horizontal_park_start >= self.link_len['global'][link-1]:
+					self.glo_to_horizontal_park_start=self.link_len['global'][link-1]+int((self.glo_to_horizontal_park_start-self.link_len['global'][link-1])*link_rate)
+				if self.glo_to_horizontal_park_finish >= self.link_len['global'][link]:
+					self.glo_to_horizontal_park_finish+=link_diff
+				elif self.glo_to_horizontal_park_finish >= self.link_len['global'][link-1]:
+					self.glo_to_horizontal_park_finish=self.link_len['global'][link-1]+int((self.glo_to_horizontal_park_finish-self.link_len['global'][link-1])*link_rate)
+				if self.glo_to_diagonal_park_finish >= self.link_len['global'][link]:
+					self.glo_to_diagonal_park_finish+=link_diff
+				elif self.glo_to_diagonal_park_finish >= self.link_len['global'][link-1]:
+					self.glo_to_diagonal_park_finish=self.link_len['global'][link-1]+int((self.glo_to_diagonal_park_finish-self.link_len['global'][link-1])*link_rate)
+				if self.glo_to_diagonal_park_start >= self.link_len['global'][link]:
+					self.glo_to_diagonal_park_start+=link_diff
+				elif self.glo_to_diagonal_park_start >= self.link_len['global'][link-1]:
+					self.glo_to_diagonal_park_start=self.link_len['global'][link-1]+int((self.glo_to_diagonal_park_start-self.link_len['global'][link-1])*link_rate)
+				for i in range(len(self.glo_to_del_start)):
+					if self.glo_to_del_start[i] >= self.link_len['global'][link]:
+						self.glo_to_del_start[i]+=link_diff
+					elif self.glo_to_del_start[i] >= self.link_len['global'][link-1]:
+						self.glo_to_del_start[i]=self.link_len['global'][link-1]+int((self.glo_to_del_start[i]-self.link_len['global'][link-1])*link_rate)
+				for i in range(len(self.glo_to_del_finish)):
+					if self.glo_to_del_finish[i] >= self.link_len['global'][link]:
+						self.glo_to_del_finish[i]+=link_diff
+					elif self.glo_to_del_finish[i] >= self.link_len['global'][link-1]:
+						self.glo_to_del_finish[i]=self.link_len['global'][link-1]+int((self.glo_to_del_finish[i]-self.link_len['global'][link-1])*link_rate)
+				for i in range(len(self.del_to_glo_finish)):
+					if self.del_to_glo_finish[i] >= self.link_len['global'][link]:
+						self.del_to_glo_finish[i]+=link_diff
+					elif self.del_to_glo_finish[i] >= self.link_len['global'][link-1]:
+						self.del_to_glo_finish[i]=self.link_len['global'][link-1]+int((self.del_to_glo_finish[i]-self.link_len['global'][link-1])*link_rate)
+				for i in range(len(self.del_to_glo_start)):
+					if self.del_to_glo_start[i] >= self.link_len['global'][link]:
+						self.del_to_glo_start[i]+=link_diff
+					elif self.del_to_glo_start[i] >= self.link_len['global'][link-1]:
+						self.del_to_glo_start[i]=self.link_len['global'][link-1]+int((self.del_to_glo_start[i]-self.link_len['global'][link-1])*link_rate)
+				for i in range(len(self.trafficlight_list)):
+					if self.trafficlight_list[i] >= self.link_len['global'][link]:
+						self.trafficlight_list[i]+=link_diff
+					elif self.trafficlight_list[i] >= self.link_len['global'][link-1]:
+						self.trafficlight_list[i]=self.link_len['global'][link-1]+int((self.trafficlight_list[i]-self.link_len['global'][link-1])*link_rate)
 				self.link_len[mode]=self.link_len[mode][:link]+[i+link_diff for i in self.link_len[mode][link:]]
 				self.waypoints[mode]={}
 				self.waypoints[mode]=new_waypoints
+				
 			else:
 				self.waypoints[mode][link]=interpolate_waypoints(self.waypoints[mode][link]['x'], self.waypoints[mode][link]['y'], 0,space=space)
 				self.set_other_link()
@@ -394,6 +468,8 @@ def kcity():
 
 	kcity.set_lanewidth()
 	kcity.set_other_link()
+	for link_int in [4,8,10,11,12,13,14]:
+		kcity.interpolate_map(mode='global', space=0.2,link=link_int) # space는 m 단위로 넣기
 	kcity.horizontal_parking_path=kcity.make_path('horizontal_parking',kcity.horizontal_parking_map_num)
 	kcity.delivery_path=kcity.make_path('delivery',kcity.delivery_map_num)
 	return kcity
@@ -477,7 +553,7 @@ def playground():
 	playground.set_lanewidth()
 	return playground
 
-use_map=playground()
+use_map=kcity()
 start_index=0
 
 if start_index==0:

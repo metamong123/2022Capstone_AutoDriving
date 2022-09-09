@@ -77,7 +77,7 @@ def callback_mode(msg):
 	else:
 		mode = msg.data
 
-link_ind=2
+link_ind=start_index
 my_wp=0
 def callback_wp_link_ind(msg):
 	global link_ind, my_wp
@@ -104,10 +104,11 @@ def callback_state_imu(msg):
 	obj_msg=msg
 	t2 = time.time()
 
-dir='straight'
-def callback_dir(msg):
-	global dir
-	dir=msg.strings[0]
+def find_dir(link_dict, link_ind):
+	for i in link_dict.keys():
+		for j in link_dict[i]:
+			if link_ind == j:
+				return i
 
 if __name__ == "__main__":
 	WB = 1.04
@@ -128,9 +129,6 @@ if __name__ == "__main__":
 	t2 = time.time()
 
 	rospy.init_node("control")
-
-
-	
 
 	s=0
 	d=0
@@ -155,8 +153,12 @@ if __name__ == "__main__":
 	steer_imu=0
 	msg = state.get_ros_msg(a, steer_imu, id=id)
 
-	if dir == 'right' or dir == 'left':
-		dir='curve'
+	if mode == 'global':
+		dir=find_dir(use_map.link_dir, link_ind)
+		if dir == 'right' or dir == 'left':
+			dir='curve'
+	else:
+		dir = 'straight'
 	
 	while not rospy.is_shutdown():
 		
@@ -192,17 +194,17 @@ if __name__ == "__main__":
 				a = 0
 		else:
 			## PID control
-			if dir == 'right' or dir == 'left':
-				dir='curve'
-			
 			if mode == 'global':
-				error_pa = use_map.target_speed[mode][dir] - state.v
-				error_da = state.v - prev_v
-				error_ia += use_map.target_speed[mode][dir] - state.v
+				dir=find_dir(use_map.link_dir, link_ind)
+				if dir == 'right' or dir == 'left':
+					dir='curve'
 			else:
-				error_pa = use_map.target_speed[mode][dir] - state.v
-				error_da = state.v - prev_v
-				error_ia += use_map.target_speed[mode][dir] - state.v
+				dir = 'straight'
+			
+			error_pa = use_map.target_speed[mode][dir] - state.v
+			error_da = state.v - prev_v
+			error_ia += use_map.target_speed[mode][dir] - state.v
+    
 			kp_a = 0.5
 			kd_a = 0.7
 			ki_a = 0.01

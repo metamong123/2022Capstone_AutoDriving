@@ -23,17 +23,17 @@ def interpolate_waypoints(wx, wy, space=0.5):
 
   fx = interp1d(s, wx)
   fy = interp1d(s, wy)
-  ss = np.linspace(0, s[-1], num=int(s[-1] / space) + 1, endpoint=True)
+  # s = np.linspace(0, s[-1], num=int(s[-1] / space) + 1, endpoint=True)
 
-  dxds = np.gradient(fx(ss), ss, edge_order=1)
-  dyds = np.gradient(fy(ss), ss, edge_order=1)
+  dxds = np.gradient(fx(s), s, edge_order=1)
+  dyds = np.gradient(fy(s), s, edge_order=1)
   wyaw = np.arctan2(dyds, dxds)
 
   return {
-    "x": fx(ss),
-    "y": fy(ss),
+    "x": fx(s),
+    "y": fy(s),
     "yaw": wyaw,
-    "s": ss
+    "s": s
   }
 
 df=pd.read_csv('gps.csv')
