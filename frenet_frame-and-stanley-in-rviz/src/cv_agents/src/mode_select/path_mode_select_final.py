@@ -149,8 +149,18 @@ if __name__ == "__main__":
 			path_msg.x.data = use_map.delivery_path[1][0]  # B path
 			path_msg.y.data = use_map.delivery_path[1][1]
 			path_msg.yaw.data = use_map.delivery_path[1][2]
-		elif mode == 'parking'
-   
+		elif mode == 'horizontal_parking':
+			fp=MakingPath()
+			fp.x=use_map.horizontal_parking_path[parking_ind][0]
+			fp.y=use_map.horizontal_parking_path[parking_ind][1]
+			fp.yaw=use_map.horizontal_parking_path[parking_ind][2]
+			park_wp = get_closest_waypoints(state_x, state_y, use_map.waypoints['horizontal_parking'][parking_ind*2]['x'][:use_map.link_len['horizontal_parking'][parking_ind*2]], 
+			use_map.waypoints['horizontal_parking'][parking_ind*2]['y'][:use_map.link_len['horizontal_parking'][parking_ind*2]],park_wp)
+			print("현재 주차할 위치 : " + str(parking_ind) + "차량 위치 :" + str(park_wp))
+			path_msg.x.data = fp.x  # parking final path
+			path_msg.y.data = fp.y
+			path_msg.yaw.data = fp.yaw
+			park_pub.publish(park_msg)
 		else: # mode = 'global' or 'dynamic_object'
 			path_msg.x.data = global_path_x
 			path_msg.y.data = global_path_y
