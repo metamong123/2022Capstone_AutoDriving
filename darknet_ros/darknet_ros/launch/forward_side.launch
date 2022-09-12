@@ -14,7 +14,7 @@
 
   <!-- ROS and network parameter files -->
   <arg name="ros_param_file_1"     default="$(find darknet_ros)/config/ros_1.yaml"/>
-  <arg name="network_param_file_1" default="$(find darknet_ros)/config/forward_ver3.yaml"/>
+  <arg name="network_param_file_1" default="$(find darknet_ros)/config/forward.yaml"/>
   <arg name="ros_param_file_2"     default="$(find darknet_ros)/config/ros_2.yaml"/>
   <arg name="network_param_file_2" default="$(find darknet_ros)/config/delivery.yaml"/>
 
