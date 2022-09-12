@@ -43,7 +43,7 @@ class State:
 		self.dt = dt
 		self.WB = WB
 
-	def get_ros_msg(self, a, steer, v_com):
+	def get_ros_msg(self, a, steer, v_com,gear=0):
 		dt = self.dt
 		v = self.v
 
@@ -60,6 +60,7 @@ class State:
 				c.drive.speed = v + a*dt
 		else:
 			c.drive.speed = v_com
+		c.drive.acceleration = gear
 
 		return c
 
@@ -186,7 +187,7 @@ if __name__ == "__main__":
 		accel_msg = Float64()
 
 		state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
-		
+		gear=0
 		# 수평 주차 할 때만 사용할 것.
 		# if mode == 'parking':
 		# 	yaw_reversed=backward_yaw(obj_msg.yaw)
@@ -203,6 +204,7 @@ if __name__ == "__main__":
 				#steer_imu = road_yaw - state.yaw
 				steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu.stanley_control_pd(state.x, state.y, state.yaw, state.v, [x], [y], [road_yaw])
 				a = 0
+				gear=0
 				if obj_msg.v <= 1:
 					v_com=use_map.target_speed[mode][dir]
 				else:
@@ -231,8 +233,11 @@ if __name__ == "__main__":
 
 			if mode == 'horizontal_parking':
 				steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu_back.stanley_control_pd(obj_msg.x, obj_msg.y, obj_msg.yaw, obj_msg.v, path_x, path_y, path_yaw)
+				steer_imu=-(steer_imu)
+				gear = 2
 			else:
 				steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu.stanley_control_pd(obj_msg.x, obj_msg.y, obj_msg.yaw, obj_msg.v, path_x, path_y, path_yaw)
+				gear=0
 			# stanley_control / stanley_control_thresh / stanley_control_pid
 			v_com=use_map.target_speed[mode][dir]
 			# if mode == 'global':
@@ -252,7 +257,7 @@ if __name__ == "__main__":
 		# else:
 		# 	steer_imu=steer_imu
 
-		msg = state.get_ros_msg(a, steer_imu, v_com)
+		msg = state.get_ros_msg(a, steer_imu, v_com,gear)
 		v_com=use_map.target_speed[mode][dir]
 
 		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer_imu) + ",a = "+str(a))

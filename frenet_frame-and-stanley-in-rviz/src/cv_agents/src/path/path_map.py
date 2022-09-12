@@ -618,7 +618,7 @@ def hightech_delivery():
 	return hightech_delivery
 
 def hightech_parking():
-
+	
 	hightech_parking=Path(path_map + "/src/hightech_parking/global.pkl")
 	
 	hightech_parking.set_global_link([0,41,48,77,84])
@@ -630,12 +630,12 @@ def hightech_parking():
 		hightech_parking.horizontal_parking_route.append(park_route)
 		hightech_parking.set_other_mode(mode='horizontal_parking', pc_route=park_route,link=2*i)
 
-	hightech_parking.glo_to_horizontal_park_start=18
-	hightech_parking.glo_to_horizontal_park_finish=15
-	hightech_parking.horizontal_parking_stop=[]
+	hightech_parking.glo_to_horizontal_park_start=[17,25,32,39]
+	hightech_parking.glo_to_horizontal_park_finish=[19,27,34,41]
+	hightech_parking.horizontal_parking_stop=[58]
 	hightech_parking.horizontal_park_to_glo=[]
 	
-	hightech_parking.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6,'uturn':8/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
+	hightech_parking.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6,'uturn':8/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
 	hightech_parking.lane_width={'none':{3.0:[i for i in range(6)]}}
 	hightech_parking.set_lanewidth()
 	hightech_parking.set_other_link()
