@@ -77,7 +77,7 @@ Visualization Manager:
       Marker Topic: /rviz/candidate_frenet_paths
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -85,7 +85,7 @@ Visualization Manager:
       Marker Topic: /rviz/optimal_frenet_path
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -157,16 +157,24 @@ Visualization Manager:
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
-      Enabled: false
+      Enabled: true
       Marker Topic: /rviz/parking_link_4
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /rviz/global_links
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /rviz/delivery_link_0
       Name: MarkerArray
       Namespaces:
         "": true
@@ -200,25 +208,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 69.74005126953125
+      Distance: 110.73905181884766
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 962724.5625
-        Y: 1958990.125
-        Z: -9.024593353271484
+        X: 962654.8125
+        Y: 1959262.375
+        Z: -13.545439720153809
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.3297966718673706
+      Pitch: 1.5647963285446167
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.26500892639160156
+      Yaw: 1.0100082159042358
     Saved: ~
 Window Geometry:
   Displays:

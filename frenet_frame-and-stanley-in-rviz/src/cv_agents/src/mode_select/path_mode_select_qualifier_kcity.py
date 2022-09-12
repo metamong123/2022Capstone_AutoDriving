@@ -80,6 +80,22 @@ if __name__ == "__main__":
 
 	rospy.init_node("path_select")
 
+	rospy.Subscriber("/optimal_frenet_path_global", PathArray, global_path_callback)
+	rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
+	rospy.Subscriber("/link_direction", StringArray, link_callback)
+	rospy.Subscriber("/obstacles", ObjectArray, obstacle_callback)
+	rospy.Subscriber("/mission_status", String, end_callback)
+	rospy.Subscriber("/objects/car_1/gps", Object, state_callback, queue_size=1)
+	mode_pub = rospy.Publisher("/mode_selector", String, queue_size=10)
+	path_pub = rospy.Publisher("/final_path", PathArray, queue_size=1)
+	park_pub = rospy.Publisher("/park_ind_wp", Int32MultiArray, queue_size=1)
+	traffic_pub = rospy.Publisher("/traffic_mode", String, queue_size=1)
+
+	path_msg = PathArray()
+	mode_msg = String()
+	park_msg = Int32MultiArray()
+	traffic_msg = String()
+
 	parking_ind = 0
 	park_wp = 0
 	
@@ -87,22 +103,6 @@ if __name__ == "__main__":
 	dist = 0
 	#mode_msg.data = 'global'
 	while not rospy.is_shutdown():
-
-		rospy.Subscriber("/optimal_frenet_path_global", PathArray, global_path_callback)
-		rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
-		rospy.Subscriber("/link_direction", StringArray, link_callback)
-		rospy.Subscriber("/obstacles", ObjectArray, obstacle_callback)
-		rospy.Subscriber("/mission_status", String, end_callback)
-		rospy.Subscriber("/objects/car_1/gps", Object, state_callback, queue_size=1)
-		mode_pub = rospy.Publisher("/mode_selector", String, queue_size=10)
-		path_pub = rospy.Publisher("/final_path", PathArray, queue_size=1)
-		park_pub = rospy.Publisher("/park_ind_wp", Int32MultiArray, queue_size=1)
-		traffic_pub = rospy.Publisher("/traffic_mode", String, queue_size=1)
-
-		path_msg = PathArray()
-		mode_msg = String()
-		park_msg = Int32MultiArray()
-		traffic_msg = String()
 
 		######## mode select based waypoint #######
 		if (not use_map.diagonal_parking_map_num==0) and (global_wp <= use_map.glo_to_diagonal_park_finish and global_wp >=use_map.glo_to_diagonal_park_start):  # parking mode
@@ -114,13 +114,29 @@ if __name__ == "__main__":
 
 		######### traffic light mode ################
 		super_break = False
-		for number in range(len(use_map.trafficlight_list)):
-			if (global_wp <= use_map.trafficlight_list[number]) and (global_wp >= use_map.trafficlight_list[number]-3):
+
+		#### traffic 인식 간격 속도별 조정 ####
+		if (mode == 'delivery_A' or mode == 'delivery_B'):
+			target_speed = use_map.target_speed[delivery][current_dir]
+		else:
+			target_speed = use_map.target_speed[mode][current_dir]
+		if target_speed >= 15:
+			traffic_interval = 7
+		elif target_speed >= 10:
+			traffic_interval = 5
+		elif target_speed > 5:
+			traffic_interval = 4
+		else:
+			traffic_interval = 3
+		#####################
+
+		for number1 in range(len(use_map.trafficlight_list)):
+			if (global_wp <= use_map.trafficlight_list[number1]) and (global_wp >= use_map.trafficlight_list[number1]-traffic_interval):
 				traffic_mode = 'traffic'
 				break
 			else:
-				for number in range(len(use_map.notrafficlight_list)):
-					if (global_wp <= use_map.notrafficlight_list[number]) and (global_wp >= use_map.notrafficlight_list[number]-3):
+				for number2 in range(len(use_map.notrafficlight_list)):
+					if (global_wp <= use_map.notrafficlight_list[number2]) and (global_wp >= use_map.notrafficlight_list[number2]-3):
 						traffic_mode = 'notraffic'
 						super_break = True
 						break

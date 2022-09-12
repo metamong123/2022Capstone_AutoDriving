@@ -154,7 +154,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 50
+			traffic_brake = 90
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
@@ -174,7 +174,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 50
+			traffic_brake = 90
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
@@ -193,7 +193,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 50
+			traffic_brake = 90
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
@@ -214,24 +214,25 @@ if __name__=='__main__':
 
 	rospy.init_node('core_control')
 
+	rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
+	rospy.Subscriber("/forward_sign", Int32MultiArray, forward_callback)
+	rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
+	rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
+	rospy.Subscriber("/odom_imu", Odometry, odometry_callback)
+	rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
+	rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
+	rospy.Subscriber("/link_direction", StringArray, link_callback)
+	rospy.Subscriber("/col", Int32, col_callback)
+
+	#mission_pub = rospy.Publisher('/mission_status', String, queue_size=10)
+	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
+
+	cmd=AckermannDriveStamped()
+	#end_msg=String()
+
 	mode_status = 'going'
 	r=rospy.Rate(10)
 	while not rospy.is_shutdown():
-		rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
-		rospy.Subscriber("/forward_sign", Int32MultiArray, forward_callback)
-		rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
-		rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
-		rospy.Subscriber("/odom_imu", Odometry, odometry_callback)
-		rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
-		rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
-		rospy.Subscriber("/link_direction", StringArray, link_callback)
-		rospy.Subscriber("/col", Int32, col_callback)
-
-		#mission_pub = rospy.Publisher('/mission_status', String, queue_size=10)
-		final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
-
-		cmd=AckermannDriveStamped()
-		#end_msg=String()
 
 		if car_mode == 'global':
 			#if move_mode == 'finish':

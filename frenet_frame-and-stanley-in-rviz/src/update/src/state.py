@@ -8,6 +8,7 @@ from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Quaternion
 from object_msgs.msg import Object
 from nav_msgs.msg import Odometry
+import numpy as np
 
 class ImuPub:
 	def __init__(self):
@@ -30,7 +31,7 @@ class ImuPub:
 	
 	def msg_pub(self):
 		quat_imu = tf.transformations.quaternion_from_euler(0, 0, self.yaw_imu)
-		self.tf_broadcaster.sendTransform((self.x_imu, self.y_imu, 1.5), quat_imu,rospy.Time.now(),"/car_1", "/map")
+		self.tf_broadcaster.sendTransform((self.x_imu, self.y_imu, 1.5), quat_imu,rospy.Time(0),"/car_1", "/map")
 	
 		#o_gps = Object()
 		#o_gps.header.frame_id = "/map"
@@ -70,7 +71,7 @@ class ImuPub:
 		m = Marker()
 		m.header.frame_id = "/map"
 		m.header.stamp = rospy.Time.now()
-		m.id = id
+		m.id = 1
 		m.type = m.CUBE
 
 		#m.pose.position.x = x + 1.3 * math.cos(yaw)
@@ -97,23 +98,28 @@ class ImuPub:
 		# sensor_msgs/Imu.msg 
 		self.x_gps = data.pose.pose.position.x
 		self.y_gps = data.pose.pose.position.y
-		self.v_gps = data.twist.twist.linear.x
-		# vy = data.twist.twist.linear.y
+		vx_gps = data.twist.twist.linear.x
+		vy_gps = data.twist.twist.linear.y
 		# vz = data.twist.twist.linear.z
-		# v = np.sqrt(vx**2+vy**2+vz**2)
+		self.v_gps = np.sqrt(vx_gps**2+vy_gps**2)
 
 		orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
 		roll, pitch, self.yaw_gps = euler_from_quaternion (orientation_list)
+
 
 
 	def odometry_imu_callback(self, data):
 		# sensor_msgs/Imu.msg 
 		self.x_imu = data.pose.pose.position.x 
 		self.y_imu = data.pose.pose.position.y 
-		self.v_imu = data.twist.twist.linear.x
+		vx_imu = data.twist.twist.linear.x
+		vy_imu = data.twist.twist.linear.y
+		# vz = data.twist.twist.linear.z
+		self.v_imu = np.sqrt(vx_imu**2+vy_imu**2)
 
 		orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
 		roll, pitch, self.yaw_imu = euler_from_quaternion(orientation_list) 
+		self.yaw_imu+=0.27
 
 
 if __name__ == "__main__":

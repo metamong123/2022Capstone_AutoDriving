@@ -32,7 +32,7 @@ def pi_2_pi(angle):
 
 class State:
 
-	def __init__(self, x=0.0, y=0.0, yaw=0.0, v=0.0, dt=0.05, WB=1.04):
+	def __init__(self, x=0.0, y=0.0, yaw=0.0, v=0.0, dt=0.1, WB=1.04):
 		self.x = x
 		self.y = y
 		self.yaw = yaw
@@ -42,7 +42,7 @@ class State:
 		self.dt = dt
 		self.WB = WB
 
-	def get_ros_msg(self, a, steer, id):
+	def get_ros_msg(self, a, steer, v_com):
 		dt = self.dt
 		v = self.v
 
@@ -50,10 +50,17 @@ class State:
 		c.header.frame_id = "/map"
 		c.header.stamp = rospy.Time.now()
 		c.drive.steering_angle = steer
-		c.drive.speed = v + a*dt
+		if v_com == 0:
+			if (v+a*dt) > 20 / 3.6:
+				c.drive.speed = 10/3.6
+			elif (v+a*dt) < 1:
+				c.drive.speed = 7/3.6
+			else:
+				c.drive.speed = v + a*dt
+		else:
+			c.drive.speed = v_com
 
 		return c
-
 
 
 path_x=[]
@@ -113,9 +120,9 @@ def find_dir(link_dict, link_ind):
 if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	control_gain={'global':10,'parking':10, 'delivery':10}
-	cte_speed_gain=0
-	yaw_weight=0.8
+	control_gain={'global':1,'parking':1, 'delivery':1}
+	cte_speed_gain=5
+	yaw_weight=1
 	cte_weight=1
 	cte_thresh_hold=0
 	yaw_d_gain=0
@@ -129,7 +136,17 @@ if __name__ == "__main__":
 	t2 = time.time()
 
 	rospy.init_node("control")
-
+	
+	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
+	accel_pub=rospy.Publisher("/accel", Float64, queue_size=1)
+	# state_gps_sub = rospy.Subscriber("/objects/car_1/gps", Object, callback_state_gps, queue_size=1)
+	state_imu_sub = rospy.Subscriber("/objects/car_1", Object, callback_state_imu, queue_size=1)
+	path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=1)
+	# path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
+	mode_sub= rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
+	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
+	# dir_sub=rospy.Subscriber("/link_direction", StringArray, callback_dir, queue_size=1)
+	
 	s=0
 	d=0
 	x=0
@@ -138,20 +155,22 @@ if __name__ == "__main__":
 	park_ind=0
 	v=0
 
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=2, dt=0.05)
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
 	# 수평 주차 할 때만 사용할 것.
 	# if mode == 'parking':
 	# 	yaw_reversed=backward_yaw(obj_msg.yaw)
-	# 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=yaw_reversed, v=2, dt=0.05)
+	# 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=yaw_reversed, v=2, dt=0.1)
 	# else:
-	# 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=2, dt=0.05)
+	# 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=2, dt=0.1)
 
 	prev_v = state.v
+	error_pa=0
+	error_da=0
 	error_ia = 0
 	r = rospy.Rate(10)
 	a = 0
 	steer_imu=0
-	msg = state.get_ros_msg(a, steer_imu, id=id)
+	msg = state.get_ros_msg(a, steer_imu, 2)
 
 	if mode == 'global':
 		dir=find_dir(use_map.link_dir, link_ind)
@@ -162,26 +181,18 @@ if __name__ == "__main__":
 	
 	while not rospy.is_shutdown():
 		
-		control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
-		accel_pub=rospy.Publisher("/accel", Float64, queue_size=1)
-		# state_gps_sub = rospy.Subscriber("/objects/car_1/gps", Object, callback_state_gps, queue_size=1)
-		state_imu_sub = rospy.Subscriber("/objects/car_1", Object, callback_state_imu, queue_size=1)
-		path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=1)
-		#path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
-		mode_sub= rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
-		waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
-		dir_sub=rospy.Subscriber("/link_direction", StringArray, callback_dir, queue_size=1)
+
 
 		accel_msg = Float64()
 
-		state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=msg.drive.speed, dt=0.05)
+		state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
 		
 		# 수평 주차 할 때만 사용할 것.
 		# if mode == 'parking':
 		# 	yaw_reversed=backward_yaw(obj_msg.yaw)
-		# 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=yaw_reversed, v=2, dt=0.05)
+		# 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=yaw_reversed, v=2, dt=0.1)
 		# else:
-		# 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=2, dt=0.05)
+		# 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=2, dt=0.1)
 
 
 		if not path_x: ## No solution
@@ -192,6 +203,10 @@ if __name__ == "__main__":
 				#steer_imu = road_yaw - state.yaw
 				steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu.stanley_control_pd(state.x, state.y, state.yaw, state.v, [x], [y], [road_yaw])
 				a = 0
+				if obj_msg.v <= 1:
+					v_com=use_map.target_speed[mode][dir]
+				else:
+					v_com=use_map.target_speed[mode][dir]
 		else:
 			## PID control
 			if mode == 'global':
@@ -200,18 +215,23 @@ if __name__ == "__main__":
 					dir='curve'
 			else:
 				dir = 'straight'
-			
+			# print("IN")
 			error_pa = use_map.target_speed[mode][dir] - state.v
 			error_da = state.v - prev_v
 			error_ia += use_map.target_speed[mode][dir] - state.v
-    
-			kp_a = 0.5
-			kd_a = 0.7
+
+			if error_ia >= 40:
+				error_ia = 40
+
+			kp_a = 1
+			kd_a = 0.5
 			ki_a = 0.01
+
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
-			steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu.stanley_control_pd(obj_msg.x, obj_msg.y, obj_msg.yaw, state.v, path_x, path_y, path_yaw)
+
+			steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu.stanley_control_pd(obj_msg.x, obj_msg.y, obj_msg.yaw, obj_msg.v, path_x, path_y, path_yaw)
 			# stanley_control / stanley_control_thresh / stanley_control_pid
-			
+			v_com=use_map.target_speed[mode][dir]
 			# if mode == 'global':
 			# 	steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw)
 			# elif mode == 'parking':
@@ -222,9 +242,16 @@ if __name__ == "__main__":
 			f_imu.write(str(t2) + ',' + str(obj_msg.x) + ',' + str(obj_msg.y) + ',' + str(map_yaw_imu*180/math.pi) + ',' + str(obj_msg.yaw*180/math.pi) + ',' + str(yaw_term_imu*180/math.pi) + ',' + str(cte_imu*1e2) + ',' + str(steer_imu*180/math.pi) + '\n')
 
 		accel_msg.data = a
-		
-		msg = state.get_ros_msg(a, steer_imu, id=id)
-		
+
+		# XXXXXXXXXXXXXXXXXXXXXXX
+		# if mode == 'parking':
+		# 	steer_imu=backward_yaw(steer_imu)
+		# else:
+		# 	steer_imu=steer_imu
+
+		msg = state.get_ros_msg(a, steer_imu, v_com)
+		v_com=use_map.target_speed[mode][dir]
+
 		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer_imu) + ",a = "+str(a))
 		prev_v = state.v
 

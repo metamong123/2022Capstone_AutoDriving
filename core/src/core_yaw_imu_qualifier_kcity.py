@@ -159,7 +159,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 50
+			traffic_brake = 90
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
@@ -179,7 +179,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 50
+			traffic_brake = 90
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
@@ -198,7 +198,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 50
+			traffic_brake = 90
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
@@ -219,25 +219,27 @@ if __name__=='__main__':
 
 	rospy.init_node('core_control')
 
+	rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
+	rospy.Subscriber("/forward_sign", Int32MultiArray, forward_callback)
+	rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
+	rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
+	rospy.Subscriber("/odom_imu", Odometry, odometry_callback)
+	rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
+	rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
+	rospy.Subscriber("/link_direction", StringArray, link_callback)
+	rospy.Subscriber("/col", Int32, col_callback)
+	rospy.Subscriber("/traffic_mode", String, traffic_callback)
+
+	#mission_pub = rospy.Publisher('/mission_status', String, queue_size=10)
+	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
+
+	cmd=AckermannDriveStamped()
+	#end_msg=String()
+
 	mode_status = 'going'
 	
 	while not rospy.is_shutdown():
-		rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
-		rospy.Subscriber("/forward_sign", Int32MultiArray, forward_callback)
-		rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
-		rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
-		rospy.Subscriber("/odom_imu", Odometry, odometry_callback)
-		rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
-		rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
-		rospy.Subscriber("/link_direction", StringArray, link_callback)
-		rospy.Subscriber("/col", Int32, col_callback)
-		rospy.Subscriber("/traffic_mode", String, traffic_callback)
 
-		#mission_pub = rospy.Publisher('/mission_status', String, queue_size=10)
-		final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
-
-		cmd=AckermannDriveStamped()
-		#end_msg=String()
 
 		if car_mode == 'global':
 			if traffic_mode == 'traffic':
@@ -248,7 +250,7 @@ if __name__=='__main__':
 					cmd.drive.speed = 0
 					cmd.drive.steering_angle = 0
 					cmd.drive.acceleration = 0
-					cmd.drive.jerk = 50
+					cmd.drive.jerk = 90
 					notraffic_status = True
 					final_cmd_Pub.publish(cmd)
 					print('no traffic mode')
@@ -281,6 +283,7 @@ if __name__=='__main__':
 					print('global mode!!!')
 				mode_status = 'going'
 				rospy.set_param('mission_status', mode_status)  #혹시 안바뀌는걸 방지해 global일때 계속 주기적으로 mission status 바꿔줌
+				notraffic_status = False  # notraffic 구간이 여러번 있으니 바꿔줘야함
 			
 
 		elif car_mode == 'parking':

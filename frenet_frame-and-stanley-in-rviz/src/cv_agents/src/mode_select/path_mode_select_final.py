@@ -79,36 +79,33 @@ if __name__ == "__main__":
 
 	rospy.init_node("path_select")
 
+
+	rospy.Subscriber("/optimal_frenet_path_global", PathArray, global_path_callback)
+	rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
+	rospy.Subscriber("/link_direction", StringArray, link_callback)
+	rospy.Subscriber("/obstacles", ObjectArray, obstacle_callback)
+	rospy.Subscriber("/mission_status", String, end_callback)
+	rospy.Subscriber("/objects/car_1/gps", Object, state_callback, queue_size=1)
+	mode_pub = rospy.Publisher("/mode_selector", String, queue_size=10)
+	path_pub = rospy.Publisher("/final_path", PathArray, queue_size=1)
+	park_pub = rospy.Publisher("/park_ind_wp", Int32MultiArray, queue_size=1)
+	dc_pub = rospy.Publisher("/dc", String, queue_size=1)
+	path_msg = PathArray()
+	mode_msg = String()
+	park_msg = Int32MultiArray()
+	dc_msg = String()
 	parking_ind = 0
+	parking = False
 	park_wp = 0
 	r = rospy.Rate(10)
 	mode='global'
 	dist = 0
+	dc = 'no'
+
 	#mode_msg.data = 'global'
 	while not rospy.is_shutdown():
 
-		rospy.Subscriber("/optimal_frenet_path_global", PathArray, global_path_callback)
-		rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
-		rospy.Subscriber("/link_direction", StringArray, link_callback)
-		rospy.Subscriber("/obstacles", ObjectArray, obstacle_callback)
-		rospy.Subscriber("/mission_status", String, end_callback)
-		rospy.Subscriber("/objects/car_1/gps", Object, state_callback, queue_size=1)
-		mode_pub = rospy.Publisher("/mode_selector", String, queue_size=10)
-		path_pub = rospy.Publisher("/final_path", PathArray, queue_size=1)
-		park_pub = rospy.Publisher("/park_ind_wp", Int32MultiArray, queue_size=1)
-
-		path_msg = PathArray()
-		mode_msg = String()
-		park_msg = Int32MultiArray()
-
-		######## mode select based waypoint #######
-		if (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
-			mode = 'delivery_A'
-		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
-			mode = 'delivery_B'
-		
-
-        ### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
+		### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
 		mode_status = rospy.get_param('mission_status')
 		if mode_status == 'end':
 			print('global start')
@@ -117,11 +114,31 @@ if __name__ == "__main__":
 			rospy.set_param('mission_status', mode_status)
 		else:
 			pass
-		if (mode == 'delivery_A' and mode == 'delivery_B'):
-			mode_msg.data = 'delivery'
+
+		parking_ind = 0 # 수평주차할 위치
+		######## mode select based waypoint #######
+		if (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
+			mode = 'delivery_A'
+			dc = 'slow'
+		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
+			mode = 'delivery_B'
+			dc = 'slow'
+		elif (not use_map.horizontal_parking_map_num==0) and (global_wp <= use_map.glo_to_horizontal_park_start[parking_ind] and parking = False): # horizontal parking mode
+			mode = 'horizontal_parking'
 		else:
-			mode_msg.data = mode
-			mode_pub.publish(mode_msg)
+			dc = 'no'
+		if mode == 'delivery_A' and (global_wp >= use_map.del_to_glo_start[0]):
+			mode = 'global'
+		elif mode == 'delivery_B' and (global_wp >= use_map.del_to_glo_start[1]):
+			mode = 'global'
+		else:
+			pass
+
+
+		mode_msg.data = mode
+		dc_msg.data = dc
+		mode_pub.publish(mode_msg)
+		dc_pub.publish(dc_msg)
 		
 
 		if mode == 'delivery_A':
@@ -132,6 +149,7 @@ if __name__ == "__main__":
 			path_msg.x.data = use_map.delivery_path[1][0]  # B path
 			path_msg.y.data = use_map.delivery_path[1][1]
 			path_msg.yaw.data = use_map.delivery_path[1][2]
+		elif mode == 'parking'
    
 		else: # mode = 'global' or 'dynamic_object'
 			path_msg.x.data = global_path_x

@@ -46,6 +46,35 @@ def interpolate_waypoints(wx, wy, s_init, space=0.5):
 		"s": s
 	}
 
+def get_s_yaw(wx, wy):
+	_s = 0
+	s = [0]
+	for i in range(1, len(wx)):
+		prev_x = wx[i - 1]
+		prev_y = wy[i - 1]
+		x = wx[i]
+		y = wy[i]
+
+		dx = x - prev_x
+		dy = y - prev_y
+
+		_s = np.hypot(dx, dy)
+		s.append(s[-1] + _s)
+
+	fx = interp1d(s, wx,bounds_error=False)
+	fy = interp1d(s, wy,bounds_error=False)
+
+	dxds = np.gradient(fx(s), s, edge_order=1,)
+	dyds = np.gradient(fy(s), s, edge_order=1)
+	wyaw = np.arctan2(dyds, dxds)
+	# print(fx(s))
+	return {
+		"x": fx(s),
+		"y": fy(s),
+		"yaw": wyaw,
+		"s": s
+	}	
+
 class MakingPath:
 	def __init__(self):
 		self.x = []
@@ -59,6 +88,9 @@ class Path:
 		with open(pc_route, 'rb') as f:
 			file=pickle.load(f)
 			self.waypoints['global']=file[0]
+			# for i in self.waypoints['global'].keys():
+			# 	self.waypoints['global'][i]=list(reversed(self.waypoints['global'][i]))
+			# self.waypoints['global']=get_s_yaw(self.waypoints['global']['x'],self.waypoints['global']['y'])
 		self.horizontal_parking_route=[] #parking pkl파일 경로
 		self.diagonal_parking_route=[]
 		self.delivery_route=[] #delivery pkl파일 경로
@@ -105,7 +137,8 @@ class Path:
 					self.waypoints[mode][link+1]={}
 					for i in self.waypoints[mode][link].keys():
 						self.waypoints[mode][link+1][i]=list(reversed(self.waypoints[mode][link][i]))
-			
+					self.waypoints[mode][link+1]=get_s_yaw(self.waypoints[mode][link+1]['x'],self.waypoints[mode][link+1]['y'])
+
 			elif mode == 'horizontal_parking':
 				with open(pc_route, 'rb') as f:
 					file=pickle.load(f)
@@ -113,7 +146,7 @@ class Path:
 					self.waypoints[mode][link+1]={}
 					for i in self.waypoints[mode][link].keys():
 						self.waypoints[mode][link+1][i]=list(reversed(self.waypoints[mode][link][i]))
-			
+					self.waypoints[mode][link+1]=get_s_yaw(self.waypoints[mode][link+1]['x'],self.waypoints[mode][link+1]['y'])
 			else:
 				for i in range(self.delivery_map_num):
 					with open(pc_route, 'rb') as f:
@@ -128,13 +161,15 @@ class Path:
 					self.waypoints[mode][1]={}
 					for i in self.waypoints[mode][0].keys():
 						self.waypoints[mode][1][i]=list(reversed(self.waypoints[mode][0][i]))
-			
+					self.waypoints[mode][1]=get_s_yaw(self.waypoints[mode][1]['x'],self.waypoints[mode][1]['y'])
+
 			elif mode == 'horizontal_parking':
 				with open(pc_route, 'rb') as f:
 					self.waypoints[mode][0]=pickle.load(f)
 					self.waypoints[mode][1]={}
 					for i in self.waypoints[mode][0].keys():
 						self.waypoints[mode][1][i]=list(reversed(self.waypoints[mode][0][i]))
+					self.waypoints[mode][1]=get_s_yaw(self.waypoints[mode][1]['x'],self.waypoints[mode][1]['y'])
 			else:
 				for i in range(self.delivery_map_num):
 					with open(pc_route, 'rb') as f:
@@ -352,11 +387,11 @@ def delivery_test_cw():
 	delivery_test_cw.set_global_link(link_list)
 	delivery_test_cw.set_dir([0,2,4,6,8],[],[1,3,5,7],[])
 	
-	delivery_test_cw.delivery_map_num=2
-	for i in range(delivery_test_cw.delivery_map_num):
-		del_route=path_map+"/src/delivery_test_cw/delivery_"+str(i)+"_"+str(del_space)+".pkl"
-		delivery_test_cw.delivery_route.append(del_route)
-		delivery_test_cw.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
+	# delivery_test_cw.delivery_map_num=2
+	# for i in range(delivery_test_cw.delivery_map_num):
+	# 	del_route=path_map+"/src/delivery_test_cw/delivery_"+str(i)+"_"+str(del_space)+".pkl"
+	# 	delivery_test_cw.delivery_route.append(del_route)
+	# 	delivery_test_cw.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
 	
 	delivery_test_cw.glo_to_del_start=list(np.array([30, 110])*float(0.5/1))
 	delivery_test_cw.glo_to_del_finish=list(np.array([40, 120])*float(0.5/1))
@@ -364,7 +399,7 @@ def delivery_test_cw():
 	delivery_test_cw.glo_to_dynamic_finish=500*float(0.5/1)
 	
 	delivery_test_cw.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
-	delivery_test_cw.set_other_link(glo_space=1,del_space=1)
+	delivery_test_cw.set_other_link()
 	delivery_test_cw.delivery_path=delivery_test_cw.make_path('delivery',delivery_test_cw.delivery_map_num)
 
 	delivery_test_cw.lane_width={'none':{3.0:[i for i in range(10)]}}
@@ -553,8 +588,66 @@ def playground():
 	playground.set_lanewidth()
 	return playground
 
-use_map=kcity()
+def hightech_delivery():
+
+	hightech_delivery=Path(path_map + "/src/hightech_delivery/global.pkl")
+	
+	hightech_delivery.set_global_link([0,10])
+	hightech_delivery.set_dir([0,1,2],[],[],[])
+
+	hightech_delivery.delivery_map_num=1
+	for i in range(hightech_delivery.delivery_map_num):
+		del_route=path_map+"/src/hightech_delivery/delivery_"+str(i)+".pkl"
+		hightech_delivery.delivery_route.append(del_route)
+		hightech_delivery.set_other_mode(mode='delivery', pc_route=del_route,link=i)
+
+	hightech_delivery.glo_to_del_start=[14, 10000]
+	hightech_delivery.glo_to_del_finish=[16, 10000]
+	hightech_delivery.del_to_glo_start=[50, 10000]
+	hightech_delivery.del_to_glo_finish=[52, 10000]
+
+
+	hightech_delivery.target_speed={'global':{'straight':12/3.6, 'curve':10/3.6,'uturn':8/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':7/3.6},'dynamic_object':{'straight':10/3.6}}
+	hightech_delivery.lane_width={'none':{3.0:[i for i in range(3)]}}
+	hightech_delivery.set_lanewidth()
+	hightech_delivery.set_other_link()
+
+	hightech_delivery.delivery_path=hightech_delivery.make_path('delivery',hightech_delivery.delivery_map_num)
+
+
+	return hightech_delivery
+
+def hightech_parking():
+
+	hightech_parking=Path(path_map + "/src/hightech_parking/global.pkl")
+	
+	hightech_parking.set_global_link([0,41,48,77,84])
+	hightech_parking.set_dir([0,2,4,5],[],[1,3],[])
+
+	hightech_parking.horizontal_parking_map_num=4
+	for i in range(hightech_parking.horizontal_parking_map_num):
+		park_route=path_map+"/src/hightech_parking/parking_"+str(i)+".pkl"
+		hightech_parking.horizontal_parking_route.append(park_route)
+		hightech_parking.set_other_mode(mode='horizontal_parking', pc_route=park_route,link=2*i)
+
+	hightech_parking.glo_to_horizontal_park_start=18
+	hightech_parking.glo_to_horizontal_park_finish=15
+	hightech_parking.horizontal_parking_stop=[]
+	hightech_parking.horizontal_park_to_glo=[]
+	
+	hightech_parking.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6,'uturn':8/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
+	hightech_parking.lane_width={'none':{3.0:[i for i in range(6)]}}
+	hightech_parking.set_lanewidth()
+	hightech_parking.set_other_link()
+	hightech_parking.horizontal_parking_path=hightech_parking.make_path('horizontal_parking',hightech_parking.horizontal_parking_map_num)
+
+	return hightech_parking
+
+use_map=hightech_delivery()
 start_index=0
+
+# use_map=kcity()
+# start_index=12
 
 if start_index==0:
     obj_msg=Object(x=use_map.waypoints['global']['x'][:use_map.link_len['global'][start_index]][0],y=use_map.waypoints['global']['y'][:use_map.link_len['global'][start_index]][0],yaw=use_map.waypoints['global']['yaw'][:use_map.link_len['global'][start_index]][0],v=0,L=1.600,W=1.04)
