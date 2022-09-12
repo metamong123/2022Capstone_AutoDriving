@@ -128,35 +128,25 @@ def my_state_array(ind, wp):
 	return m
 	
 def sub_and_pub():
-	global opt_frenet_pub,cand_frenet_pub,waypoint_pub,dir_pub,global_path_pub,col_pub,col_msg,s,d,x,y,road_yaw,dir,state,si,si_d,si_dd,sf_d,sf_dd,di,di_d,df_dd,di_dd,df_d,opt_d,prev_opt_d,obstacle_sub,state_sub,accel_sub,mode_sub
+	# global opt_frenet_pub,cand_frenet_pub,waypoint_pub,dir_pub,global_path_pub,col_pub,col_msg,obstacle_sub,state_sub,accel_sub,mode_sub
+	global s,d,x,y,road_yaw,dir,state,si,si_d,si_dd,sf_d,sf_dd,di,di_d,df_dd,di_dd,df_d,opt_d,prev_opt_d
+
+	# obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
+	# state_sub = rospy.Subscriber("/objects/car_1", Object, callback2, queue_size=1)
+	# accel_sub = rospy.Subscriber("/accel", Float64, callback3, queue_size=1)
+
+	# mode_sub=rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=10)
+
+	# opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
+	# cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
+	# waypoint_pub = rospy.Publisher("/waypoint", Int32MultiArray, queue_size=1)
+	# dir_pub=rospy.Publisher("/link_direction", StringArray, queue_size=1)
+	# global_path_pub=rospy.Publisher("/optimal_frenet_path_global", PathArray, queue_size=1)
+	# col_pub=rospy.Publisher("/col", Int32, queue_size=1)
+
+	# col_msg=Int32()
 	
-
-	#topic_receiver=TopicReciver()
-
-	obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
-	state_sub = rospy.Subscriber("/objects/car_1", Object, callback2, queue_size=1)
-	accel_sub = rospy.Subscriber("/accel", Float64, callback3, queue_size=1)
-
-	mode_sub=rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=10)
-
-
-	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
-	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
-	waypoint_pub = rospy.Publisher("/waypoint", Int32MultiArray, queue_size=1)
-	dir_pub=rospy.Publisher("/link_direction", StringArray, queue_size=1)
-	global_path_pub=rospy.Publisher("/optimal_frenet_path_global", PathArray, queue_size=1)
-	col_pub=rospy.Publisher("/col", Int32, queue_size=1)
-
-	col_msg=Int32()
-
-	if mode == 'global':
-		dir=find_dir(use_map.link_dir, link_ind['global'])
-		if dir == 'right' or dir == 'left':
-			dir='curve'
-	else:
-		dir = 'straight'
-	
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=1, dt=0.1)
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
 
 	# my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
@@ -168,6 +158,13 @@ def sub_and_pub():
 
 	s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 	x, y, road_yaw = get_cartesian(s, d, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],use_map.waypoints['global']['s'][:use_map.link_len['global'][link_ind['global']]])
+
+	if mode == 'global':
+		dir=find_dir(use_map.link_dir, link_ind['global'])
+		if dir == 'right' or dir == 'left':
+			dir='curve'
+	else:
+		dir = 'straight'
 
 	yawi = state.yaw - road_yaw
 	si = s
@@ -187,22 +184,20 @@ if __name__ == "__main__":
 	rospy.init_node("path")
 
 	# #topic_receiver=TopicReciver()
+	obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
+	state_sub = rospy.Subscriber("/objects/car_1", Object, callback2, queue_size=1)
+	accel_sub = rospy.Subscriber("/accel", Float64, callback3, queue_size=1)
 
-	# obstacle_sub = rospy.Subscriber("obstacles", ObjectArray, callback_obstacle, queue_size=1)
-	# state_sub = rospy.Subscriber("/objects/car_1", Object, callback2, queue_size=1)
-	# accel_sub = rospy.Subscriber("/accel", Float64, callback3, queue_size=1)
+	mode_sub=rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=10)
 
-	# rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=10)
+	opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
+	cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
+	waypoint_pub = rospy.Publisher("/waypoint", Int32MultiArray, queue_size=1)
+	dir_pub=rospy.Publisher("/link_direction", StringArray, queue_size=1)
+	global_path_pub=rospy.Publisher("/optimal_frenet_path_global", PathArray, queue_size=1)
+	col_pub=rospy.Publisher("/col", Int32, queue_size=1)
 
-
-	# opt_frenet_pub = rospy.Publisher("/rviz/optimal_frenet_path", MarkerArray, queue_size=1)
-	# cand_frenet_pub = rospy.Publisher("/rviz/candidate_frenet_paths", MarkerArray, queue_size=1)
-	# waypoint_pub = rospy.Publisher("/waypoint", Int32MultiArray, queue_size=1)
-	# dir_pub=rospy.Publisher("/link_direction", StringArray, queue_size=1)
-	# global_path_pub=rospy.Publisher("/optimal_frenet_path_global", PathArray, queue_size=1)
-	# col_pub=rospy.Publisher("/col", Int32, queue_size=1)
-
-	# col_msg=Int32()
+	col_msg=Int32()
 
 	my_wp={'global':0,'diagonal_parking':{},'horizontal_parking':[]}
 	# if (not use_map.diagonal_parking_map_num==0):
@@ -289,9 +284,7 @@ if __name__ == "__main__":
 			my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
 			if(my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):
-				if link_ind['global']==(len(use_map.link_len['global'])-1):
-					pass
-				else:
+				if link_ind['global']<(len(use_map.link_len['global'])-1):
 					link_ind['global']+=1
 			# if(my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):
 			# 	if link_ind['global']==len(use_map.link_len['global']):
@@ -301,9 +294,12 @@ if __name__ == "__main__":
 
 			mode_msg=direction_array(find_dir(use_map.link_dir, link_ind['global']), find_dir(use_map.link_dir, (link_ind['global']+1)))
 
-			dir=find_dir(use_map.link_dir, link_ind['global'])
-			if dir == 'right' or dir == 'left':
-				dir='curve'
+			if mode == 'global':
+				dir=find_dir(use_map.link_dir, link_ind['global'])
+				if dir == 'right' or dir == 'left':
+					dir='curve'
+			else:
+				dir = 'straight'
 
 			s, d = get_frenet(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 			x, y, road_yaw = get_cartesian(s, d, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],use_map.waypoints['global']['s'][:use_map.link_len['global'][link_ind['global']]])
@@ -332,9 +328,7 @@ if __name__ == "__main__":
 		my_wp['global'] = get_closest_waypoints(state.x, state.y, use_map.waypoints['global']['x'][:use_map.link_len['global'][link_ind['global']]], use_map.waypoints['global']['y'][:use_map.link_len['global'][link_ind['global']]],my_wp['global'])
 
 		if (my_wp['global'] >= (use_map.link_len['global'][link_ind['global']]-10)):
-			if link_ind['global']==(len(use_map.link_len['global'])-1):
-				pass
-			else:
+			if link_ind['global']<(len(use_map.link_len['global'])-1):
 				link_ind['global']+=1
 		# if mode=='parking':
 		# 	if (not use_map.diagonal_parking_map_num==0):

@@ -164,7 +164,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 50
+			traffic_brake = 90
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
@@ -184,7 +184,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 50
+			traffic_brake = 90
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/4
@@ -203,7 +203,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 50
+			traffic_brake = 90
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/4
@@ -240,9 +240,11 @@ if __name__=='__main__':
 
 		#mission_pub = rospy.Publisher('/mission_status', String, queue_size=10)
 		final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
-
+	
 		cmd=AckermannDriveStamped()
 		#end_msg=String()
+
+
 
 		if car_mode == 'global':
 			if traffic_mode == 'traffic':
@@ -286,6 +288,7 @@ if __name__=='__main__':
 					print('global mode!!!')
 				mode_status = 'going'
 				rospy.set_param('mission_status', mode_status)  #혹시 안바뀌는걸 방지해 global일때 계속 주기적으로 mission status 바꿔줌
+				notraffic_status = False  # notraffic 구간이 여러번 있으니 바꿔줘야함
 			
 
 		elif car_mode == 'parking':

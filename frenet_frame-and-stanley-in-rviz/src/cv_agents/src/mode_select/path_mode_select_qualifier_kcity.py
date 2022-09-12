@@ -106,6 +106,13 @@ if __name__ == "__main__":
 		park_msg = Int32MultiArray()
 		traffic_msg = String()
 
+		parking_ind = 0
+		park_wp = 0
+
+		mode='global'
+		dist = 0
+		#mode_msg.data = 'global'
+
 		######## mode select based waypoint #######
 		if (not use_map.diagonal_parking_map_num==0) and (global_wp <= use_map.glo_to_diagonal_park_finish and global_wp >=use_map.glo_to_diagonal_park_start):  # parking mode
 			mode = 'parking'
@@ -116,13 +123,29 @@ if __name__ == "__main__":
 
 		######### traffic light mode ################
 		super_break = False
-		for number in range(len(use_map.trafficlight_list)):
-			if (global_wp <= use_map.trafficlight_list[number]) and (global_wp >= use_map.trafficlight_list[number]-5):
+
+		#### traffic 인식 간격 속도별 조정 ####
+		if (mode == 'delivery_A' or mode == 'delivery_B'):
+			target_speed = use_map.target_speed[delivery][current_dir]
+		else:
+			target_speed = use_map.target_speed[mode][current_dir]
+		if target_speed >= 15:
+			traffic_interval = 7
+		elif target_speed >= 10:
+			traffic_interval = 5
+		elif target_speed > 5:
+			traffic_interval = 4
+		else:
+			traffic_interval = 3
+		#####################
+
+		for number1 in range(len(use_map.trafficlight_list)):
+			if (global_wp <= use_map.trafficlight_list[number1]) and (global_wp >= use_map.trafficlight_list[number1]-traffic_interval):
 				traffic_mode = 'traffic'
 				break
 			else:
-				for number in range(len(use_map.notrafficlight_list)):
-					if (global_wp <= use_map.notrafficlight_list[number]) and (global_wp >= use_map.notrafficlight_list[number]-3):
+				for number2 in range(len(use_map.notrafficlight_list)):
+					if (global_wp <= use_map.notrafficlight_list[number2]) and (global_wp >= use_map.notrafficlight_list[number2]-3):
 						traffic_mode = 'notraffic'
 						super_break = True
 						break

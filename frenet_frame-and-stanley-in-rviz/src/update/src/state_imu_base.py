@@ -57,10 +57,10 @@ class TopicReciver:
 			x_imu = data.pose.pose.position.x 
 			y_imu = data.pose.pose.position.y 
 
-			v_imu = data.twist.twist.linear.x
-			# vy = data.twist.twist.linear.y
+			vx_imu = data.twist.twist.linear.x
+			vy_imu = data.twist.twist.linear.y
 			# vz = data.twist.twist.linear.z
-			# v = np.sqrt(vx**2+vy**2+vz**2)
+			v_imu = np.sqrt(vx_imu**2+vy_imu**2)
 
 			orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
 			roll, pitch, yaw_imu = euler_from_quaternion (orientation_list) 

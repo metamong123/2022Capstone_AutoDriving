@@ -115,11 +115,23 @@ def callback_dir(msg):
 	dir=msg.strings[0]
 
 if __name__ == "__main__":
+	control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
+	accel_pub=rospy.Publisher("/accel", Float64, queue_size=1)
+	state_gps_sub = rospy.Subscriber("/objects/car_1/gps", Object, callback_state_gps, queue_size=1)
+	state_imu_sub = rospy.Subscriber("/objects/car_1/imu", Object, callback_state_imu, queue_size=1)
+	path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=1)
+	#path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
+	mode_sub= rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
+	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
+	dir_sub=rospy.Subscriber("/link_direction", StringArray, callback_dir, queue_size=1)
+
+	accel_msg = Float64()
+	
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	control_gain={'global':10,'parking':10, 'delivery':10}
+	control_gain={'global':1,'parking':1, 'delivery':1}
 	cte_speed_gain=0
-	yaw_weight=0.8
+	yaw_weight=1
 	cte_weight=1
 	cte_thresh_hold=0
 	yaw_d_gain=0
@@ -169,17 +181,7 @@ if __name__ == "__main__":
 	
 	while not rospy.is_shutdown():
 		
-		control_pub = rospy.Publisher("/ackermann_cmd_frenet", AckermannDriveStamped, queue_size=1)
-		accel_pub=rospy.Publisher("/accel", Float64, queue_size=1)
-		state_gps_sub = rospy.Subscriber("/objects/car_1/gps", Object, callback_state_gps, queue_size=1)
-		state_imu_sub = rospy.Subscriber("/objects/car_1/imu", Object, callback_state_imu, queue_size=1)
-		path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=1)
-		#path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
-		mode_sub= rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
-		waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
-		dir_sub=rospy.Subscriber("/link_direction", StringArray, callback_dir, queue_size=1)
-
-		accel_msg = Float64()
+		
 
 		state=State(x=obj_msg_imu.x, y=obj_msg_imu.y, yaw=obj_msg_imu.yaw, v=msg.drive.speed, dt=0.05)
 		

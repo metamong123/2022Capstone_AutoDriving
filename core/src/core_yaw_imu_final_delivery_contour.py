@@ -114,7 +114,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 50
+			traffic_brake = 90
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
@@ -134,7 +134,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 50
+			traffic_brake = 90
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
@@ -153,7 +153,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 50
+			traffic_brake = 90
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
@@ -170,8 +170,10 @@ def traffic_decision():
 	return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
 delivery_ind =0 
+A_flag = False
+B_flag = False
 def delivery_decision():
-	global delivery_ind
+	global delivery_ind, A_flag, B_flag
 	
 	#print(A_number)
 	if A_number == 0:  # A1
@@ -184,17 +186,29 @@ def delivery_decision():
 		pass
 
 	if car_mode == 'delivery_A':
-		if A_x[delivery_ind] > 315:   #parameter
-			delivery_flag = 'wait'
-		if delivery_flag == 'wait' and (stopline > 445 or A_x[delivery_ind] > 315):  #parameter
-			delivery_flag = 'end'
+		if A_flag == False:
+			if A_x[delivery_ind] > 315:   #parameter
+				delivery_flag = 'wait'
+			else:
+				pass
+			if delivery_flag == 'wait' and (stopline > 445 or A_x[delivery_ind] > 315):  #parameter
+				delivery_flag = 'end'
+				A_flag = True
+			else:
+				delivery_flag = 'going'
 		else:
 			delivery_flag = 'going'
 	elif car_mode == 'delivery_B':
-		if B_x[delivery_ind] > 315:   #parameter
-			delivery_flag = 'wait'
-		if delivery_flag == 'wait' and (stopline > 445 or B_x[delivery_ind] > 315):  #parameter
-			delivery_flag = 'end'
+		if B_flag == False:
+			if B_x[delivery_ind] > 315:   #parameter
+				delivery_flag = 'wait'
+			else:
+				pass
+			if delivery_flag == 'wait' and (stopline > 445 or B_x[delivery_ind] > 315):  #parameter
+				delivery_flag = 'end'
+				B_flag = True
+			else:
+				delivery_flag = 'going'
 		else:
 			delivery_flag = 'going'
 	return delivery_flag
@@ -204,26 +218,28 @@ if __name__=='__main__':
 
 	rospy.init_node('core_control')
 
+	rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
+	rospy.Subscriber("/forward_sign", Int32MultiArray, forward_callback)
+	rospy.Subscriber('/side_sign',Int32MultiArray, delivery_sign_callback)
+	rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
+	rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
+	rospy.Subscriber("/odom_imu", Odometry, odometry_callback)
+	rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
+	rospy.Subscriber("/link_direction", StringArray, link_callback)
+	rospy.Subscriber("/stopline", Int32, delivery_stopline_callback)
+		
+	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
+
+	
+
 	mode_status = 'going'
 	r=rospy.Rate(10)
 	
 	while not rospy.is_shutdown():
-		rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
-		rospy.Subscriber("/forward_sign", Int32MultiArray, forward_callback)
-		rospy.Subscriber('/side_sign',Int32MultiArray, delivery_sign_callback)
-		rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
-		rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
-		rospy.Subscriber("/odom_imu", Odometry, odometry_callback)
-		rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
-		rospy.Subscriber("/link_direction", StringArray, link_callback)
-		rospy.Subscriber("/stopline", Int32, delivery_stopline_callback)
-		
-		
-		final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
 
-		cmd=AckermannDriveStamped()
 		#end_msg=String()
-
+		cmd=AckermannDriveStamped()
+		cmd.header.stamp=rospy.Time.now()
 		if car_mode == 'global':
 			#if move_mode == 'finish':
 			#	cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = traffic_decision()
@@ -267,7 +283,7 @@ if __name__=='__main__':
 				print('delivery finish!!! stop!!')
 				rospy.sleep(5) # 4sec
 			print('delivery mode')
-
+		
 		final_cmd_Pub.publish(cmd)
 
 		r.sleep()

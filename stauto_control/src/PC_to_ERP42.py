@@ -1,15 +1,12 @@
 #! /usr/bin/env python
 
+from locale import dcgettext
 import rospy
-from std_msgs.msg import Int32 
+from std_msgs.msg import String
 from ackermann_msgs.msg import AckermannDriveStamped
-from geometry_msgs.msg import Twist
 from math import *
 import numpy as np
 
-import serial
-import math
-import time
 import serial
 
 S = chr(0x53)
@@ -128,31 +125,54 @@ brake = 0
 #    steer = data.steer
 #    brake = data.brake
 #    print(steer)
-
+j=0
 def acker_callback(msg):
-    global speed, steer, brake, gear
+	global speed, steer, brake, gear, j
+	
+	a = 0  #parameter
+	speed = msg.drive.speed
+	steer = -(msg.drive.steering_angle)  # why minus?
 
-    speed = msg.drive.speed
-    steer = -(msg.drive.steering_angle)  # why minus?
+	brake = int(msg.drive.jerk)
+	gear = int(msg.drive.acceleration) 
 
-    brake = int(msg.drive.jerk)
-    gear = int(msg.drive.acceleration)  
+	if abs(steer) > 0.05 :
+		if j<500:
+			brake = 60 #int(speed * 10 + a)
+			#print(brake)
+			j=j+1
+		else:
+			brake = 0
+	else :
+		if dc == 'slow':
+			speed = 0
+			brake = 50
+		else:
+			brake = 0
+			j=0 
     #print(speed)    
     #print(steer*180/np.pi)
     #print(brake)
     #print(gear)
+dc = 'no'
+def dc_callback(msg):
+	global dc
+	dc = msg.data
 
 if __name__ == '__main__':
 	rospy.init_node('serial_node')	
 
-	rate = rospy.Rate(10)
+	rate = rospy.Rate(20)
 
-	port = str(rospy.get_param("~robot_port","/dev/ttyUSB0"))	
+	port = str(rospy.get_param("~robot_port","/dev/ttyUSB1"))	
 	ser = serial.serial_for_url(port, baudrate=115200, timeout=1)
 
 	while (ser.isOpen() and (not rospy.is_shutdown())):
 		rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
+		rospy.Subscriber('/dc',String, dc_callback)
     #Send to Controller
 		Send_to_ERP42(gear, speed, steer, brake)
+		
     #print(speed)
 		rate.sleep()
+

@@ -77,6 +77,20 @@ if __name__ == "__main__":
 
 	rospy.init_node("path_select")
 
+	rospy.Subscriber("/optimal_frenet_path_global", PathArray, global_path_callback)
+	rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
+	rospy.Subscriber("/link_direction", StringArray, link_callback)
+	rospy.Subscriber("/obstacles", ObjectArray, obstacle_callback)
+	rospy.Subscriber("/mission_status", String, end_callback)
+	rospy.Subscriber("/objects/car_1/gps", Object, state_callback, queue_size=1)
+	mode_pub = rospy.Publisher("/mode_selector", String, queue_size=10)
+	path_pub = rospy.Publisher("/final_path", PathArray, queue_size=1)
+	park_pub = rospy.Publisher("/park_ind_wp", Int32MultiArray, queue_size=1)
+
+	path_msg = PathArray()
+	mode_msg = String()
+	park_msg = Int32MultiArray()
+
 	parking_ind = 0
 	park_wp = 0
 	r = rospy.Rate(10)
@@ -85,19 +99,7 @@ if __name__ == "__main__":
 	#mode_msg.data = 'global'
 	while not rospy.is_shutdown():
 
-		rospy.Subscriber("/optimal_frenet_path_global", PathArray, global_path_callback)
-		rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
-		rospy.Subscriber("/link_direction", StringArray, link_callback)
-		rospy.Subscriber("/obstacles", ObjectArray, obstacle_callback)
-		rospy.Subscriber("/mission_status", String, end_callback)
-		rospy.Subscriber("/objects/car_1/gps", Object, state_callback, queue_size=1)
-		mode_pub = rospy.Publisher("/mode_selector", String, queue_size=10)
-		path_pub = rospy.Publisher("/final_path", PathArray, queue_size=1)
-		park_pub = rospy.Publisher("/park_ind_wp", Int32MultiArray, queue_size=1)
 
-		path_msg = PathArray()
-		mode_msg = String()
-		park_msg = Int32MultiArray()
 		#print(use_map.glo_to_park_start)
 		######## mode select based waypoint #######
 		if (not use_map.diagonal_parking_map_num==0) and (global_wp <= use_map.glo_to_diagonal_park_finish and global_wp >=use_map.glo_to_diagonal_park_start):  # parking mode
@@ -128,11 +130,9 @@ if __name__ == "__main__":
 			rospy.set_param('mission_status', mode_status)
 		else:
 			pass
-		if (mode == 'delivery_A' and mode == 'delivery_B'):
-			mode_msg.data = 'delivery'
-		else:
-			mode_msg.data = mode
-			mode_pub.publish(mode_msg)
+
+		mode_msg.data = mode
+		mode_pub.publish(mode_msg)
 		
 
 		if mode == 'parking':

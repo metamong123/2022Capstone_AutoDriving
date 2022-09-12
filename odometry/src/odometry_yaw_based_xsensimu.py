@@ -14,7 +14,7 @@ import numpy as np
 
 Odom_Pub = rospy.Publisher('/odom_imu', Odometry, queue_size=1)
 
-def callback(gps, imu):
+def callback(gps, imu, vel):
 	
 	cov1 = gps.position_covariance[0] 
 	cov2 = gps.position_covariance[4]
@@ -30,12 +30,17 @@ def callback(gps, imu):
 	gpose.pose.covariance[21]=cov3
 	gpose.pose.covariance[28]=cov3
 	gpose.pose.covariance[35]=cov3
-
+	
 	gpose.pose.pose.orientation.x= imu.quaternion.x
 	gpose.pose.pose.orientation.y= imu.quaternion.y
 	gpose.pose.pose.orientation.z= imu.quaternion.z
 	gpose.pose.pose.orientation.w= imu.quaternion.w
 	
+	gpose.twist.twist.linear.x = vel.twist.twist.linear.x
+	gpose.twist.twist.linear.y = vel.twist.twist.linear.y
+	gpose.twist.twist.linear.z = vel.twist.twist.linear.z
+
+
 	Odom_Pub.publish(gpose)
 	r.sleep()
 	
@@ -48,8 +53,9 @@ if __name__=='__main__':
 	r = rospy.Rate(10)
 	
 	gps_sub = message_filters.Subscriber("/gps/fix",NavSatFix)
+	gps_vel_sub = message_filters.Subscriber("/ublox_gps/fix_velocity",TwistWithCovarianceStamped)
 	imu_sub = message_filters.Subscriber("/filter/quaternion",QuaternionStamped)
-	ts = message_filters.ApproximateTimeSynchronizer([gps_sub,imu_sub], 1,10)
+	ts = message_filters.ApproximateTimeSynchronizer([gps_sub,imu_sub,gps_vel_sub], 1,10)
 	ts.registerCallback(callback)
 
 	rospy.spin()
