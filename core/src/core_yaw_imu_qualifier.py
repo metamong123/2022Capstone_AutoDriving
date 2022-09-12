@@ -286,7 +286,7 @@ if __name__=='__main__':
 				if parking_yaw == 0:
 					parking_yaw = yaw
 				cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = parking_decision()
-			print('parking mode')
+			print('diagonal parking mode')
 
 		elif car_mode == 'dynamic_object':
 			if col == 0:

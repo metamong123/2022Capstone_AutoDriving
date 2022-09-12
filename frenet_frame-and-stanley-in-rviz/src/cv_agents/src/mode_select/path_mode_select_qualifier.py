@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
 	parking_ind = 0
 	park_wp = 0
-	r = rospy.Rate(10)
+	r = rospy.Rate(20)
 	mode='global'
 	dist = 0
 	#mode_msg.data = 'global'

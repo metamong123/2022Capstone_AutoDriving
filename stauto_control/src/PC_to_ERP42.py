@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+#-*- coding: utf-8 -*-
 
 from locale import dcgettext
 import rospy
@@ -126,6 +127,9 @@ brake = 0
 #    brake = data.brake
 #    print(steer)
 j=0
+i = 0
+prev_mode = 'global'
+mode = 'global'
 def acker_callback(msg):
 	global speed, steer, brake, gear, j
 	
@@ -134,8 +138,24 @@ def acker_callback(msg):
 	steer = -(msg.drive.steering_angle)  # why minus?
 
 	brake = int(msg.drive.jerk)
-	gear = int(msg.drive.acceleration) 
+	gear = int(msg.drive.acceleration)
+	######### mode 변경시 일정시간 정지 #######
+	if mode != prev_mode:
+		dc = True
+	else:
+		pass
 
+	if dc == True:
+		if i < 100:
+			speed = 2
+			brake = 50
+			i = i + 1
+		else:
+			i = 0
+			dc = False
+	else:
+		pass
+    #####################################			
 	if abs(steer) > 0.05 :
 		if j<500:
 			brake = 60 #int(speed * 10 + a)
@@ -144,20 +164,15 @@ def acker_callback(msg):
 		else:
 			brake = 0
 	else :
-		if dc == 'slow':
-			speed = 0
-			brake = 50
-		else:
-			brake = 0
-			j=0 
-    #print(speed)    
-    #print(steer*180/np.pi)
-    #print(brake)
-    #print(gear)
+		brake = 0
+		j=0 
+	prev_mode = mode
+
 dc = 'no'
-def dc_callback(msg):
-	global dc
-	dc = msg.data
+mode = 'global'
+def mode_callback(msg):
+	global mode
+	mode = msg.data
 
 if __name__ == '__main__':
 	rospy.init_node('serial_node')	
@@ -169,7 +184,7 @@ if __name__ == '__main__':
 
 	while (ser.isOpen() and (not rospy.is_shutdown())):
 		rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
-		rospy.Subscriber('/dc',String, dc_callback)
+		rospy.Subscriber('/mode_selector',String, mode_callback)
     #Send to Controller
 		Send_to_ERP42(gear, speed, steer, brake)
 		

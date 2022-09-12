@@ -635,7 +635,7 @@ def hightech_parking():
 	hightech_parking.horizontal_parking_stop=[58]
 	hightech_parking.horizontal_park_to_glo=[]
 	
-	hightech_parking.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6,'uturn':8/3.6},'parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
+	hightech_parking.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6,'uturn':8/3.6},'horizontal_parking':{'straight':5/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
 	hightech_parking.lane_width={'none':{3.0:[i for i in range(6)]}}
 	hightech_parking.set_lanewidth()
 	hightech_parking.set_other_link()

@@ -90,14 +90,16 @@ if __name__ == "__main__":
 	path_pub = rospy.Publisher("/final_path", PathArray, queue_size=1)
 	park_pub = rospy.Publisher("/park_ind_wp", Int32MultiArray, queue_size=1)
 	dc_pub = rospy.Publisher("/dc", String, queue_size=1)
+
 	path_msg = PathArray()
 	mode_msg = String()
 	park_msg = Int32MultiArray()
 	dc_msg = String()
+
 	parking_ind = 0
 	parking = False
 	park_wp = 0
-	r = rospy.Rate(10)
+	r = rospy.Rate(20)
 	mode='global'
 	dist = 0
 	dc = 'no'
@@ -123,8 +125,9 @@ if __name__ == "__main__":
 		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
 			mode = 'delivery_B'
 			dc = 'slow'
-		elif (not use_map.horizontal_parking_map_num==0) and (global_wp <= use_map.glo_to_horizontal_park_start[parking_ind] and parking = False): # horizontal parking mode
+		elif (not use_map.horizontal_parking_map_num==0) and (global_wp >= use_map.glo_to_horizontal_park_start[parking_ind]) and (global_wp <= use_map.glo_to_horizontal_park_finish[parking_ind]) and (parking == False): # horizontal parking mode
 			mode = 'horizontal_parking'
+			parking = True
 		else:
 			dc = 'no'
 		if mode == 'delivery_A' and (global_wp >= use_map.del_to_glo_start[0]):
