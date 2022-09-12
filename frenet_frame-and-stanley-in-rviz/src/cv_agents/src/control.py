@@ -14,6 +14,7 @@ from rocon_std_msgs.msg import StringArray
 
 from frenet import *
 from stanley_pd import *
+from stanley_back_pd import *
 
 rospack = rospkg.RosPack()
 path_frenet=rospack.get_path("cv_agents")
@@ -79,8 +80,6 @@ def callback_mode(msg):
 	# mode = msg.data
 	if (msg.data == 'delivery_A') or (msg.data == 'delivery_B'):
 		mode = 'delivery'
-	elif (msg.data == 'diagonal_parking') or (msg.data == 'horizontal_parking'):
-		mode = 'parking'
 	else:
 		mode = msg.data
 
@@ -128,6 +127,7 @@ if __name__ == "__main__":
 	yaw_d_gain=0.5
 
 	stanley_imu = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
+	stanley_imu_back = Stanely_back(k=control_gain[mode], speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
 	
 	f_imu = open("/home/mds/stanley/"+"imu_"+time.strftime('%Y%m%d_%H:%M')+"_k"+str(control_gain[mode])+"_sg"+str(cte_speed_gain)+"_wy"+str(yaw_weight)+"_wc"+str(cte_weight)+"_thresh"+str(cte_thresh_hold)+"_dgain"+str(yaw_d_gain)+".csv", "w")
 	f_imu.write('time' + ',' + 'x' + ',' + 'y' + ',' + 'map_yaw' + ',' + 'yaw' + ',' + 'yaw_term(degree)' + ',' + 'cte(cm)' + ',' + 'steering(degree)' + '\n')
@@ -229,7 +229,10 @@ if __name__ == "__main__":
 
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
 
-			steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu.stanley_control_pd(obj_msg.x, obj_msg.y, obj_msg.yaw, obj_msg.v, path_x, path_y, path_yaw)
+			if mode == 'horizontal_parking':
+				steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu_back.stanley_control_pd(obj_msg.x, obj_msg.y, obj_msg.yaw, obj_msg.v, path_x, path_y, path_yaw)
+			else:
+				steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu.stanley_control_pd(obj_msg.x, obj_msg.y, obj_msg.yaw, obj_msg.v, path_x, path_y, path_yaw)
 			# stanley_control / stanley_control_thresh / stanley_control_pid
 			v_com=use_map.target_speed[mode][dir]
 			# if mode == 'global':

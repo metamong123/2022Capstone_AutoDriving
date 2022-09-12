@@ -94,8 +94,6 @@ def callback_mode(msg):
 	global mode
 	if (msg.data == 'delivery_A') or (msg.data == 'delivery_B'):
 		mode = 'delivery'
-	elif (msg.data == 'diagonal_parking') or (msg.data == 'horizontal_parking'):
-		mode = 'parking'
 	else:
 		mode = msg.data
 
