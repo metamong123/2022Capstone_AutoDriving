@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-from os import access
 import rospy
 import math
 from std_msgs.msg import Int32MultiArray, Float64, String, Int32
@@ -45,7 +44,7 @@ def euler_from_quaternion(x, y, z, w):
         return yaw_z
 
 ####### parking 시작하기전에 수정해야할 파라미터 값들 !!!!!!!!!!!!!!!!!
-parking_finish_wp=[] # 각 parking index마다의 finish waypoint임
+parking_finish_wp=[54, 54] # 각 parking index마다의 finish waypoint임
 ###########################################################################
 
 car_mode = 'global'
@@ -116,6 +115,12 @@ def delivery_stopline_callback(msg):
 	global stopline
 	stopline = msg.data
 
+traffic_slow = 'no'
+def slow_callback(msg):
+    global traffic_slow
+    traffic_slow = msg.data
+    
+
 def traffic_decision():
 	global next_dir
 
@@ -133,7 +138,7 @@ def traffic_decision():
 			traffic_brake = int(frenet_speed * 10)
 			print("traffic mode : none")
 		else :
-			traffic_speed = frenet_speed
+			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
 			traffic_brake = 0
@@ -153,7 +158,7 @@ def traffic_decision():
 			traffic_brake = int(frenet_speed * 10)
 			print("traffic mode : none")
 		else :
-			traffic_speed = frenet_speed
+			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
 			traffic_brake = 0
@@ -172,7 +177,7 @@ def traffic_decision():
 			traffic_brake = int(frenet_speed * 10)
 			print("traffic mode : none")
 		else :
-			traffic_speed = frenet_speed
+			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
 			traffic_brake = 0
@@ -181,10 +186,8 @@ def traffic_decision():
 
 delivery_ind =0 
 delivery_flag = 'going'
-A_flag = False
-B_flag = False
 def delivery_decision():
-	global delivery_ind, A_flag, B_flag, delivery_flag
+	global delivery_ind, delivery_flag
 	
 	#print(A_number)
 	if A_number == 0:  # A1
@@ -197,29 +200,23 @@ def delivery_decision():
 		pass
 
 	if car_mode == 'delivery_A':
-		if A_flag == False:
-			if A_x[delivery_ind] > 315:   #parameter
-				delivery_flag = 'wait'
-			else:
-				pass
-			if delivery_flag == 'wait' and (stopline > 450 and A_x[delivery_ind] > 315):  #parameter
-				delivery_flag = 'end'
-				A_flag = True
-			else:
-				delivery_flag = 'going'
+		if A_x[delivery_ind] > 315:   #parameter
+			delivery_flag = 'wait'
+		else:
+			pass
+		if delivery_flag == 'wait' and (stopline > 450 and A_x[delivery_ind] > 315):  #parameter
+			delivery_flag = 'end'
 		else:
 			delivery_flag = 'going'
+
 	elif car_mode == 'delivery_B':
-		if B_flag == False:
-			if B_x[delivery_ind] > 315:   #parameter
-				delivery_flag = 'wait'
-			else:
-				pass
-			if delivery_flag == 'wait' and (stopline > 450 and B_x[delivery_ind] > 315):  #parameter
-				delivery_flag = 'end'
-				B_flag = True
-			else:
-				delivery_flag = 'going'
+		if B_x[delivery_ind] > 315:   #parameter
+			delivery_flag = 'wait'
+		else:
+			pass
+		if delivery_flag == 'wait' and (stopline > 450 and B_x[delivery_ind] > 315):  #parameter
+			delivery_flag = 'end'
+			B_flag = True
 		else:
 			delivery_flag = 'going'
 	return delivery_flag
@@ -238,6 +235,8 @@ if __name__=='__main__':
 	rospy.Subscriber("/stopline", Int32, delivery_stopline_callback)
 	rospy.Subscriber("/traffic_mode", String, traffic_callback)
 	rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
+	rospy.Subscriber("/traffic_slow", String, slow_callback)
+ 
 	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
 
 	mode_status = 'going'
@@ -284,25 +283,31 @@ if __name__=='__main__':
 						cmd.drive.jerk = 0
 						j = 0
 			else:
-				notraffic_status = False # notraffic 구간이 여러번 있으니 바꿔줘야함
-				if abs(frenet_angle) > 0.1: #각도 파라미터
-					if j<100:  #감속
-						cmd.drive.speed = frenet_speed/2
-						cmd.drive.steering_angle = frenet_angle
-						cmd.drive.acceleration = frenet_gear
-						cmd.drive.jerk = 50
-						j=j+1
-					else:
+				if traffic_slow == 'slow':
+					cmd.drive.speed = frenet_speed/2
+					cmd.drive.steering_angle = frenet_angle
+					cmd.drive.acceleration = frenet_gear
+					cmd.drive.jerk = 30
+				else:
+					if abs(frenet_angle) > 0.1: #각도 파라미터
+						if j<100:  #감속
+							cmd.drive.speed = frenet_speed/2
+							cmd.drive.steering_angle = frenet_angle
+							cmd.drive.acceleration = frenet_gear
+							cmd.drive.jerk = 50
+							j=j+1
+						else:
+							cmd.drive.speed = frenet_speed
+							cmd.drive.steering_angle = frenet_angle
+							cmd.drive.acceleration = frenet_gear
+							cmd.drive.jerk = 0	
+					else:	
 						cmd.drive.speed = frenet_speed
 						cmd.drive.steering_angle = frenet_angle
 						cmd.drive.acceleration = frenet_gear
-						cmd.drive.jerk = 0	
-				else:	
-					cmd.drive.speed = frenet_speed
-					cmd.drive.steering_angle = frenet_angle
-					cmd.drive.acceleration = frenet_gear
-					cmd.drive.jerk = 0
-					j = 0
+						cmd.drive.jerk = 0
+						j = 0
+				notraffic_status = False # notraffic 구간이 여러번 있으니 바꿔줘야함
 				print('global mode!!!')
 			mode_status = 'going'
 

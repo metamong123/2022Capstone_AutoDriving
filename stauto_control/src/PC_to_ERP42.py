@@ -130,42 +130,46 @@ def mode_callback(msg):
 	mode = msg.data
 
 if __name__ == '__main__':
-	rospy.init_node('serial_node')	
+    rospy.init_node('serial_node')	
 
-	rate = rospy.Rate(20)
+    rate = rospy.Rate(20)
 
-	port = str(rospy.get_param("~robot_port","/dev/ttyUSB3"))	
-	ser = serial.serial_for_url(port, baudrate=115200, timeout=1)
-	prev_mode = 'global'
-	j=0
-	i = 0
-	dc = False
-	while (ser.isOpen() and (not rospy.is_shutdown())):
-		rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
-		rospy.Subscriber('/mode_selector',String, mode_callback)
+    port = str(rospy.get_param("~robot_port","/dev/ttyUSB3"))	
+    ser = serial.serial_for_url(port, baudrate=115200, timeout=1)
+    prev_mode = 'global'
+    j=0
+    i = 0
+    dc = False
+    glo_speed = 0
+    while (ser.isOpen() and (not rospy.is_shutdown())):
+        rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
+        rospy.Subscriber('/mode_selector',String, mode_callback)
     #Send to Controller
+        if mode == 'global':
+            glo_speed = speed
+        else:
+            glo_speed = glo_speed
 		######### mode 변경시 일정시간 감속 #######
-		if (mode != 'horizontal_parking') and (mode != prev_mode):
-			dc = True
-		else:
-			pass
-		print(dc)
-		if dc == True:
-			if i < 50:
-				speed = 2
-				brake = 55
-				i = i + 1
-			else:
-				i = 0
-				dc = False
-		else:
-			pass
+        if (mode != 'horizontal_parking') and (mode != prev_mode):
+            dc = True
+        else:
+            pass
+        print(dc)
+        if dc == True:
+            if i < 50:
+                speed = 2
+                brake = int(5.5 * glo_speed * 3.6 - 27.5) 
+                i = i + 1
+            else:
+                i = 0
+                dc = False
+        else:
+            pass
     	#####################################
-		prev_mode = mode
+        prev_mode = mode
 
 
-		Send_to_ERP42(gear, speed, steer, brake)
+        Send_to_ERP42(gear, speed, steer, brake)
 		
     #print(speed)
-		rate.sleep()
-
+        rate.sleep()

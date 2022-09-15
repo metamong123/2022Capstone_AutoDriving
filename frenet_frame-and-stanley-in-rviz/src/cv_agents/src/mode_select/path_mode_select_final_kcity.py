@@ -96,6 +96,7 @@ if __name__ == "__main__":
 	path_pub = rospy.Publisher("/final_path", PathArray, queue_size=1)
 	park_pub = rospy.Publisher("/park_ind_wp", Int32MultiArray, queue_size=1)
 	traffic_pub = rospy.Publisher("/traffic_mode", String, queue_size=1)
+	slow_pub = rospy.Publisher("/traffic_slow", String, queue_size=1)
 
 	parking_ind = 0
 	park_wp = 0
@@ -105,6 +106,7 @@ if __name__ == "__main__":
 	dist = 0
 	traffic_interval = 0
 	target_speed = 0
+	traffic_slow = 'no'
 
 	r = rospy.Rate(20)
 	while not rospy.is_shutdown():
@@ -113,6 +115,7 @@ if __name__ == "__main__":
 		mode_msg = String()
 		park_msg = Int32MultiArray()
 		traffic_msg = String()
+		traffic_slow_msg = String()
 
         ### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
 		if mode_status == 'end':
@@ -129,6 +132,10 @@ if __name__ == "__main__":
 			mode = 'delivery_A'
 		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
 			mode = 'delivery_B'
+		elif (global_wp >= use_map.glo_to_static_finish and global_wp >= use_map.glo_to_static_start):
+			mode = 'static_object'
+			if (global_wp > use_map.glo_to_static_finish):
+				mode = 'global'
 		elif (not use_map.horizontal_parking_map_num==0) and (global_wp <= use_map.glo_to_horizontal_park_finish) and (global_wp >= use_map.glo_to_horizontal_park_start):  # horizontal mode
 			mode = 'horizontal_parking'
 			parking = True
@@ -149,7 +156,7 @@ if __name__ == "__main__":
 		else:
 			target_speed = use_map.target_speed[mode][current_dir]
 		if target_speed >= 15:
-			traffic_interval = 7
+			traffic_interval = 6
 		elif target_speed >= 10:
 			traffic_interval = 5
 		elif target_speed > 5:
@@ -157,6 +164,14 @@ if __name__ == "__main__":
 		else:
 			traffic_interval = 3
 		#####################
+  
+		for number in range(len(use_map.trafficlight_list)):
+			if (global_wp <= use_map.trafficlight_list[number1]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number1]-traffic_interval-3):
+				traffic_slow = 'slow'
+				break
+			else:
+				traffic_slow = 'no'
+		traffic_slow_msg.data = traffic_slow
 
 		for number1 in range(len(use_map.trafficlight_list)):
 			if (global_wp <= use_map.trafficlight_list[number1]) and (global_wp >= use_map.trafficlight_list[number1]-traffic_interval):
@@ -209,5 +224,7 @@ if __name__ == "__main__":
 
 		path_pub.publish(path_msg)
 		park_pub.publish(park_msg)
-		traffic_pub.publish(traffic_msg)		
+		traffic_pub.publish(traffic_msg)	
+		slow_pub.publish(traffic_slow_msg)
+    	
 		r.sleep()

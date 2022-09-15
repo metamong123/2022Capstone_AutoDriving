@@ -472,8 +472,8 @@ def boong():
 
 def kcity():
 	kcity=Path(path_map + "/src/kcity/global.pkl")
-	kcity.set_global_link([0,155,209,279,341,663,742,772,829,1214,1243,1678,1957,2120,2365,2738,2833,3000,3058,3133])
-	kcity.set_dir([0,1,2,3,6,7,9,15,16,17,18,19,20],[8,10,11],[4,5,13,14],[12]) #마지막에 유턴링크 넣으세요
+	kcity.set_global_link([0,155,209,279,354,411,505,526,556,611,703,752,971,1110,1192,1315,1503,1598,1765,1823,1898,2077])
+	kcity.set_dir([0,1,2,3,4,6,7,10,17,18,19,20,21],[8,9,11,12,16],[5,14,15],[13])
 
 	kcity.horizontal_parking_map_num=2
 	for i in range(kcity.horizontal_parking_map_num):
@@ -488,26 +488,29 @@ def kcity():
 		kcity.set_other_mode(mode='delivery', pc_route=del_route,link=i)
 
 	kcity.notrafficlight_list=[2339,2608]
-	kcity.trafficlight_list=[205,275,738,1221,2829,2996,3054]
-	kcity.uturn_list=[1991]
+	kcity.trafficlight_list=[205,275,552,731,1594,1761,1819]
+	kcity.uturn_list=[1127]
 
-	kcity.glo_to_horizontal_park_start=3201
-	kcity.glo_to_horizontal_park_finish=3211
-	kcity.horizontal_parking_stop=[]
+	kcity.glo_to_horizontal_park_start=[1964,1971]
+	kcity.glo_to_horizontal_park_finish=[1966.1973]
+	kcity.horizontal_parking_stop=[61]
 	kcity.horizontal_park_to_glo=[] 
 
-	kcity.glo_to_del_start=[773, 2739]
-	kcity.glo_to_del_finish=[775, 2741]
-	kcity.del_to_glo_start=[809,2825]
-	kcity.del_to_glo_finish=[811,2827]
+	kcity.glo_to_del_start=[556, 1504]
+	kcity.glo_to_del_finish=[558, 1506]
+	kcity.del_to_glo_start=[592,1590]
+	kcity.del_to_glo_finish=[594,1591]
 
-	kcity.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6, 'uturn':8/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':8/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':7/3.6}}
-	kcity.lane_width={'left':{3.3:{3.3:[7]}, 3.8:{3.3:[5]}}, 'right':{}, 'none':{3.3:[3,4,6,8,9,10,11,12,14,15,16], 3.8:[0,1,2,17,18,19,20], 4.1:[13]}}
+	kcity.glo_to_static_start=354
+	kcity.glo_to_static_finish=513
+
+	kcity.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6, 'uturn':8/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':7/3.6}}
+	kcity.lane_width={'left':{3.3:{3.3:[8]}, 3.8:{3.3:[6]}}, 'right':{3.3:{3.8:[4]}}, 'none':{3.3:[3,5,7,9,10,11,12,13,15,16,17], 3.8:[0,1,2,18,19,20,21], 4.1:[14]}}
 
 	kcity.set_lanewidth()
 	kcity.set_other_link()
-	for link_int in [4,8,10,11,12,13,14]:
-		kcity.interpolate_map(mode='global', space=0.2,link=link_int) # space는 m 단위로 넣기
+	# for link_int in [5,9,11,12,13,14]:
+	# 	kcity.interpolate_map(mode='global', space=0.2,link=link_int) # space는 m 단위로 넣기
 	kcity.horizontal_parking_path=kcity.make_path('horizontal_parking',kcity.horizontal_parking_map_num)
 	kcity.delivery_path=kcity.make_path('delivery',kcity.delivery_map_num)
 	return kcity
@@ -534,7 +537,7 @@ def qualifier():
 	qualifier.diagonal_parking_stop=[]
 	qualifier.diagonal_park_to_glo=[] 
 	
-	qualifier.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':7/3.6}}
+	qualifier.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':7/3.6},'static_object':{'straight':7/3.6}}
 	qualifier.lane_width={'left':{3.3:{3.3:[5]}}, 'right':{}, 'none':{3.3:[4,6,7,8], 3.8:[0,1,2,3,9,10]}}
 
 	qualifier.set_lanewidth()

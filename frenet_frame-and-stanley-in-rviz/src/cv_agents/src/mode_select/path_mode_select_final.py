@@ -118,6 +118,10 @@ if __name__ == "__main__":
 			mode = 'delivery_A'
 		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
 			mode = 'delivery_B'
+		elif (global_wp >= use_map.glo_to_static_finish and global_wp >= use_map.glo_to_static_start):
+			mode = 'static_object'
+			if (global_wp > use_map.glo_to_static_finish):
+				mode = 'global'
 		elif (not use_map.horizontal_parking_map_num==0) and (global_wp >= use_map.glo_to_horizontal_park_start[parking_ind]) and (global_wp <= use_map.glo_to_horizontal_park_finish[parking_ind]) and (parking == False): # horizontal parking mode
 			mode = 'horizontal_parking'
 			parking = True

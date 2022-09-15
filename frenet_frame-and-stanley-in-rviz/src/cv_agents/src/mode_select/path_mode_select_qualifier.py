@@ -116,6 +116,10 @@ if __name__ == "__main__":
 			mode = 'dynamic_object'
 			if global_wp >= (use_map.glo_to_dynamic_finish-5):
 				mode = 'global'
+		elif (global_wp >= use_map.glo_to_static_finish and global_wp >= use_map.glo_to_static_start):
+			mode = 'static_object'
+			if (global_wp > use_map.glo_to_static_finish):
+				mode = 'global'
 		else:
 			pass
 
