@@ -22,8 +22,9 @@ def callback(gps, imu, vel):
 	kcity=Proj(init='epsg:5179')
 	wgs84=Proj(init='epsg:4326')
 	a,b=transform(wgs84,kcity,gps.longitude,gps.latitude)
-	gpose.pose.pose.position.x=a
-	gpose.pose.pose.position.y=b
+
+	gpose.pose.pose.position.x=a #-1.8177898578578606
+	gpose.pose.pose.position.y=b #+0.34575470979325473
 	gpose.pose.covariance[0]=cov1
 	gpose.pose.covariance[7]=cov2
 	gpose.pose.covariance[14]=cov3

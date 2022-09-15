@@ -114,7 +114,7 @@ if __name__ == '__main__':
 		("B2",),
 		("B3",)
 	)
-	QUEUE_SIZE = 7
+	QUEUE_SIZE = 13
 	ACCURACY_THRESHOLD = 0.7
 
 	rospy.init_node('side_yolo')

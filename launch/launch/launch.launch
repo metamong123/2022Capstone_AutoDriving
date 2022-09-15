@@ -8,7 +8,7 @@
 
 	<include file="$(find usb_cam)/launch/forward_cam.launch" />
 	<!-- <include file="$(find usb_cam)/launch/lanenet_cam.launch" /> -->
-	<!-- <include file="$(find usb_cam)/launch/side_cam.launch" /> -->
+	<include file="$(find usb_cam)/launch/side_cam.launch" />
 	<include file="$(find usb_cam)/launch/tracker.launch" />
 
 	<node name="odom_gps" pkg="odometry" type="odometry_yaw_based_gps.py" />

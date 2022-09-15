@@ -81,8 +81,8 @@ car = 0
 def forward_callback(msg):
 	global  traffic_light, person, car
 	traffic_light = msg.data[0]
-	person = msg.data[1]
-	car = msg.data[2]
+	#person = msg.data[1]
+	#car = msg.data[2]
 
 def odometry_callback(msg):
 	global yaw
@@ -166,10 +166,10 @@ def traffic_decision():
 
 delivery_ind =0 
 delivery_flag = 'going'
-A_flag = False
-B_flag = False
+#A_flag = False
+#B_flag = False
 def delivery_decision():
-	global delivery_ind, A_flag, B_flag, delivery_flag
+	global delivery_ind, delivery_flag #A_flag, B_flag, 
 	
 	#print(A_number)
 	if A_number == 0:  # A1
@@ -182,23 +182,24 @@ def delivery_decision():
 		pass
 
 	if car_mode == 'delivery_A':
-		if A_flag == False:
-			if A_x[delivery_ind] > 450:   #parameter
-				delivery_flag = 'end'
-				A_flag = True
-			else:
-				delivery_flag = 'going'
+		#if A_flag == False:
+		if A_x[delivery_ind] > 100:   #parameter
+			delivery_flag = 'end'
+			#A_flag = True
 		else:
 			delivery_flag = 'going'
+		#else:
+		#	delivery_flag = 'going'
 	elif car_mode == 'delivery_B':
-		if B_flag == False:
-			if B_x[delivery_ind] > 450:   #parameter
-				delivery_flag = 'end'
-				B_flag = True
-			else:
-				delivery_flag = 'going'
+		#if B_flag == False:
+		if B_x[delivery_ind] > 450:   #parameter
+			delivery_flag = 'end'
+			#B_flag = True
 		else:
 			delivery_flag = 'going'
+		#else:
+		#	delivery_flag = 'going'
+	print(delivery_flag)
 	return delivery_flag
 
 if __name__=='__main__':

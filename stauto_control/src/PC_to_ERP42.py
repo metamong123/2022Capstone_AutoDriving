@@ -150,7 +150,7 @@ if __name__ == '__main__':
         else:
             glo_speed = glo_speed
 		######### mode 변경시 일정시간 감속 #######
-        if (mode != 'horizontal_parking') and (mode != prev_mode):
+        if (mode != 'global') and (mode != 'horizontal_parking') and (mode != prev_mode):
             dc = True
         else:
             pass
