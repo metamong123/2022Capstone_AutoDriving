@@ -183,7 +183,7 @@ def delivery_decision():
 
 	if car_mode == 'delivery_A':
 		if A_flag == False:
-			if A_x[delivery_ind] > 315:   #parameter
+			if A_x[delivery_ind] > 450:   #parameter
 				delivery_flag = 'end'
 				A_flag = True
 			else:
@@ -192,7 +192,7 @@ def delivery_decision():
 			delivery_flag = 'going'
 	elif car_mode == 'delivery_B':
 		if B_flag == False:
-			if B_x[delivery_ind] > 315:   #parameter
+			if B_x[delivery_ind] > 450:   #parameter
 				delivery_flag = 'end'
 				B_flag = True
 			else:
@@ -327,7 +327,6 @@ if __name__=='__main__':
 				rospy.sleep(5) # 4sec
 			print('delivery mode')
 
-		print(mode_status)
 		status_msg.data = mode_status
 		status_Pub.publish(status_msg)
 		final_cmd_Pub.publish(cmd)

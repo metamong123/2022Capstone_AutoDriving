@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 class Stanley_back:
 	def __init__(self, k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, yaw_dgain = 0, WB = 1.04):
@@ -16,6 +17,12 @@ class Stanley_back:
 		self.yaw_dgain = yaw_dgain
 		self.prev_yaw = 0
 
+	def backward_yaw(self, yaw):
+		if yaw <= 0:
+			yaw = yaw + math.pi
+		else:
+			yaw = yaw - math.pi
+		return yaw
 
 	def normalize_angle(self, angle):
 		while angle > np.pi:
@@ -45,8 +52,8 @@ class Stanley_back:
 
     
 	def stanley_control(self, x, y, yaw, v, map_xs, map_ys, map_yaws):
-		back_x = x - self.WB/2*np.cos(yaw)
-		back_y = y - self.WB/2*np.sin(yaw)
+		back_x = x
+		back_y = y
 
 		# find nearest point
 		min_index = self.find_nearest_point(back_x, back_y, map_xs, map_ys)
@@ -69,10 +76,9 @@ class Stanley_back:
 		steer = self.w_yaw * yaw_term + self.w_cte * cte_term
 		return steer, yaw_term, cte
 
-
 	def stanley_control_pd(self, x, y, yaw, v, map_xs, map_ys, map_yaws):
-		back_x = x - self.WB/2*np.cos(yaw)
-		back_y = y - self.WB/2*np.sin(yaw)
+		back_x = x
+		back_y = y
 
 		# find nearest point
 		min_index = self.find_nearest_point(back_x, back_y, map_xs, map_ys)
@@ -101,4 +107,5 @@ class Stanley_back:
 
 		# steering
 		steer = self.w_yaw*yaw_term + self.yaw_dgain*d_yaw + self.w_cte*cte_term
+		steer = -(self.backward_yaw(steer))
 		return steer, yaw_term, cte, map_yaw

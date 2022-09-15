@@ -153,7 +153,7 @@ if __name__ == '__main__':
 		if dc == True:
 			if i < 50:
 				speed = 2
-				brake = 40
+				brake = 55
 				i = i + 1
 			else:
 				i = 0

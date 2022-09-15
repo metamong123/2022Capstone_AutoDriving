@@ -188,7 +188,8 @@ if __name__ == "__main__":
 
 		state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
 		gear=0
-		# 수평 주차 할 때만 사용할 것.
+
+		# 수평 주차 할 때만 사용할 것
 		# if mode == 'parking':
 		# 	yaw_reversed=backward_yaw(obj_msg.yaw)
 		# 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=yaw_reversed, v=2, dt=0.1)
@@ -233,8 +234,6 @@ if __name__ == "__main__":
 
 			if mode == 'horizontal_parking':
 				steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu_back.stanley_control_pd(obj_msg.x, obj_msg.y, obj_msg.yaw, obj_msg.v, path_x, path_y, path_yaw)
-				# steer_imu=-(steer_imu)
-				steer_imu = -(backward_yaw(steer_imu))
 				gear = 2
 			else:
 				steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu.stanley_control_pd(obj_msg.x, obj_msg.y, obj_msg.yaw, obj_msg.v, path_x, path_y, path_yaw)
@@ -251,12 +250,6 @@ if __name__ == "__main__":
 			f_imu.write(str(t2) + ',' + str(obj_msg.x) + ',' + str(obj_msg.y) + ',' + str(map_yaw_imu*180/math.pi) + ',' + str(obj_msg.yaw*180/math.pi) + ',' + str(yaw_term_imu*180/math.pi) + ',' + str(cte_imu*1e2) + ',' + str(steer_imu*180/math.pi) + '\n')
 
 		accel_msg.data = a
-
-		# XXXXXXXXXXXXXXXXXXXXXXX
-		# if mode == 'parking':
-		# 	steer_imu=backward_yaw(steer_imu)
-		# else:
-		# 	steer_imu=steer_imu
 
 		msg = state.get_ros_msg(a, steer_imu, v_com,gear)
 		v_com=use_map.target_speed[mode][dir]

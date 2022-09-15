@@ -1,5 +1,8 @@
 <launch>
 
+	<include file="$(find velodyne_pointcloud)/launch/VLP16_points.launch" />
+	<include file="$(find adaptive_clustering_v1)/launch/adaptive_clustering_v1.launch" />
+
 	<include file="$(find ublox_gps)/launch/ublox_device.launch" />
 	<include file="$(find xsens_mti_driver)/launch/xsens_mti_node.launch" />
 
@@ -10,5 +13,6 @@
 
 	<node name="odom_gps" pkg="odometry" type="odometry_yaw_based_gps.py" />
 	<node name="odom_imu" pkg="odometry" type="odometry_yaw_based_xsensimu.py" />
+	<node name="stopline_tracker" pkg="delivery_stopline" type="stopline_tracker.py" />
 
 </launch>

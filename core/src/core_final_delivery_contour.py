@@ -198,7 +198,7 @@ def delivery_decision():
 				delivery_flag = 'wait'
 			else:
 				pass
-			if delivery_flag == 'wait' and (stopline > 450 and A_x[delivery_ind] > 315):  #parameter
+			if delivery_flag == 'wait' and (stopline > 400 and A_x[delivery_ind] > 315):  #parameter
 				delivery_flag = 'end'
 				A_flag = True
 			else:
@@ -211,7 +211,7 @@ def delivery_decision():
 				delivery_flag = 'wait'
 			else:
 				pass
-			if delivery_flag == 'wait' and (stopline > 450 and B_x[delivery_ind] > 315):  #parameter
+			if delivery_flag == 'wait' and (stopline > 400 and B_x[delivery_ind] > 315):  #parameter
 				delivery_flag = 'end'
 				B_flag = True
 			else:
@@ -268,6 +268,7 @@ if __name__=='__main__':
 				cmd.drive.jerk = 0
 				j = 0
 			mode_status = 'going'
+			stopline = 0
 			print('global mode!!!')
 
 		elif car_mode == 'horizontal_parking':
@@ -311,6 +312,7 @@ if __name__=='__main__':
 						cmd.drive.acceleration = frenet_gear
 						cmd.drive.jerk = 0
 						j = 0
+				stopline=0
 
 		elif car_mode == 'delivery_A' or car_mode == 'delivery_B':
 			delivery_flag = delivery_decision()
@@ -347,7 +349,6 @@ if __name__=='__main__':
 				rospy.sleep(5) # 4sec
 			print('delivery mode')
 		
-		print(mode_status)
 		status_msg.data = mode_status
 		status_Pub.publish(status_msg)
 		final_cmd_Pub.publish(cmd)

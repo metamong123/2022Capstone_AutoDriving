@@ -370,7 +370,6 @@ if __name__=='__main__':
 				rospy.sleep(5) # 5sec
 			print('delivery mode')
 
-		print(mode_status)
 		status_msg.data = mode_status
 		status_Pub.publish(status_msg)
 		final_cmd_Pub.publish(cmd)

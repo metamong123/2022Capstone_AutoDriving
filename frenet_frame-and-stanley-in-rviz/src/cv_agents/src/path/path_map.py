@@ -394,6 +394,8 @@ def delivery_test_cw():
 		delivery_test_cw.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
 	delivery_test_cw.glo_to_del_start=[30,110]
 	delivery_test_cw.glo_to_del_finish=[40,120]
+	delivery_test_cw.del_to_glo_start=[80,160]
+	delivery_test_cw.del_to_glo_finish=[90,170]
 	# delivery_test_cw.glo_to_del_start=list(np.array([30, 110])*float(0.5/1))
 	# delivery_test_cw.glo_to_del_finish=list(np.array([40, 120])*float(0.5/1))
 	delivery_test_cw.glo_to_dynamic_start=400

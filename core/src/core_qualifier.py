@@ -328,7 +328,6 @@ if __name__=='__main__':
 				cmd.drive.jerk = 200  #full brake
 				print("Dynamic Obstacle Discovery !!")
 
-		print(mode_status)
 		status_msg.data = mode_status
 		status_Pub.publish(status_msg)
 		final_cmd_Pub.publish(cmd)

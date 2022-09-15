@@ -45,8 +45,8 @@ class Stanley:
 
     
 	def stanley_control(self, x, y, yaw, v, map_xs, map_ys, map_yaws):
-		front_x = x + self.WB/2*np.cos(yaw)
-		front_y = y + self.WB/2*np.sin(yaw)
+		front_x = x + self.WB*np.cos(yaw)
+		front_y = y + self.WB*np.sin(yaw)
 
 		# find nearest point
 		min_index = self.find_nearest_point(front_x, front_y, map_xs, map_ys)
@@ -71,8 +71,8 @@ class Stanley:
 
 
 	def stanley_control_pd(self, x, y, yaw, v, map_xs, map_ys, map_yaws):
-		front_x = x + self.WB/2*np.cos(yaw)
-		front_y = y + self.WB/2*np.sin(yaw)
+		front_x = x + self.WB*np.cos(yaw)
+		front_y = y + self.WB*np.sin(yaw)
 
 		# find nearest point
 		min_index = self.find_nearest_point(front_x, front_y, map_xs, map_ys)
