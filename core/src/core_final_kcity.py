@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-from os import access
 import rospy
 import math
 from std_msgs.msg import Int32MultiArray, Float64, String, Int32
@@ -16,7 +15,7 @@ import numpy as np
 global parking_yaw
 
 parking_flag = 'forward'
-
+notraffic_status =  False
 waypoint = 0
 w = 0
 z = 0
@@ -44,6 +43,11 @@ def euler_from_quaternion(x, y, z, w):
      
         return yaw_z
 
+# parking 시작하기전에 수정해야할 파라미터 값들 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+parking_finish_wp=[] # 각 parking index마다의 finish waypoint임
+
+###########################################################################
+
 car_mode = 'global'
 def mode_callback(msg):
 	global car_mode
@@ -61,11 +65,6 @@ def traffic_callback(msg):
 	global traffic_mode
 	traffic_mode = msg.data
 
-assist_steer=0
-def lanenet_callback(msg):
-    global assist_steer
-    assist_steer = msg.data
-
 frenet_speed = 0
 frenet_angle = 0 
 frenet_gear = 0
@@ -74,6 +73,11 @@ def frenet_callback(msg):
     frenet_speed = msg.drive.speed
     frenet_angle = msg.drive.steering_angle  
     frenet_gear = 0
+
+park_ind_wp = [0,0]
+def parking_callback(msg):
+	global park_ind_wp
+	park_ind_wp = msg.data
 
 link_ind = 0
 global_wp = 0
@@ -108,10 +112,6 @@ def delivery_sign_callback(msg):
 	A_x = [msg.data[1], msg.data[2], msg.data[3]]
 	B_x = [msg.data[4], msg.data[5], msg.data[6]]
 
-def delivery_stopline_callback(msg):
-	global stopline
-	stopline = msg.data
-
 def traffic_decision():
 	global next_dir
 
@@ -126,7 +126,7 @@ def traffic_decision():
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = int(frenet_speed * 10)
 			print("traffic mode : none")
 		else :
 			traffic_speed = frenet_speed
@@ -146,7 +146,7 @@ def traffic_decision():
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = int(frenet_speed * 10)
 			print("traffic mode : none")
 		else :
 			traffic_speed = frenet_speed
@@ -165,7 +165,7 @@ def traffic_decision():
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = int(frenet_speed * 10)
 			print("traffic mode : none")
 		else :
 			traffic_speed = frenet_speed
@@ -176,10 +176,11 @@ def traffic_decision():
 	return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
 delivery_ind =0 
+delivery_flag = 'going'
 A_flag = False
 B_flag = False
 def delivery_decision():
-	global delivery_ind, A_flag, B_flag
+	global delivery_ind, A_flag, B_flag, delivery_flag
 	
 	#print(A_number)
 	if A_number == 0:  # A1
@@ -194,10 +195,6 @@ def delivery_decision():
 	if car_mode == 'delivery_A':
 		if A_flag == False:
 			if A_x[delivery_ind] > 315:   #parameter
-				delivery_flag = 'wait'
-			else:
-				pass
-			if delivery_flag == 'wait' and (stopline > 445 or A_x[delivery_ind] > 315):  #parameter
 				delivery_flag = 'end'
 				A_flag = True
 			else:
@@ -207,10 +204,6 @@ def delivery_decision():
 	elif car_mode == 'delivery_B':
 		if B_flag == False:
 			if B_x[delivery_ind] > 315:   #parameter
-				delivery_flag = 'wait'
-			else:
-				pass
-			if delivery_flag == 'wait' and (stopline > 445 or B_x[delivery_ind] > 315):  #parameter
 				delivery_flag = 'end'
 				B_flag = True
 			else:
@@ -219,7 +212,6 @@ def delivery_decision():
 			delivery_flag = 'going'
 	return delivery_flag
 
-
 if __name__=='__main__':
 
 	rospy.init_node('core_control')
@@ -227,24 +219,24 @@ if __name__=='__main__':
 	rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
 	rospy.Subscriber("/forward_sign", Int32MultiArray, forward_callback)
 	rospy.Subscriber('/side_sign',Int32MultiArray, delivery_sign_callback)
-	rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
 	rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
 	rospy.Subscriber("/odom_imu", Odometry, odometry_callback)
 	rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
 	rospy.Subscriber("/link_direction", StringArray, link_callback)
-	rospy.Subscriber("/stopline", Int32, delivery_stopline_callback)
+	rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
 	rospy.Subscriber("/traffic_mode", String, traffic_callback)
-		
+
 	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
 
-	cmd=AckermannDriveStamped()
-
 	mode_status = 'going'
-	notraffic_status = False
-	r=rospy.Rate(10)
+	parking_start = False
+	j = 0
+	r=rospy.Rate(20)
 	while not rospy.is_shutdown():
-
-
+		status_Pub = rospy.Publisher('/mission_status', String, queue_size=10)
+		status_msg = String()
+		cmd=AckermannDriveStamped()
+		cmd.header.stamp=rospy.Time.now()
 		if car_mode == 'global':
 			if traffic_mode == 'traffic':
 				cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = traffic_decision()
@@ -260,40 +252,110 @@ if __name__=='__main__':
 					print('no traffic mode')
 					rospy.sleep(4) # 4sec
 				elif notraffic_status == True:
-					cmd.drive.speed = frenet_speed
-					cmd.drive.steering_angle = frenet_angle
-					cmd.drive.acceleration = frenet_gear
-					cmd.drive.jerk = 0
-			else:
-				notraffic_status = False
-				if current_dir == 'straight':
-					if assist_steer == 0:
+					if abs(frenet_angle) > 0.1: #각도 파라미터
+						if j<100:  #감속
+							cmd.drive.speed = frenet_speed/2
+							cmd.drive.steering_angle = frenet_angle
+							cmd.drive.acceleration = frenet_gear
+							cmd.drive.jerk = 50
+							j=j+1
+						else:
+							cmd.drive.speed = frenet_speed
+							cmd.drive.steering_angle = frenet_angle
+							cmd.drive.acceleration = frenet_gear
+							cmd.drive.jerk = 0	
+					else:	
 						cmd.drive.speed = frenet_speed
 						cmd.drive.steering_angle = frenet_angle
 						cmd.drive.acceleration = frenet_gear
 						cmd.drive.jerk = 0
+						j = 0
+			else:
+				notraffic_status = False # notraffic 구간이 여러번 있으니 바꿔줘야함
+				if abs(frenet_angle) > 0.1: #각도 파라미터
+					if j<100:  #감속
+						cmd.drive.speed = frenet_speed/2
+						cmd.drive.steering_angle = frenet_angle
+						cmd.drive.acceleration = frenet_gear
+						cmd.drive.jerk = 50
+						j=j+1
 					else:
 						cmd.drive.speed = frenet_speed
-						cmd.drive.steering_angle = assist_steer
+						cmd.drive.steering_angle = frenet_angle
 						cmd.drive.acceleration = frenet_gear
-						cmd.drive.jerk = 0
-				else:
+						cmd.drive.jerk = 0	
+				else:	
 					cmd.drive.speed = frenet_speed
 					cmd.drive.steering_angle = frenet_angle
 					cmd.drive.acceleration = frenet_gear
 					cmd.drive.jerk = 0
+					j = 0
 				print('global mode!!!')
 			mode_status = 'going'
-			rospy.set_param('mission_status', mode_status)  #혹시 안바뀌는걸 방지해 global일때 계속 주기적으로 mission status 바꿔줌
-				
+			
+		elif car_mode == 'horizontal_parking':
+			if parking_start == False:
+				cmd.drive.speed = 0
+				cmd.drive.steering_angle = 0
+				cmd.drive.acceleration = 0
+				cmd.drive.jerk = 200  #full brake
+				final_cmd_Pub.publish(cmd)
+				print('parking start')
+				rospy.sleep(2)
+				parking_start = True
+			else:
+				if park_ind_wp[1] >= parking_finish_wp[park_ind_wp[0]]:
+					cmd.drive.speed = 0
+					cmd.drive.steering_angle = 0
+					cmd.drive.acceleration = 0
+					cmd.drive.jerk = 200  #full brake
+					final_cmd_Pub.publish(cmd)
+					mode_status = 'end' 
+					status_msg.data = mode_status
+					status_Pub.publish(status_msg)
+					print('parking finish!!! stop!!')
+					rospy.sleep(4) # 4sec
+				else:
+					if abs(frenet_angle) > 0.1: #각도 파라미터
+						if j<100:  #감속
+							cmd.drive.speed = frenet_speed
+							cmd.drive.steering_angle = frenet_angle
+							cmd.drive.acceleration = frenet_gear
+							cmd.drive.jerk = 10
+							j=j+1
+						else:
+							cmd.drive.speed = frenet_speed
+							cmd.drive.steering_angle = frenet_angle
+							cmd.drive.acceleration = frenet_gear
+							cmd.drive.jerk = 0	
+					else:	
+						cmd.drive.speed = frenet_speed
+						cmd.drive.steering_angle = frenet_angle
+						cmd.drive.acceleration = frenet_gear
+						cmd.drive.jerk = 0
+						j = 0
 
 		elif car_mode == 'delivery_A' or car_mode == 'delivery_B':
 			delivery_flag = delivery_decision()
 			if delivery_flag == 'going':
-				cmd.drive.speed = frenet_speed
-				cmd.drive.steering_angle = frenet_angle
-				cmd.drive.acceleration = frenet_gear
-				cmd.drive.jerk = 0
+				if abs(frenet_angle) > 0.1: #각도 파라미터
+					if j<100:  #감속
+						cmd.drive.speed = frenet_speed
+						cmd.drive.steering_angle = frenet_angle
+						cmd.drive.acceleration = frenet_gear
+						cmd.drive.jerk = 20
+						j=j+1
+					else:
+						cmd.drive.speed = frenet_speed
+						cmd.drive.steering_angle = frenet_angle
+						cmd.drive.acceleration = frenet_gear
+						cmd.drive.jerk = 0	
+				else:	
+					cmd.drive.speed = frenet_speed
+					cmd.drive.steering_angle = frenet_angle
+					cmd.drive.acceleration = frenet_gear
+					cmd.drive.jerk = 0
+					j = 0
 			elif delivery_flag == 'end':
 				cmd.drive.speed = 0
 				cmd.drive.steering_angle = 0
@@ -302,11 +364,15 @@ if __name__=='__main__':
 				final_cmd_Pub.publish(cmd)
 				mode_status = 'end'   # global mode로 바꾸기위한 flag를 파라미터 서버로 전달
 				delivery_flag = 'going'
-				rospy.set_param('mission_status',mode_status)
+				status_msg.data = mode_status
+				status_Pub.publish(status_msg)
 				print('delivery finish!!! stop!!')
 				rospy.sleep(5) # 5sec
 			print('delivery mode')
 
+		print(mode_status)
+		status_msg.data = mode_status
+		status_Pub.publish(status_msg)
 		final_cmd_Pub.publish(cmd)
 
 		r.sleep()

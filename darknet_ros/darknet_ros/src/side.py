@@ -89,7 +89,7 @@ class YoloPub():
 			if bounding_box.probability >= self.threshold:
 				width=bounding_box.xmax - bounding_box.xmin
 				height=bounding_box.ymax - bounding_box.ymin
-				if width < 200 and height < 200:
+				if width < 300 and height < 300:
 					xmean=(bounding_box.xmin+bounding_box.xmax)/2
 					self.id_to_queue_list[bounding_box.id+3].append(xmean)
 					if bounding_box.id in (0, 1, 2): # find A number

@@ -387,18 +387,19 @@ def delivery_test_cw():
 	delivery_test_cw.set_global_link(link_list)
 	delivery_test_cw.set_dir([0,2,4,6,8],[],[1,3,5,7],[])
 	
-	# delivery_test_cw.delivery_map_num=2
-	# for i in range(delivery_test_cw.delivery_map_num):
-	# 	del_route=path_map+"/src/delivery_test_cw/delivery_"+str(i)+"_"+str(del_space)+".pkl"
-	# 	delivery_test_cw.delivery_route.append(del_route)
-	# 	delivery_test_cw.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
+	delivery_test_cw.delivery_map_num=2
+	for i in range(delivery_test_cw.delivery_map_num):
+		del_route=path_map+"/src/delivery_test_cw/delivery_"+str(i)+"_"+str(del_space)+".pkl"
+		delivery_test_cw.delivery_route.append(del_route)
+		delivery_test_cw.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
+	delivery_test_cw.glo_to_del_start=[30,110]
+	delivery_test_cw.glo_to_del_finish=[40,120]
+	# delivery_test_cw.glo_to_del_start=list(np.array([30, 110])*float(0.5/1))
+	# delivery_test_cw.glo_to_del_finish=list(np.array([40, 120])*float(0.5/1))
+	delivery_test_cw.glo_to_dynamic_start=400
+	delivery_test_cw.glo_to_dynamic_finish=500
 	
-	delivery_test_cw.glo_to_del_start=list(np.array([30, 110])*float(0.5/1))
-	delivery_test_cw.glo_to_del_finish=list(np.array([40, 120])*float(0.5/1))
-	delivery_test_cw.glo_to_dynamic_start=400*float(0.5/1)
-	delivery_test_cw.glo_to_dynamic_finish=500*float(0.5/1)
-	
-	delivery_test_cw.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
+	delivery_test_cw.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':10/3.6}}
 	delivery_test_cw.set_other_link()
 	delivery_test_cw.delivery_path=delivery_test_cw.make_path('delivery',delivery_test_cw.delivery_map_num)
 
@@ -498,7 +499,7 @@ def kcity():
 	kcity.del_to_glo_start=[809,2825]
 	kcity.del_to_glo_finish=[811,2827]
 
-	kcity.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6, 'uturn':8/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':8/3.6},'dynamic_object':{'straight':10/3.6}}
+	kcity.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6, 'uturn':8/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':8/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':7/3.6}}
 	kcity.lane_width={'left':{3.3:{3.3:[7]}, 3.8:{3.3:[5]}}, 'right':{}, 'none':{3.3:[3,4,6,8,9,10,11,12,14,15,16], 3.8:[0,1,2,17,18,19,20], 4.1:[13]}}
 
 	kcity.set_lanewidth()
@@ -531,7 +532,7 @@ def qualifier():
 	qualifier.diagonal_parking_stop=[]
 	qualifier.diagonal_park_to_glo=[] 
 	
-	qualifier.target_speed={'global':{'straight':7/3.6, 'curve':7/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':7/3.6}}
+	qualifier.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':7/3.6}}
 	qualifier.lane_width={'left':{3.3:{3.3:[5]}}, 'right':{}, 'none':{3.3:[4,6,7,8], 3.8:[0,1,2,3,9,10]}}
 
 	qualifier.set_lanewidth()
@@ -635,15 +636,15 @@ def hightech_parking():
 	hightech_parking.horizontal_parking_stop=[58]
 	hightech_parking.horizontal_park_to_glo=[]
 	
-	hightech_parking.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6,'uturn':8/3.6},'horizontal_parking':{'straight':5/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
-	hightech_parking.lane_width={'none':{3.0:[i for i in range(6)]}}
+	hightech_parking.target_speed={'global':{'straight':12/3.6, 'curve':10/3.6,'uturn':8/3.6},'horizontal_parking':{'straight':5/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
+	hightech_parking.lane_width={'none':{2.0:[i for i in range(6)]}}
 	hightech_parking.set_lanewidth()
 	hightech_parking.set_other_link()
 	hightech_parking.horizontal_parking_path=hightech_parking.make_path('horizontal_parking',hightech_parking.horizontal_parking_map_num)
 
 	return hightech_parking
 
-use_map=hightech_delivery()
+use_map=delivery_test_cw()
 start_index=0
 
 # use_map=kcity()

@@ -120,15 +120,15 @@ def find_dir(link_dict, link_ind):
 if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	control_gain={'global':1,'parking':1, 'delivery':1}
-	cte_speed_gain=5
+	control_gain={'global':3,'parking':1, 'delivery':3}
+	cte_speed_gain=7
 	yaw_weight=1
 	cte_weight=1
 	cte_thresh_hold=0
 	yaw_d_gain=0.5
 
 	stanley_imu = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
-	stanley_imu_back = Stanely_back(k=control_gain[mode], speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
+	stanley_imu_back = Stanley_back(k=control_gain[mode], speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
 	
 	f_imu = open("/home/mds/stanley/"+"imu_"+time.strftime('%Y%m%d_%H:%M')+"_k"+str(control_gain[mode])+"_sg"+str(cte_speed_gain)+"_wy"+str(yaw_weight)+"_wc"+str(cte_weight)+"_thresh"+str(cte_thresh_hold)+"_dgain"+str(yaw_d_gain)+".csv", "w")
 	f_imu.write('time' + ',' + 'x' + ',' + 'y' + ',' + 'map_yaw' + ',' + 'yaw' + ',' + 'yaw_term(degree)' + ',' + 'cte(cm)' + ',' + 'steering(degree)' + '\n')
@@ -233,7 +233,8 @@ if __name__ == "__main__":
 
 			if mode == 'horizontal_parking':
 				steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu_back.stanley_control_pd(obj_msg.x, obj_msg.y, obj_msg.yaw, obj_msg.v, path_x, path_y, path_yaw)
-				steer_imu=-(steer_imu)
+				# steer_imu=-(steer_imu)
+				steer_imu = -(backward_yaw(steer_imu))
 				gear = 2
 			else:
 				steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu.stanley_control_pd(obj_msg.x, obj_msg.y, obj_msg.yaw, obj_msg.v, path_x, path_y, path_yaw)

@@ -1,0 +1,8 @@
+<launch>
+	<param name="mission_status" type="string" value="going" />
+	<node name="path" pkg="cv_agents" type="path_global.py" />
+	<node name="core" pkg="core" type="core_yaw_imu_final_test.py" />
+	<node name="path_select" pkg="cv_agents" type="path_mode_select_final_test.py" output="screen"/>
+	<node name="control" pkg="cv_agents" type="control.py" />
+	
+</launch>

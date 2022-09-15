@@ -97,6 +97,7 @@ def callback_mode(msg):
 		mode = 'parking'
 	else:
 		mode = msg.data
+	print(mode)
 
 
 def direction_array(current_dir, next_dir):

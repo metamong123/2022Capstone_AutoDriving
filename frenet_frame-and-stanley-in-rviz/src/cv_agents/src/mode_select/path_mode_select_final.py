@@ -53,7 +53,6 @@ def link_callback(msg):
 mode_status ="going"
 def end_callback(msg):
 	global mode_status
-	print("1")
 	mode_status = msg.data
 	print(mode_status)
 
@@ -79,22 +78,15 @@ if __name__ == "__main__":
 
 	rospy.init_node("path_select")
 
-
 	rospy.Subscriber("/optimal_frenet_path_global", PathArray, global_path_callback)
 	rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
 	rospy.Subscriber("/link_direction", StringArray, link_callback)
 	rospy.Subscriber("/obstacles", ObjectArray, obstacle_callback)
 	rospy.Subscriber("/mission_status", String, end_callback)
-	rospy.Subscriber("/objects/car_1/gps", Object, state_callback, queue_size=1)
+	rospy.Subscriber("/objects/car_1", Object, state_callback, queue_size=1)
 	mode_pub = rospy.Publisher("/mode_selector", String, queue_size=10)
 	path_pub = rospy.Publisher("/final_path", PathArray, queue_size=1)
 	park_pub = rospy.Publisher("/park_ind_wp", Int32MultiArray, queue_size=1)
-	dc_pub = rospy.Publisher("/dc", String, queue_size=1)
-
-	path_msg = PathArray()
-	mode_msg = String()
-	park_msg = Int32MultiArray()
-	dc_msg = String()
 
 	parking_ind = 0
 	parking = False
@@ -102,48 +94,45 @@ if __name__ == "__main__":
 	r = rospy.Rate(20)
 	mode='global'
 	dist = 0
-	dc = 'no'
 
 	#mode_msg.data = 'global'
 	while not rospy.is_shutdown():
 
+		path_msg = PathArray()
+		mode_msg = String()
+		park_msg = Int32MultiArray()
+		dc_msg = String()
+
 		### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
-		mode_status = rospy.get_param('mission_status')
 		if mode_status == 'end':
 			print('global start')
 			mode = 'global'
 			mode_status = 'going'
-			rospy.set_param('mission_status', mode_status)
 		else:
 			pass
 
-		parking_ind = 0 # 수평주차할 위치
+		parking_ind = 1 # 수평주차할 위치
+		
 		######## mode select based waypoint #######
 		if (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
 			mode = 'delivery_A'
-			dc = 'slow'
 		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
 			mode = 'delivery_B'
-			dc = 'slow'
 		elif (not use_map.horizontal_parking_map_num==0) and (global_wp >= use_map.glo_to_horizontal_park_start[parking_ind]) and (global_wp <= use_map.glo_to_horizontal_park_finish[parking_ind]) and (parking == False): # horizontal parking mode
 			mode = 'horizontal_parking'
 			parking = True
 		else:
-			dc = 'no'
-		if mode == 'delivery_A' and (global_wp >= use_map.del_to_glo_start[0]):
-			mode = 'global'
-		elif mode == 'delivery_B' and (global_wp >= use_map.del_to_glo_start[1]):
-			mode = 'global'
-		else:
 			pass
-
+		#if mode == 'delivery_A' and (global_wp >= use_map.del_to_glo_start[0]):
+		#	mode = 'global'
+		#elif mode == 'delivery_B' and (global_wp >= use_map.del_to_glo_start[1]):
+		#	mode = 'global'
+		#else:
+		#	pass
 
 		mode_msg.data = mode
-		dc_msg.data = dc
 		mode_pub.publish(mode_msg)
-		dc_pub.publish(dc_msg)
 		
-
 		if mode == 'delivery_A':
 			path_msg.x.data = use_map.delivery_path[0][0]  # A path
 			path_msg.y.data = use_map.delivery_path[0][1]
@@ -154,12 +143,13 @@ if __name__ == "__main__":
 			path_msg.yaw.data = use_map.delivery_path[1][2]
 		elif mode == 'horizontal_parking':
 			fp=MakingPath()
-			fp.x=use_map.horizontal_parking_path[parking_ind][0]
-			fp.y=use_map.horizontal_parking_path[parking_ind][1]
-			fp.yaw=use_map.horizontal_parking_path[parking_ind][2]
-			park_wp = get_closest_waypoints(state_x, state_y, use_map.waypoints['horizontal_parking'][parking_ind*2]['x'][:use_map.link_len['horizontal_parking'][parking_ind*2]], 
-			use_map.waypoints['horizontal_parking'][parking_ind*2]['y'][:use_map.link_len['horizontal_parking'][parking_ind*2]],park_wp)
+			fp.x=use_map.horizontal_parking_path[parking_ind*2][0]
+			fp.y=use_map.horizontal_parking_path[parking_ind*2][1]
+			fp.yaw=use_map.horizontal_parking_path[parking_ind*2][2]
+
+			park_wp = get_closest_waypoints(state_x, state_y, use_map.waypoints['horizontal_parking'][parking_ind*2]['x'][:use_map.link_len['horizontal_parking'][parking_ind*2]], use_map.waypoints['horizontal_parking'][parking_ind*2]['y'][:use_map.link_len['horizontal_parking'][parking_ind*2]],park_wp)
 			print("현재 주차할 위치 : " + str(parking_ind) + "차량 위치 :" + str(park_wp))
+			park_msg.data = [parking_ind, park_wp] #현재 이동하는 parking index, wp보내줌
 			path_msg.x.data = fp.x  # parking final path
 			path_msg.y.data = fp.y
 			path_msg.yaw.data = fp.yaw

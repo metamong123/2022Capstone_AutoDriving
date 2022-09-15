@@ -100,14 +100,13 @@ def Send_to_ERP42(gear, speed, steer, brake):
     BRAKE = GetBRAKE(brake)
 
     ALIVE = chr(count_alive)
-    vals = [S, T, X, AorM, ESTOP, GEAR, SPEED0, SPEED1, STEER0, STEER1, BRAKE, ALIVE, ETX0, ETX1]
+    #vals = [S, T, X, AorM, ESTOP, GEAR, SPEED0, SPEED1, STEER0, STEER1, BRAKE, ALIVE, ETX0, ETX1]
 
-    for i in range(len(vals)):
-        ser.write(vals[i]) # send!
-        print("speed :", speed)
-        print("steer :", steer)
-        print("gear :" , gear)
-        print("brake :", brake)
+    #for i in range(len(vals)):
+    print("speed :", speed)
+    print("steer :", steer)
+    print("gear :" , gear)
+    print("brake :", brake)
 cur_ENC_backup=0
 
 
@@ -117,12 +116,63 @@ gear = 0
 speed = 0
 steer = 0
 brake = 0
+
+#def cmd_callback(data):
+#    global gear, speed, steer, brake
+
+#    gear = data.gear
+#    speed = data.speed
+#    steer = data.steer
+#    brake = data.brake
+#    print(steer)
+j=0
+i = 0
+dc = False
+prev_mode = 'global'
 def acker_callback(msg):
-	global speed, steer, brake, gear
+	global speed, steer, brake, gear, i, j, mode, prev_mode, dc
+	
+	a = 0  #parameter
 	speed = msg.drive.speed
 	steer = -(msg.drive.steering_angle)  # why minus?
+
 	brake = int(msg.drive.jerk)
 	gear = int(msg.drive.acceleration)
+	######### mode 변경시 일정시간 정지 #######
+	if (mode != 'horizontal_parking') and (mode != prev_mode):
+		dc = True
+	else:
+		pass
+
+	if dc == True:
+		if i < 10:
+			speed = 2
+			brake = 50
+			i = i + 1
+		else:
+			i = 0
+			dc = False
+	else:
+		pass
+    #####################################			
+	if mode == 'global':
+		if abs(steer) > 0.05 :
+			if j<1000:
+				brake = 100 #int(speed * 10 + a)
+				#print(brake)
+				j=j+1
+			else:
+				brake = 0
+		else :
+			brake = 0
+			j=0 
+	#print(j)
+	prev_mode = mode
+	print("speed :", speed)
+	print("steer :", steer)
+	print("gear :" , gear)
+	print("brake :", brake)
+
 
 mode = 'global'
 def mode_callback(msg):
@@ -134,38 +184,15 @@ if __name__ == '__main__':
 
 	rate = rospy.Rate(20)
 
-	port = str(rospy.get_param("~robot_port","/dev/ttyUSB3"))	
-	ser = serial.serial_for_url(port, baudrate=115200, timeout=1)
-	prev_mode = 'global'
-	j=0
-	i = 0
-	dc = False
-	while (ser.isOpen() and (not rospy.is_shutdown())):
-		rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
-		rospy.Subscriber('/mode_selector',String, mode_callback)
+	#port = str(rospy.get_param("~robot_port","/dev/ttyUSB1"))	
+	#ser = serial.serial_for_url(port, baudrate=115200, timeout=1)
+
+	#while (ser.isOpen() and (not rospy.is_shutdown())):
+	rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
+	rospy.Subscriber('/mode_selector',String, mode_callback)
     #Send to Controller
-		######### mode 변경시 일정시간 감속 #######
-		if (mode != 'horizontal_parking') and (mode != prev_mode):
-			dc = True
-		else:
-			pass
-		print(dc)
-		if dc == True:
-			if i < 50:
-				speed = 2
-				brake = 40
-				i = i + 1
-			else:
-				i = 0
-				dc = False
-		else:
-			pass
-    	#####################################
-		prev_mode = mode
-
-
-		Send_to_ERP42(gear, speed, steer, brake)
+	Send_to_ERP42(gear, speed, steer, brake)
 		
     #print(speed)
-		rate.sleep()
+	rospy.spin()
 

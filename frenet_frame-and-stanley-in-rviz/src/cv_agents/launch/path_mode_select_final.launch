@@ -1,5 +1,5 @@
 <launch>
 	<param name="mission_status" type="string" value="going" />
-	<node name="path_select" pkg="cv_agents" type="path_mode_select_final.py"/>
+	<node name="path_select" pkg="cv_agents" type="path_mode_select_final.py" output="screen"/>
 </launch>
  

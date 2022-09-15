@@ -68,11 +68,6 @@ def traffic_callback(msg):
 	global traffic_mode
 	traffic_mode = msg.data
 
-assist_steer=0
-def lanenet_callback(msg):
-    global assist_steer
-    assist_steer = msg.data
-
 frenet_speed = 0
 frenet_angle = 0 
 frenet_gear = 0
@@ -121,13 +116,13 @@ parking_speed = 0
 parking_brake = 0 
 parking_yaw = 0
 parking_gear = 0
-
+j=0
 def parking_decision():
 	global parking_flag
 	global back_speed, back_angle
 	global save_speed,save_angle
 	global move_mode, frenet_speed, frenet_angle, frenet_gear  
-	global parking_angle, parking_brake, parking_speed, parking_gear, parking_yaw, yaw
+	global parking_angle, parking_brake, parking_speed, parking_gear, parking_yaw, yaw, j
 
 	if parking_flag == 'backward':
 		#print(yaw)
@@ -149,11 +144,23 @@ def parking_decision():
 		if park_ind_wp[1] >= parking_finish_wp[park_ind_wp[0]]:
 			parking_flag = 'finish'
 		else:
-			parking_speed = frenet_speed
-			parking_angle = frenet_angle
-			parking_gear = frenet_gear
-			parking_brake = 0
-
+			if abs(frenet_angle) > 0.1: #각도 파라미터
+				if j<100: # 감속
+					parking_speed = frenet_speed
+					parking_angle = frenet_angle
+					parking_gear = frenet_angle
+					parking_brake = 10
+				else:
+					parking_speed = frenet_speed
+					parking_angle = frenet_angle
+					parking_gear = frenet_gear
+					parking_brake = 0
+			else:
+				parking_speed = frenet_speed
+				parking_angle = frenet_angle
+				parking_gear = frenet_gear
+				parking_brake = 0
+				j=0
 	return parking_speed, parking_angle, parking_gear, parking_brake
 
 def traffic_decision():
@@ -170,7 +177,7 @@ def traffic_decision():
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = int(frenet_speed * 10)
 			print("traffic mode : none")
 		else :
 			traffic_speed = frenet_speed
@@ -187,10 +194,10 @@ def traffic_decision():
 			traffic_brake = 90
 			print("traffic mode : stop")
 		elif traffic_light == -1:
-			traffic_speed = frenet_speed/4
+			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = int(frenet_speed * 10)
 			print("traffic mode : none")
 		else :
 			traffic_speed = frenet_speed
@@ -206,10 +213,10 @@ def traffic_decision():
 			traffic_brake = 90
 			print("traffic mode : stop")
 		elif traffic_light == -1:
-			traffic_speed = frenet_speed/4
+			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = int(frenet_speed * 10)
 			print("traffic mode : none")
 		else :
 			traffic_speed = frenet_speed
@@ -223,28 +230,29 @@ def traffic_decision():
 if __name__=='__main__':
 
 	rospy.init_node('core_control')
-	r = rospy.Rate(10)
+
+	rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
+	rospy.Subscriber("/forward_sign", Int32MultiArray, forward_callback)
+	rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
+	rospy.Subscriber("/odom_imu", Odometry, odometry_callback)
+	rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
+	rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
+	rospy.Subscriber("/link_direction", StringArray, link_callback)
+	rospy.Subscriber("/col", Int32, col_callback)
+	rospy.Subscriber("/traffic_mode", String, traffic_callback)	
+
+	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
+	
+	r = rospy.Rate(20)
+	j = 0
 	mode_status = 'going'
 	notraffic_status =  False
 	while not rospy.is_shutdown():
-		rospy.Subscriber("/ackermann_cmd_frenet",AckermannDriveStamped,frenet_callback)
-		rospy.Subscriber("/forward_sign", Int32MultiArray, forward_callback)
-		rospy.Subscriber("/assist_steer", Float64, lanenet_callback)
-		rospy.Subscriber("/waypoint", Int32MultiArray, waypoint_callback)
-		rospy.Subscriber("/odom_imu", Odometry, odometry_callback)
-		rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
-		rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
-		rospy.Subscriber("/link_direction", StringArray, link_callback)
-		rospy.Subscriber("/col", Int32, col_callback)
-		rospy.Subscriber("/traffic_mode", String, traffic_callback)
 
-		#mission_pub = rospy.Publisher('/mission_status', String, queue_size=10)
-		final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
-	
+		status_Pub = rospy.Publisher('/mission_status', String, queue_size=10)
+		status_msg = String()
 		cmd=AckermannDriveStamped()
-		#end_msg=String()
-
-
+		cmd.header.stamp=rospy.Time.now()
 
 		if car_mode == 'global':
 			if traffic_mode == 'traffic':
@@ -255,43 +263,57 @@ if __name__=='__main__':
 					cmd.drive.speed = 0
 					cmd.drive.steering_angle = 0
 					cmd.drive.acceleration = 0
-					cmd.drive.jerk = 100
+					cmd.drive.jerk = 90
 					notraffic_status = True
 					final_cmd_Pub.publish(cmd)
 					print('no traffic mode')
 					rospy.sleep(4) # 4sec
 				elif notraffic_status == True:
-					cmd.drive.speed = frenet_speed
-					cmd.drive.steering_angle = frenet_angle
-					cmd.drive.acceleration = frenet_gear
-					cmd.drive.jerk = 0
-			else:
-				if parking_flag == 'backward':  # for parking
-					cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = parking_decision()
-				else:
-					if current_dir == 'straight':
-						if assist_steer == 0:
+					if abs(frenet_angle) > 0.1: #각도 파라미터
+						if j<100:  #감속
+							cmd.drive.speed = frenet_speed/2
+							cmd.drive.steering_angle = frenet_angle
+							cmd.drive.acceleration = frenet_gear
+							cmd.drive.jerk = 50
+							j=j+1
+						else:
 							cmd.drive.speed = frenet_speed
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = 0
-						else:
-							cmd.drive.speed = frenet_speed
-							cmd.drive.steering_angle = assist_steer
-							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = 0
-					else:
+							cmd.drive.jerk = 0	
+					else:	
 						cmd.drive.speed = frenet_speed
 						cmd.drive.steering_angle = frenet_angle
 						cmd.drive.acceleration = frenet_gear
 						cmd.drive.jerk = 0
+						j = 0
+			else:
+				notraffic_status = False # notraffic 구간이 여러번 있으니 바꿔줘야함				
+				if parking_flag == 'backward':  # for parking
+					cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = parking_decision()
+				else:
+					if abs(frenet_angle) > 0.1: #각도 파라미터
+						if j<100:  #감속
+							cmd.drive.speed = frenet_speed/2
+							cmd.drive.steering_angle = frenet_angle
+							cmd.drive.acceleration = frenet_gear
+							cmd.drive.jerk = 80
+							j=j+1
+						else:
+							cmd.drive.speed = frenet_speed
+							cmd.drive.steering_angle = frenet_angle
+							cmd.drive.acceleration = frenet_gear
+							cmd.drive.jerk = 0	
+					else:	
+						cmd.drive.speed = frenet_speed
+						cmd.drive.steering_angle = frenet_angle
+						cmd.drive.acceleration = frenet_gear
+						cmd.drive.jerk = 0
+						j = 0
 					print('global mode!!!')
 				mode_status = 'going'
-				rospy.set_param('mission_status', mode_status)  #혹시 안바뀌는걸 방지해 global일때 계속 주기적으로 mission status 바꿔줌
-				notraffic_status = False  # notraffic 구간이 여러번 있으니 바꿔줘야함
 			
-
-		elif car_mode == 'parking':
+		elif car_mode == 'diagonal_parking':
 			#print(parking_yaw)
 			if parking_flag == 'finish':
 				cmd.drive.speed = 0
@@ -309,34 +331,46 @@ if __name__=='__main__':
 				cmd.drive.jerk = 80
 				final_cmd_Pub.publish(cmd)
 				mode_status = 'end'   # global mode로 바꾸기위한 flag를 파라미터 서버로 전달
-				rospy.set_param('mission_status',mode_status)
+				status_msg.data = mode_status
+				status_Pub.publish(status_msg)
 				print('parking mission end!')
 				rospy.sleep(1) # 1sec
 			else:	
 				if parking_yaw == 0:
 					parking_yaw = yaw
 				cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = parking_decision()
-			print('parking mode')
+			print('diagonal parking mode')
 
 		elif car_mode == 'dynamic_object':
 			if col == 0:
-				cmd.drive.speed = frenet_speed
-				cmd.drive.steering_angle = frenet_angle
-				cmd.drive.acceleration = frenet_gear
-				cmd.drive.jerk = 0
+				if abs(frenet_angle) > 0.1: #각도 파라미터
+					if j<100:  #감속
+						cmd.drive.speed = frenet_speed
+						cmd.drive.steering_angle = frenet_angle
+						cmd.drive.acceleration = frenet_gear
+						cmd.drive.jerk = 20
+						j=j+1
+					else:
+						cmd.drive.speed = frenet_speed
+						cmd.drive.steering_angle = frenet_angle
+						cmd.drive.acceleration = frenet_gear
+						cmd.drive.jerk = 0	
+				else:	
+					cmd.drive.speed = frenet_speed
+					cmd.drive.steering_angle = frenet_angle
+					cmd.drive.acceleration = frenet_gear
+					cmd.drive.jerk = 0
+					j = 0
 			else:
-				#if person == 0:   # yolo와 혼합
-				#	cmd.drive.speed = frenet_speed
-				#	cmd.drive.steering_angle = frenet_angle
-				#	cmd.drive.acceleration = frenet_gear
-				#	cmd.drive.jerk = 0
-				#else:
 				cmd.drive.speed = 0
 				cmd.drive.steering_angle = 0
 				cmd.drive.acceleration = 0
 				cmd.drive.jerk = 200  #full brake
 				print("Dynamic Obstacle Discovery !!")
 
+		print(mode_status)
+		status_msg.data = mode_status
+		status_Pub.publish(status_msg)
 		final_cmd_Pub.publish(cmd)
 
 		r.sleep()

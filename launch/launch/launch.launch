@@ -1,0 +1,14 @@
+<launch>
+
+	<include file="$(find ublox_gps)/launch/ublox_device.launch" />
+	<include file="$(find xsens_mti_driver)/launch/xsens_mti_node.launch" />
+
+	<include file="$(find usb_cam)/launch/forward_cam.launch" />
+	<!-- <include file="$(find usb_cam)/launch/lanenet_cam.launch" /> -->
+	<!-- <include file="$(find usb_cam)/launch/side_cam.launch" /> -->
+	<include file="$(find usb_cam)/launch/tracker.launch" />
+
+	<node name="odom_gps" pkg="odometry" type="odometry_yaw_based_gps.py" />
+	<node name="odom_imu" pkg="odometry" type="odometry_yaw_based_xsensimu.py" />
+
+</launch>
