@@ -21,7 +21,7 @@ from path_map import *
 
 # initialize
 # initialize
-LANE_WIDTH = 3.0  # lane width [m]
+# LANE_WIDTH = 3.0  # lane width [m]
 WB = 1.04
 
 ## defalt
@@ -40,18 +40,21 @@ WB = 1.04
 # DT_T = 2 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 # DT = 0.1 # timestep for update
 
-
-# ## 10km/h
+MIN_T =use_map.MIN_T
+DT_T =use_map.DT_T
+MAX_T =use_map.MAX_T
+DT = use_map.DT 
+## 10km/h
 # MIN_T = 2.0 # minimum terminal time [s]
 # MAX_T = 6.0 # maximum terminal time [s], default = 2
-# DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+# DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 # DT = 0.5 # timestep for update
 
 ## 10km/h
-MIN_T = 3.0 # minimum terminal time [s]
-MAX_T = 6.0 # maximum terminal time [s], default = 2
-DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
-DT = 0.5 # timestep for update
+# MIN_T = 3.0 # minimum terminal time [s]
+# MAX_T = 6.0 # maximum terminal time [s], default = 2
+# DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+# DT = 0.5 # timestep for update
 
 
 # MIN_T = 2.0 # minimum terminal time [s]
@@ -326,15 +329,15 @@ class FrenetPath:
 		self.ds = []
 		self.kappa = []
 
-def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET):
-# def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed):
+def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET, dir):
+# def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, dir):
 	frenet_paths = []
 
 	# generate path to each offset goal
 	for df in DF_SET:
 
 		# Lateral motion planning
-		for T in np.arange(MIN_T, MAX_T+DT_T, DT_T):
+		for T in np.arange(MIN_T[dir], MAX_T[dir]+DT_T[dir], DT_T[dir]):
 			fp = FrenetPath()
 			lat_traj = QuinticPolynomial(di, di_d, di_dd, df, df_d, df_dd, T)
 
@@ -354,7 +357,7 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 			tfp.s_ddd = [lon_traj.calc_jerk(t) for t in fp.t]
 
 			# 경로 늘려주기 (In case T < MAX_T)
-			for _t in np.arange(T, MAX_T, DT): ## delta time
+			for _t in np.arange(T, MAX_T[dir], DT): ## delta time
 				tfp.t.append(_t)
 				tfp.d.append(tfp.d[-1])
 				_s = tfp.s[-1] + tfp.s_d[-1] * DT ## delta time
@@ -468,9 +471,9 @@ def check_path(fplist, obs_info, mapx, mapy, maps):
 	return [fplist[i] for i in ok_ind], col
 	# return fplist, col
 
-def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed, DF_SET):
+def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed, DF_SET, dir):
 # def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed):
-	fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed,DF_SET)
+	fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed,DF_SET,dir)
 	# fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed)
 	fplist = calc_global_paths(fplist, mapx, mapy, maps)
 	col=0

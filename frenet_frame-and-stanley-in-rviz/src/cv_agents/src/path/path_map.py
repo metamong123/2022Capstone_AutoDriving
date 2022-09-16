@@ -104,6 +104,10 @@ class Path:
 		self.link_len={'global':[],'horizontal_parking':[],'diagonal_parking':[],'delivery':[]}
 		self.link_dir={'straight':[],'left':[],'right':[]}
 		self.target_speed={}
+		self.MIN_T = {} # minimum terminal time [s]
+		self.MAX_T = {} # maximum terminal time [s], default = 2
+		self.DT_T = {} # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+		self.DT = 0.5 # timestep for update
 		self.trafficlight_list=[]
 		self.notrafficlight_list=[]
 		self.uturn_list=[]
@@ -377,6 +381,11 @@ class Path:
 					LANE_WIDTH = j
 					for l in self.lane_width[i][j]: # l = link_index
 						self.DF_SET[l]=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2])
+	def set_terminal_time(self):
+		for dir in self.target_speed['global'].keys():
+			self.MIN_T[dir]=2.0
+			self.DT_T[dir]=round(4.0*((10/3.6)/self.target_speed['global'][dir]),1)
+			self.MAX_T[dir]=self.MIN_T[dir]+self.DT_T[dir]
 
 def delivery_test_cw():
 	del_space = 0.5
@@ -401,12 +410,13 @@ def delivery_test_cw():
 	delivery_test_cw.glo_to_dynamic_start=400
 	delivery_test_cw.glo_to_dynamic_finish=500
 	
-	delivery_test_cw.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':10/3.6}}
+	delivery_test_cw.target_speed={'global':{'straight':10/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':10/3.6}}
 	delivery_test_cw.set_other_link()
 	delivery_test_cw.delivery_path=delivery_test_cw.make_path('delivery',delivery_test_cw.delivery_map_num)
 
 	delivery_test_cw.lane_width={'none':{3.0:[i for i in range(10)]}}
 	delivery_test_cw.set_lanewidth()
+	delivery_test_cw.set_terminal_time()
 
 	return delivery_test_cw
 
