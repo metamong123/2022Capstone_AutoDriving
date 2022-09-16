@@ -158,7 +158,7 @@ if __name__ == '__main__':
         if dc == True:
             if i < 50:
                 speed = 2
-                brake = int(5.5 * glo_speed * 3.6 - 27.5) 
+                brake = int(5.5 * glo_speed * 3.6 - 27.5) if glo_speed > 1.38 else 10
                 i = i + 1
             else:
                 i = 0
