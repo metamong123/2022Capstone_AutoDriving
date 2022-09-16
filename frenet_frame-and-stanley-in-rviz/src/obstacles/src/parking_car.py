@@ -97,7 +97,7 @@ if __name__ == "__main__":
 	#create node
 
 	WIDTH_THRESH = 1.5
-	LEN_THRESH = 10
+	LEN_THRESH = 5
 
 	rospy.init_node('parking_car')
 	r = rospy.Rate(10)

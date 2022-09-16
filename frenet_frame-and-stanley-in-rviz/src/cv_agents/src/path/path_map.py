@@ -482,7 +482,7 @@ def boong():
 
 def kcity():
 	kcity=Path(path_map + "/src/kcity/global.pkl")
-	kcity.set_global_link([0,155,209,279,354,411,505,526,556,611,703,752,971,1110,1192,1315,1503,1598,1765,1823,1898,2077])
+	kcity.set_global_link([0,155,209,279,354,411,505,526,556,611,703,752,969,1108,1234,1311,1496,1591,1759,1816,1891,2070])
 	kcity.set_dir([0,1,2,3,4,6,7,10,17,18,19,20,21],[8,9,11,12,16],[5,14,15],[13])
 
 	kcity.horizontal_parking_map_num=2
@@ -497,24 +497,25 @@ def kcity():
 		kcity.delivery_route.append(del_route)
 		kcity.set_other_mode(mode='delivery', pc_route=del_route,link=i)
 
-	kcity.notrafficlight_list=[2339,2608]
-	kcity.trafficlight_list=[205,275,552,731,1594,1761,1819]
-	kcity.uturn_list=[1127]
+	kcity.notrafficlight_list=[1298.1432]
+	kcity.trafficlight_list=[205,275,522,731,1594,1754,1812]
+	kcity.uturn_list=[1125]
 
-	kcity.glo_to_horizontal_park_start=[1964,1971]
+	kcity.glo_to_horizontal_park_start=[1957,1959]
 	kcity.glo_to_horizontal_park_finish=[1966.1973]
-	kcity.horizontal_parking_stop=[61]
+	kcity.horizontal_parking_stop=[]
 	kcity.horizontal_park_to_glo=[] 
 
-	kcity.glo_to_del_start=[556, 1504]
-	kcity.glo_to_del_finish=[558, 1506]
-	kcity.del_to_glo_start=[592,1590]
-	kcity.del_to_glo_finish=[594,1591]
+	kcity.glo_to_del_start=[556, 1497]
+	kcity.glo_to_del_finish=[558, 1499]
+	kcity.del_to_glo_start=[592,1583]
+	kcity.del_to_glo_finish=[594,1585]
 
 	kcity.glo_to_static_start=354
 	kcity.glo_to_static_finish=513
 
-	kcity.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6, 'uturn':8/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':7/3.6}}
+	kcity.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':5/3.6}}
+	
 	kcity.lane_width={'left':{3.3:{3.3:[8]}, 3.8:{3.3:[6]}}, 'right':{3.3:{3.8:[4]}}, 'none':{3.3:[3,5,7,9,10,11,12,13,15,16,17], 3.8:[0,1,2,18,19,20,21], 4.1:[14]}}
 
 	kcity.set_lanewidth()
@@ -523,12 +524,13 @@ def kcity():
 	# 	kcity.interpolate_map(mode='global', space=0.2,link=link_int) # space는 m 단위로 넣기
 	kcity.horizontal_parking_path=kcity.make_path('horizontal_parking',kcity.horizontal_parking_map_num)
 	kcity.delivery_path=kcity.make_path('delivery',kcity.delivery_map_num)
+	kcity.set_terminal_time()
 	return kcity
 
 def qualifier():
 	qualifier=Path(path_map + "/src/qualifier/global.pkl")
 	qualifier.set_global_link([0,96,124,154,219,457,480,654,754,901,1054])
-	qualifier.set_dir([0,2,3,9,10],[4,5,6,7],[1,8],[])
+	qualifier.set_dir([0,2,3,5,9,10],[4,6,7],[1,8],[])
 
 	qualifier.diagonal_parking_map_num=6
 	for i in range(qualifier.diagonal_parking_map_num):
@@ -539,6 +541,9 @@ def qualifier():
 	qualifier.notrafficlight_list=[477,750]
 	qualifier.trafficlight_list=[202]
 
+	qualifier.glo_to_static_start=450
+	qualifier.glo_to_static_finish=470
+
 	qualifier.glo_to_dynamic_start=662
 	qualifier.glo_to_dynamic_finish=742
 
@@ -547,12 +552,13 @@ def qualifier():
 	qualifier.diagonal_parking_stop=[]
 	qualifier.diagonal_park_to_glo=[] 
 	
-	qualifier.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':7/3.6},'static_object':{'straight':7/3.6}}
+	qualifier.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':5/3.6}}
 	qualifier.lane_width={'left':{3.3:{3.3:[5]}}, 'right':{}, 'none':{3.3:[4,6,7,8], 3.8:[0,1,2,3,9,10]}}
 
 	qualifier.set_lanewidth()
 	qualifier.set_other_link()
 	qualifier.diagonal_parking_path=qualifier.make_path('diagonal_parking',qualifier.diagonal_parking_map_num)
+	qualifier.set_terminal_time()
 	return qualifier
 
 def uturn_test():
@@ -659,7 +665,7 @@ def hightech_parking():
 
 	return hightech_parking
 
-use_map=delivery_test_cw()
+use_map=qualifier()
 start_index=0
 
 # use_map=kcity()

@@ -119,7 +119,7 @@ class ImuPub:
 
 		orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
 		roll, pitch, self.yaw_imu = euler_from_quaternion(orientation_list) 
-		self.yaw_imu+=0.1
+		self.yaw_imu+=0.15
 
 
 if __name__ == "__main__":

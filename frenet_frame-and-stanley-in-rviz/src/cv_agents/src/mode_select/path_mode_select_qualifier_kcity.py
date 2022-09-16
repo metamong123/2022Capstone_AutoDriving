@@ -97,6 +97,8 @@ if __name__ == "__main__":
 	park_wp = 0
 	mode='global'
 	dist = 0
+
+
 	traffic_interval = 0
 	target_speed = 0
 	traffic_slow = 'no'
@@ -124,7 +126,7 @@ if __name__ == "__main__":
 			mode = 'dynamic_object'
 			if global_wp >= (use_map.glo_to_dynamic_finish-5):
 				mode = 'global'
-		elif (global_wp >= use_map.glo_to_static_finish and global_wp >= use_map.glo_to_static_start):
+		elif (global_wp <= use_map.glo_to_static_finish and global_wp >= use_map.glo_to_static_start):
 			mode = 'static_object'
 			if (global_wp > use_map.glo_to_static_finish):
 				mode = 'global'
@@ -135,21 +137,28 @@ if __name__ == "__main__":
 
 		#### traffic 인식 간격 속도별 조정 ####
 		if (mode == 'delivery_A' or mode == 'delivery_B'):
-			target_speed = use_map.target_speed[delivery][current_dir]
+			current_dir = 'straight'
+			target_speed = use_map.target_speed['delivery'][current_dir]
 		else:
+			if mode == 'global':
+				if current_dir == 'right' or current_dir == 'left':
+					current_dir='curve'
+			else:
+				current_dir = 'straight'
 			target_speed = use_map.target_speed[mode][current_dir]
-		if target_speed >= 15:
-			traffic_interval = 6
-		elif target_speed >= 10:
-			traffic_interval = 5
-		elif target_speed > 5:
-			traffic_interval = 4
-		else:
-			traffic_interval = 3
-		#####################
+		#if target_speed >= 15:
+		#	traffic_interval = 6
+		#elif target_speed >= 10:
+		#	traffic_interval = 5
+		#elif target_speed > 5:
+		#	traffic_interval = 4
+		#else:
+		#	traffic_interval = 3
+		######################
+		traffic_interval = 5
 
 		for number in range(len(use_map.trafficlight_list)):
-			if (global_wp <= use_map.trafficlight_list[number1]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number1]-traffic_interval-3):
+			if (global_wp <= use_map.trafficlight_list[number]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number]-traffic_interval-3):
 				traffic_slow = 'slow'
 				break
 			else:
@@ -162,7 +171,7 @@ if __name__ == "__main__":
 				break
 			else:
 				for number2 in range(len(use_map.notrafficlight_list)):
-					if (global_wp <= use_map.notrafficlight_list[number2]) and (global_wp >= use_map.notrafficlight_list[number2]-3):
+					if (global_wp <= use_map.notrafficlight_list[number2]) and (global_wp >= use_map.notrafficlight_list[number2]-2):
 						traffic_mode = 'notraffic'
 						super_break = True
 						break

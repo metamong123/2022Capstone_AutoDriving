@@ -24,8 +24,8 @@ yaw = 0
 ##########################################################################
 
 # parking 시작하기전에 수정해야할 파라미터 값들 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-parking_finish_wp=[110,110,110,110,110,110] # 각 parking index마다의 finish waypoint임
-parking_straight_back_wp=[108,108,108,108,108,108]
+parking_finish_wp=[56,56,56,56,56,56] # 각 parking index마다의 finish waypoint임
+parking_straight_back_wp=[55,55,55,55,55,55]
 
 ###########################################################################
 
@@ -85,13 +85,13 @@ def waypoint_callback(msg):
 	global_wp = msg.data[1]  #global waypoint
 
 traffic_light = 0 
-person = 0 
-car = 0
+#person = 0 
+#car = 0
 def forward_callback(msg):
-	global  traffic_light, person, car
+	global  traffic_light#, person, car
 	traffic_light = msg.data[0]
-	person = msg.data[1]
-	car = msg.data[2]
+	#person = msg.data[1]
+	#car = msg.data[2]
 
 def odometry_callback(msg):
 	global x, y, z, w, yaw
@@ -183,13 +183,13 @@ def traffic_decision():
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = int(frenet_speed * 10)
+			traffic_brake = 40
 			print("traffic mode : none")
 		else :
 			traffic_speed = 2 * frenet_speed / 3
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = 20
 			print("traffic mode : go")
     
 	elif next_dir == 'straight':
@@ -203,13 +203,13 @@ def traffic_decision():
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = int(frenet_speed * 10)
+			traffic_brake = 40
 			print("traffic mode : none")
 		else :
 			traffic_speed = 2 * frenet_speed / 3
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = 20
 			print("traffic mode : go")
 	elif next_dir == 'right':
 		if traffic_light == 1 or traffic_light == 2 or traffic_light == 4:
@@ -222,13 +222,13 @@ def traffic_decision():
 			traffic_speed = frenet_speed / 2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = int(frenet_speed * 10)
+			traffic_brake = 40
 			print("traffic mode : none")
 		else :
 			traffic_speed = 2 * frenet_speed / 3
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = 20
 			print("traffic mode : go")
 	return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
@@ -281,7 +281,7 @@ if __name__=='__main__':
 							cmd.drive.speed = frenet_speed/2
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = 50
+							cmd.drive.jerk = 20
 							j=j+1
 						else:
 							cmd.drive.speed = frenet_speed
@@ -299,14 +299,14 @@ if __name__=='__main__':
 					cmd.drive.speed = frenet_speed/2
 					cmd.drive.steering_angle = frenet_angle
 					cmd.drive.acceleration = frenet_gear
-					cmd.drive.jerk = 30
+					cmd.drive.jerk = 40
 				else:
 					if abs(frenet_angle) > 0.1: #각도 파라미터
 						if j<100:  #감속
 							cmd.drive.speed = frenet_speed/2
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = 50
+							cmd.drive.jerk = 20
 							j=j+1
 						else:
 							cmd.drive.speed = frenet_speed
