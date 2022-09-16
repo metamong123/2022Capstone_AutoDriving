@@ -132,9 +132,9 @@ if __name__ == "__main__":
 			mode = 'delivery_A'
 		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
 			mode = 'delivery_B'
-		elif (global_wp >= use_map.glo_to_static_finish and global_wp >= use_map.glo_to_static_start):
+		elif (global_wp <= use_map.glo_to_static_finish and global_wp >= use_map.glo_to_static_start):
 			mode = 'static_object'
-			if (global_wp > use_map.glo_to_static_finish):
+			if (global_wp <= use_map.glo_to_static_finish-5):
 				mode = 'global'
 		elif (not use_map.horizontal_parking_map_num==0) and (global_wp <= use_map.glo_to_horizontal_park_finish) and (global_wp >= use_map.glo_to_horizontal_park_start):  # horizontal mode
 			mode = 'horizontal_parking'
@@ -170,7 +170,8 @@ if __name__ == "__main__":
 		else:
 			traffic_interval = 3
 		#####################
-  
+		traffic_interval = 6
+
 		for number in range(len(use_map.trafficlight_list)):
 			if (global_wp <= use_map.trafficlight_list[number1]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number1]-traffic_interval-3):
 				traffic_slow = 'slow'
@@ -185,7 +186,7 @@ if __name__ == "__main__":
 				break
 			else:
 				for number2 in range(len(use_map.notrafficlight_list)):
-					if (global_wp <= use_map.notrafficlight_list[number2]) and (global_wp >= use_map.notrafficlight_list[number2]-3):
+					if (global_wp <= use_map.notrafficlight_list[number2]) and (global_wp >= use_map.notrafficlight_list[number2]-5):
 						traffic_mode = 'notraffic'
 						super_break = True
 						break

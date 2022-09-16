@@ -131,6 +131,8 @@ def mode_callback(msg):
 
 if __name__ == '__main__':
     rospy.init_node('serial_node')	
+    rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
+    rospy.Subscriber('/mode_selector',String, mode_callback)
 
     rate = rospy.Rate(20)
 
@@ -142,13 +144,14 @@ if __name__ == '__main__':
     dc = False
     glo_speed = 0
     while (ser.isOpen() and (not rospy.is_shutdown())):
-        rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
-        rospy.Subscriber('/mode_selector',String, mode_callback)
+        # rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
+        # rospy.Subscriber('/mode_selector',String, mode_callback)
     #Send to Controller
         if mode == 'global':
             glo_speed = speed
         else:
             glo_speed = glo_speed
+
 		######### mode 변경시 일정시간 감속 #######
         if (mode != 'global') and (mode != 'horizontal_parking') and (mode != prev_mode):
             dc = True
@@ -158,7 +161,7 @@ if __name__ == '__main__':
         if dc == True:
             if i < 50:
                 speed = 2
-                brake = int(5.5 * glo_speed * 3.6 - 27.5) if glo_speed > 1.38 else 10
+                brake = int(5.5 * glo_speed * 3.6 - 27.5) if glo_speed > 1.36 else 0
                 i = i + 1
             else:
                 i = 0

@@ -40,27 +40,27 @@ WB = 1.04
 # DT_T = 2 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 # DT = 0.1 # timestep for update
 
-MIN_T =use_map.MIN_T
-DT_T =use_map.DT_T
-MAX_T =use_map.MAX_T
-DT = use_map.DT 
+# MIN_T =use_map.MIN_T
+# DT_T =use_map.DT_T
+# MAX_T =use_map.MAX_T
+# DT = use_map.DT 
 ## 10km/h
 # MIN_T = 2.0 # minimum terminal time [s]
 # MAX_T = 6.0 # maximum terminal time [s], default = 2
 # DT_T = 2.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 # DT = 0.5 # timestep for update
 
-## 10km/h
+# 10km/h
 # MIN_T = 3.0 # minimum terminal time [s]
 # MAX_T = 6.0 # maximum terminal time [s], default = 2
 # DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 # DT = 0.5 # timestep for update
 
 
-# MIN_T = 2.0 # minimum terminal time [s]
-# MAX_T = 4.0 # maximum terminal time [s], default = 2
-# DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
-# DT = 0.5 # timestep for update
+MIN_T = 2.0 # minimum terminal time [s]
+MAX_T = 4.0 # maximum terminal time [s], default = 2
+DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+DT = 0.5 # timestep for update
 
 ## 경로는 잘 생기나 DT가 너무 안 맞음
 # MIN_T = 2.0 # minimum terminal time [s]
@@ -337,7 +337,8 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 	for df in DF_SET:
 
 		# Lateral motion planning
-		for T in np.arange(MIN_T[dir], MAX_T[dir]+DT_T[dir], DT_T[dir]):
+		# for T in np.arange(MIN_T[dir], MAX_T[dir]+DT_T[dir], DT_T[dir]):
+		for T in np.arange(MIN_T, MAX_T+DT_T, DT_T):
 			fp = FrenetPath()
 			lat_traj = QuinticPolynomial(di, di_d, di_dd, df, df_d, df_dd, T)
 
@@ -357,7 +358,8 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 			tfp.s_ddd = [lon_traj.calc_jerk(t) for t in fp.t]
 
 			# 경로 늘려주기 (In case T < MAX_T)
-			for _t in np.arange(T, MAX_T[dir], DT): ## delta time
+			# for _t in np.arange(T, MAX_T[dir], DT): ## delta time
+			for _t in np.arange(T, MAX_T, DT): ## delta time
 				tfp.t.append(_t)
 				tfp.d.append(tfp.d[-1])
 				_s = tfp.s[-1] + tfp.s_d[-1] * DT ## delta time

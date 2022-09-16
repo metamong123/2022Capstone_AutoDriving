@@ -388,6 +388,11 @@ if __name__=='__main__':
 				print('delivery finish!!! stop!!')
 				rospy.sleep(5) # 5sec
 			print('delivery mode')
+		elif car_mode == 'static_object':
+			cmd.drive.speed = frenet_speed
+			cmd.drive.steering_angle = frenet_angle
+			cmd.drive.acceleration = frenet_gear
+			cmd.drive.jerk = 0
 
 		status_msg.data = mode_status
 		status_Pub.publish(status_msg)

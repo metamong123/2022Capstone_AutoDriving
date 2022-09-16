@@ -24,8 +24,8 @@ yaw = 0
 ##########################################################################
 
 # parking 시작하기전에 수정해야할 파라미터 값들 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-parking_finish_wp=[56,56,56,56,56,56] # 각 parking index마다의 finish waypoint임
-parking_straight_back_wp=[55,55,55,55,55,55]
+parking_finish_wp=[54,54,54,54,54,54] # 각 parking index마다의 finish waypoint임
+parking_straight_back_wp=[50,50,50,50,50,50]
 
 ###########################################################################
 
@@ -377,6 +377,11 @@ if __name__=='__main__':
 				cmd.drive.acceleration = 0
 				cmd.drive.jerk = 200  #full brake
 				print("Dynamic Obstacle Discovery !!")
+		elif car_mode == 'static_object':
+			cmd.drive.speed = frenet_speed
+			cmd.drive.steering_angle = frenet_angle
+			cmd.drive.acceleration = frenet_gear
+			cmd.drive.jerk = 0
 
 		status_msg.data = mode_status
 		status_Pub.publish(status_msg)

@@ -124,6 +124,8 @@ class Path:
 		self.glo_to_del_finish=[]
 		self.del_to_glo_start=[]
 		self.del_to_glo_finish=[]
+		self.glo_to_static_start=0
+		self.glo_to_static_finish=0
 		self.horizontal_parking_stop=[] # 주차 구역마다 주차 정지 waypoint 설정
 		self.horizontal_park_to_glo=[] # parking->global 변경 waypoint 지점
 		self.diagonal_parking_stop=[] # 주차 구역마다 주차 정지 waypoint 설정
@@ -552,13 +554,13 @@ def qualifier():
 	qualifier.diagonal_parking_stop=[]
 	qualifier.diagonal_park_to_glo=[] 
 	
-	qualifier.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':5/3.6}}
+	qualifier.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':12/3.6},'static_object':{'straight':5/3.6}}
 	qualifier.lane_width={'left':{3.3:{3.3:[5]}}, 'right':{}, 'none':{3.3:[4,6,7,8], 3.8:[0,1,2,3,9,10]}}
 
 	qualifier.set_lanewidth()
 	qualifier.set_other_link()
 	qualifier.diagonal_parking_path=qualifier.make_path('diagonal_parking',qualifier.diagonal_parking_map_num)
-	qualifier.set_terminal_time()
+	# qualifier.set_terminal_time()
 	return qualifier
 
 def uturn_test():

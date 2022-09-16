@@ -124,11 +124,11 @@ if __name__ == "__main__":
 			mode = 'diagonal_parking'
 		elif (global_wp <= use_map.glo_to_dynamic_finish and global_wp >= use_map.glo_to_dynamic_start):  # dynamic_object
 			mode = 'dynamic_object'
-			if global_wp >= (use_map.glo_to_dynamic_finish-5):
+			if global_wp >= (use_map.glo_to_dynamic_finish-4):
 				mode = 'global'
 		elif (global_wp <= use_map.glo_to_static_finish and global_wp >= use_map.glo_to_static_start):
 			mode = 'static_object'
-			if (global_wp > use_map.glo_to_static_finish):
+			if (global_wp >= use_map.glo_to_static_finish-4):
 				mode = 'global'
 		else:
 			pass
@@ -187,7 +187,7 @@ if __name__ == "__main__":
 		mode_pub.publish(mode_msg)
 		
 		if mode == 'diagonal_parking':
-			parking_ind=2
+			parking_ind=0
 
 			fp=MakingPath()
 			fp.x=use_map.diagonal_parking_path[parking_ind][0]
