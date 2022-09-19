@@ -120,7 +120,7 @@ def find_dir(link_dict, link_ind):
 if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	control_gain={'global':3,'parking':1, 'delivery':3}
+	control_gain={'global':2,'parking':1, 'delivery':3}
 	cte_speed_gain={'global':7,'parking':7, 'delivery':7}
 	yaw_weight=1
 	cte_weight=1

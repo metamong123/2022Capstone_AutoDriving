@@ -667,7 +667,7 @@ def hightech_parking():
 
 	return hightech_parking
 
-use_map=qualifier()
+use_map=kcity()
 start_index=0
 
 # use_map=kcity()
