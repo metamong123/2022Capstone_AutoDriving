@@ -134,7 +134,7 @@ def traffic_decision():
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = 20
 			print("traffic mode : go")
     
 	elif next_dir == 'straight':
@@ -154,7 +154,7 @@ def traffic_decision():
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = 20
 			print("traffic mode : go")
 	elif next_dir == 'right':
 		if traffic_light == 1 or traffic_light == 2 or traffic_light == 4:
@@ -173,16 +173,14 @@ def traffic_decision():
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = 20
 			print("traffic mode : go")
 	return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
 delivery_ind =0 
 delivery_flag = 'going'
-A_flag = False
-B_flag = False
 def delivery_decision():
-	global delivery_ind, A_flag, B_flag, delivery_flag
+	global delivery_ind, delivery_flag
 	
 	#print(A_number)
 	if A_number == 0:  # A1
@@ -195,21 +193,13 @@ def delivery_decision():
 		pass
 
 	if car_mode == 'delivery_A':
-		if A_flag == False:
-			if A_x[delivery_ind] > 315:   #parameter
-				delivery_flag = 'end'
-				A_flag = True
-			else:
-				delivery_flag = 'going'
+		if A_x[delivery_ind] > 315:   #parameter
+			delivery_flag = 'end'
 		else:
 			delivery_flag = 'going'
 	elif car_mode == 'delivery_B':
-		if B_flag == False:
-			if B_x[delivery_ind] > 315:   #parameter
-				delivery_flag = 'end'
-				B_flag = True
-			else:
-				delivery_flag = 'going'
+		if B_x[delivery_ind] > 315:   #parameter
+			delivery_flag = 'end'
 		else:
 			delivery_flag = 'going'
 	return delivery_flag
@@ -233,6 +223,7 @@ if __name__=='__main__':
 
 	mode_status = 'going'
 	parking_start = False
+	notraffic_status = False
 	j = 0
 	r=rospy.Rate(20)
 	while not rospy.is_shutdown():
@@ -260,7 +251,7 @@ if __name__=='__main__':
 							cmd.drive.speed = frenet_speed/2
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = 50
+							cmd.drive.jerk = 20
 							j=j+1
 						else:
 							cmd.drive.speed = frenet_speed
@@ -278,14 +269,14 @@ if __name__=='__main__':
 					cmd.drive.speed = frenet_speed/2
 					cmd.drive.steering_angle = frenet_angle
 					cmd.drive.acceleration = frenet_gear
-					cmd.drive.jerk = 30
+					cmd.drive.jerk = 40
 				else:
 					if abs(frenet_angle) > 0.1: #각도 파라미터
 						if j<100:  #감속
 							cmd.drive.speed = frenet_speed/2
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = 50
+							cmd.drive.jerk = 40
 							j=j+1
 						else:
 							cmd.drive.speed = frenet_speed
@@ -323,7 +314,7 @@ if __name__=='__main__':
 					status_msg.data = mode_status
 					status_Pub.publish(status_msg)
 					print('parking finish!!! stop!!')
-					rospy.sleep(4) # 4sec
+					rospy.sleep(5) # 5sec
 				else:
 					if abs(frenet_angle) > 0.1: #각도 파라미터
 						if j<100:  #감속

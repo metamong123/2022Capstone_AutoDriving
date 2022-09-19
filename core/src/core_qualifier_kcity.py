@@ -85,13 +85,9 @@ def waypoint_callback(msg):
 	global_wp = msg.data[1]  #global waypoint
 
 traffic_light = 0 
-#person = 0 
-#car = 0
 def forward_callback(msg):
-	global  traffic_light#, person, car
+	global  traffic_light
 	traffic_light = msg.data[0]
-	#person = msg.data[1]
-	#car = msg.data[2]
 
 def odometry_callback(msg):
 	global x, y, z, w, yaw
@@ -177,7 +173,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 90
+			traffic_brake = 100
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
@@ -197,7 +193,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 90
+			traffic_brake = 100
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
@@ -216,7 +212,7 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 90
+			traffic_brake = 100
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed / 2
@@ -270,7 +266,7 @@ if __name__=='__main__':
 					cmd.drive.speed = 0
 					cmd.drive.steering_angle = 0
 					cmd.drive.acceleration = 0
-					cmd.drive.jerk = 90
+					cmd.drive.jerk = 100
 					notraffic_status = True
 					final_cmd_Pub.publish(cmd)
 					print('no traffic mode')
@@ -306,7 +302,7 @@ if __name__=='__main__':
 							cmd.drive.speed = frenet_speed/2
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = 20
+							cmd.drive.jerk = 20  # 예선은 고정! 바꾸지말기
 							j=j+1
 						else:
 							cmd.drive.speed = frenet_speed

@@ -86,13 +86,9 @@ def waypoint_callback(msg):
 	global_wp = msg.data[1]  #global waypoint
 
 traffic_light = 0 
-person = 0 
-car = 0
 def forward_callback(msg):
-	global  traffic_light, person, car
+	global  traffic_light
 	traffic_light = msg.data[0]
-	person = msg.data[1]
-	car = msg.data[2]
 
 def odometry_callback(msg):
 	global yaw
@@ -111,6 +107,7 @@ def delivery_sign_callback(msg):
 	A_x = [msg.data[1], msg.data[2], msg.data[3]]
 	B_x = [msg.data[4], msg.data[5], msg.data[6]]
 
+stopline = 0
 def delivery_stopline_callback(msg):
 	global stopline
 	stopline = msg.data
@@ -129,19 +126,19 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 90
+			traffic_brake = 100
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = int(frenet_speed * 10)
+			traffic_brake = 40
 			print("traffic mode : none")
 		else :
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = 20
 			print("traffic mode : go")
     
 	elif next_dir == 'straight':
@@ -149,38 +146,38 @@ def traffic_decision():
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 90
+			traffic_brake = 100
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = int(frenet_speed * 10)
+			traffic_brake = 40
 			print("traffic mode : none")
 		else :
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = 20
 			print("traffic mode : go")
 	elif next_dir == 'right':
 		if traffic_light == 1 or traffic_light == 2 or traffic_light == 4:
 			traffic_speed = 0
 			traffic_angle = 0
 			traffic_gear = 0
-			traffic_brake = 90
+			traffic_brake = 100
 			print("traffic mode : stop")
 		elif traffic_light == -1:
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = int(frenet_speed * 10)
+			traffic_brake = 40
 			print("traffic mode : none")
 		else :
 			traffic_speed = frenet_speed/2
 			traffic_angle = frenet_angle
 			traffic_gear = 0
-			traffic_brake = 0
+			traffic_brake = 20
 			print("traffic mode : go")
 	return traffic_speed, traffic_angle, traffic_gear, traffic_brake
 
@@ -216,7 +213,6 @@ def delivery_decision():
 			pass
 		if delivery_flag == 'wait' and (stopline > 450 and B_x[delivery_ind] > 315):  #parameter
 			delivery_flag = 'end'
-			B_flag = True
 		else:
 			delivery_flag = 'going'
 	return delivery_flag
@@ -258,7 +254,7 @@ if __name__=='__main__':
 					cmd.drive.speed = 0
 					cmd.drive.steering_angle = 0
 					cmd.drive.acceleration = 0
-					cmd.drive.jerk = 90
+					cmd.drive.jerk = 100
 					notraffic_status = True
 					final_cmd_Pub.publish(cmd)
 					print('no traffic mode')
@@ -269,7 +265,7 @@ if __name__=='__main__':
 							cmd.drive.speed = frenet_speed/2
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = 50
+							cmd.drive.jerk = 20
 							j=j+1
 						else:
 							cmd.drive.speed = frenet_speed
@@ -287,14 +283,14 @@ if __name__=='__main__':
 					cmd.drive.speed = frenet_speed/2
 					cmd.drive.steering_angle = frenet_angle
 					cmd.drive.acceleration = frenet_gear
-					cmd.drive.jerk = 30
+					cmd.drive.jerk = 40
 				else:
 					if abs(frenet_angle) > 0.1: #각도 파라미터
 						if j<100:  #감속
 							cmd.drive.speed = frenet_speed/2
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = 50
+							cmd.drive.jerk = 40
 							j=j+1
 						else:
 							cmd.drive.speed = frenet_speed
@@ -332,14 +328,14 @@ if __name__=='__main__':
 					status_msg.data = mode_status
 					status_Pub.publish(status_msg)
 					print('parking finish!!! stop!!')
-					rospy.sleep(4) # 4sec
+					rospy.sleep(5) # 5sec
 				else:
 					if abs(frenet_angle) > 0.1: #각도 파라미터
 						if j<100:  #감속
 							cmd.drive.speed = frenet_speed
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = 10
+							cmd.drive.jerk = 20
 							j=j+1
 						else:
 							cmd.drive.speed = frenet_speed

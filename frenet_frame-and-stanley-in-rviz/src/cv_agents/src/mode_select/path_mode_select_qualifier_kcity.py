@@ -155,7 +155,7 @@ if __name__ == "__main__":
 		#else:
 		#	traffic_interval = 3
 		######################
-		traffic_interval = 5
+		traffic_interval = 7
 
 		for number in range(len(use_map.trafficlight_list)):
 			if (global_wp <= use_map.trafficlight_list[number]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number]-traffic_interval-3):
@@ -200,7 +200,7 @@ if __name__ == "__main__":
 			path_msg.y.data = fp.y
 			path_msg.yaw.data = fp.yaw
 
-		else: # mode = 'global' or 'dynamic_object'
+		else: # mode = 'global' or 'dynamic_object' or 'static_object'
 			path_msg.x.data = global_path_x
 			path_msg.y.data = global_path_y
 			path_msg.yaw.data = global_path_yaw

@@ -60,7 +60,7 @@ WB = 1.04
 MIN_T = 2.0 # minimum terminal time [s]
 MAX_T = 4.0 # maximum terminal time [s], default = 2
 DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
-DT = 0.5 # timestep for update
+DT = 0.2 # timestep for update
 
 ## 경로는 잘 생기나 DT가 너무 안 맞음
 # MIN_T = 2.0 # minimum terminal time [s]
@@ -76,7 +76,8 @@ DT = 0.5 # timestep for update
 
 V_MAX = 20/3.6	  # maximum velocity [m/s]
 ACC_MAX=V_MAX/0.1
-
+D_T_S = 5.0 / 3.6  # target speed sampling length [m/s]
+N_S_SAMPLE = 1  # sampling number of target speed
 
 STEER_MAX = math.radians(28)
 
@@ -88,7 +89,7 @@ K_T = 0.1 # weight for terminal time (터미널 타임을 위한 웨이트)
 K_D = 1.0 # weight for consistency, default = 1.0 (일관성을 위한 웨이트?)
 K_GD = 7.0 # weight for global path tracking (글로벌 패스를 따르는 것에 대한 웨이트)
 K_V = 1.0 # weight for getting to target speed (목표 속도로 도달하는 것을 위한 웨이트)
-K_LAT = 1.0 # weight for lateral direction, default = 1.0 (횡방향을 위한 웨이트)
+K_LAT = 1.5 # weight for lateral direction, default = 1.0 (횡방향을 위한 웨이트)
 K_LON = 1.0 # weight for longitudinal direction (종방향을 위한 웨이트)
 
 # lateral planning 시 terminal position condition 후보  (양 차선 중앙), default len(DF_SET) = 2
@@ -329,7 +330,7 @@ class FrenetPath:
 		self.ds = []
 		self.kappa = []
 
-def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET, dir):
+def calc_frenet_paths_before(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET, dir):
 # def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, dir):
 	frenet_paths = []
 
@@ -392,6 +393,57 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 			tfp.c_tot = K_LAT * tfp.c_lat + K_LON * tfp.c_lon
 
 			frenet_paths.append(tfp)
+
+	return frenet_paths
+
+def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET, dir):
+# def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, dir):
+	frenet_paths = []
+
+	# generate path to each offset goal
+	for df in DF_SET:
+
+		# Lateral motion planning
+		# for T in np.arange(MIN_T[dir], MAX_T[dir]+DT_T[dir], DT_T[dir]):
+		for T in np.arange(MIN_T, MAX_T+DT_T, DT_T):
+			fp = FrenetPath()
+			lat_traj = QuinticPolynomial(di, di_d, di_dd, df, df_d, df_dd, T)
+
+			fp.t = [t for t in np.arange(0.0, T, DT)] ## delta time
+			fp.d = [lat_traj.calc_pos(t) for t in fp.t]
+			fp.d_d = [lat_traj.calc_vel(t) for t in fp.t]
+			fp.d_dd = [lat_traj.calc_acc(t) for t in fp.t]
+			fp.d_ddd = [lat_traj.calc_jerk(t) for t in fp.t]
+
+			# Longitudinal motion planning (velocity keeping)
+			for tv in np.arange(target_speed - D_T_S * N_S_SAMPLE, target_speed + D_T_S * N_S_SAMPLE, D_T_S):
+				tfp = deepcopy(fp)
+				lon_traj = QuarticPolynomial(si, si_d, si_dd, tv, sf_dd, T)
+
+				tfp.s = [lon_traj.calc_pos(t) for t in fp.t]
+				tfp.s_d = [lon_traj.calc_vel(t) for t in fp.t]
+				tfp.s_dd = [lon_traj.calc_acc(t) for t in fp.t]
+				tfp.s_ddd = [lon_traj.calc_jerk(t) for t in fp.t]
+
+				J_lat = sum(np.power(tfp.d_ddd, 2))  # lateral jerk
+				J_lon = sum(np.power(tfp.s_ddd, 2))  # longitudinal jerk
+
+				# cost for consistency
+				d_diff = (tfp.d[-1] - opt_d) ** 2
+				# cost for target speed
+				v_diff = (target_speed - tfp.s_d[-1]) ** 2
+				#cost for global path tracking
+				d_track = (tfp.d[-1]) ** 2 
+				# print("cost for global path tracking",d_track)
+				# lateral cost
+				tfp.c_lat = K_J * J_lat + K_T * T + K_D * d_diff + K_GD * d_track 
+				# logitudinal cost
+				tfp.c_lon = K_J * J_lon + K_T * T + K_V * v_diff
+
+				# total cost combined
+				tfp.c_tot = K_LAT * tfp.c_lat + K_LON * tfp.c_lon
+
+				frenet_paths.append(tfp)
 
 	return frenet_paths
 
@@ -459,10 +511,10 @@ def check_path(fplist, obs_info, mapx, mapy, maps):
 			a += 1
 			#print("a:" + str(a))
 			continue
-		#if any([abs(kappa) > K_MAX for kappa in fplist[i].kappa]):  # Max curvature check
-		#	#print("curv:"+str(abs(kappa)))
-		#	curv += 1
-		#	continue
+		if any([abs(kappa) > K_MAX for kappa in fplist[i].kappa]):  # Max curvature check
+			#print("curv:"+str(abs(kappa)))
+			curv += 1
+			continue
 		elif collision_check(_path, obs_info, mapx, mapy, maps):
 			#print("col")
 			col += 1

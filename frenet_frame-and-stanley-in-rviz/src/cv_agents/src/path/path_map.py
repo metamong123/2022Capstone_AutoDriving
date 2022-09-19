@@ -482,6 +482,7 @@ def boong():
 	boong.set_lanewidth()
 	return boong
 
+
 def kcity():
 	kcity=Path(path_map + "/src/kcity/global.pkl")
 	kcity.set_global_link([0,155,209,279,354,411,505,526,556,611,703,752,969,1108,1234,1311,1496,1591,1759,1816,1891,2070])
@@ -516,7 +517,7 @@ def kcity():
 	kcity.glo_to_static_start=354
 	kcity.glo_to_static_finish=513
 
-	kcity.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':5/3.6}}
+	kcity.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6, 'uturn': 7/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':5/3.6}}
 	
 	kcity.lane_width={'left':{3.3:{3.3:[8]}, 3.8:{3.3:[6]}}, 'right':{3.3:{3.8:[4]}}, 'none':{3.3:[3,5,7,9,10,11,12,13,15,16,17], 3.8:[0,1,2,18,19,20,21], 4.1:[14]}}
 
@@ -541,7 +542,7 @@ def qualifier():
 		qualifier.set_other_mode(mode='diagonal_parking', pc_route=park_route,link=2*i)
 
 	qualifier.notrafficlight_list=[477,750]
-	qualifier.trafficlight_list=[202]
+	qualifier.trafficlight_list=[205]
 
 	qualifier.glo_to_static_start=450
 	qualifier.glo_to_static_finish=470
@@ -549,7 +550,7 @@ def qualifier():
 	qualifier.glo_to_dynamic_start=662
 	qualifier.glo_to_dynamic_finish=742
 
-	qualifier.glo_to_diagonal_park_start=99
+	qualifier.glo_to_diagonal_park_start=99 # 바꿀예정 90
 	qualifier.glo_to_diagonal_park_finish=102
 	qualifier.diagonal_parking_stop=[]
 	qualifier.diagonal_park_to_glo=[] 

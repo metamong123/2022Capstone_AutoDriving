@@ -149,15 +149,21 @@ def callback_dir(msg):
 if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	
-	control_gain=10
-	cte_speed_gain=5
-	yaw_weight=0.8
-	cte_weight=0.9
+	control_gain={'global':4,'diagonal_parking':4,'horizontal_parking':4,'delivery':4,'dynamic_object':4,'static_object':4}
+	cte_speed_gain={'global':{'straight':5/3.6, 'curve':7/3.6, 'uturn': 10/3.6},'diagonal_parking':{'straight':12/3.6},'horizontal_parking':{'straight':12/3.6},'delivery':{'straight':12/3.6},'dynamic_object':{'straight':5/3.6},'static_object':{'straight':5/3.6}}
+	yaw_weight=1
+	cte_weight=1
 	cte_thresh_hold=0
-	yaw_d_gain=0
+	yaw_d_gain=0.5
+	dir = 'straight'
+	# control_gain=4
+	# cte_speed_gain=5
+	# yaw_weight=0.8
+	# cte_weight=1
+	# cte_thresh_hold=0
+	# yaw_d_gain=0.5
 
-	stanley = Stanley(k=control_gain, speed_gain=cte_speed_gain, w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
+	stanley = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
 	#stanley = Stanley(0.5, 5, 0.9, 0.9,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
 	t1 = time.time()
 
@@ -228,7 +234,8 @@ if __name__ == "__main__":
 			ki_a = 0.01
 			
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
-			
+
+			stanley = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
 			# stanley_control / stanley_control_thresh / stanley_control_pid
 			steer, yaw_term, cte, map_yaw = stanley.stanley_control_pd(state.x, state.y, state.yaw, state.v, path_x, path_y, path_yaw)
 			# if mode == 'global':
