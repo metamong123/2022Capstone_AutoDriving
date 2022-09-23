@@ -8,12 +8,12 @@
 	<node name="collision_check" pkg="obstacles" type="collision_check_with_visualizing_car.py" />
 
 	<node name="path" pkg="cv_agents" type="path_global.py" output="screen"/>
-	<node name="path_select" pkg="cv_agents" type="path_mode_select_final_kcity.py" output="screen"/>
+	<node name="path_select" pkg="cv_agents" type="path_mode_select_final.py" output="screen"/>
 	
 	
 	<node name="control" pkg="cv_agents" type="control.py"/>
-	<node name='core_controller' pkg='core' type='core_final_kcity.py'/>
+	<node name='core_controller' pkg='core' type='core_final_delivery_contour.py'/>
 
-	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find cv_agents)/rviz/kcity.rviz"/>
+	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find cv_agents)/rviz/frontier.rviz"/>
 	
 </launch>

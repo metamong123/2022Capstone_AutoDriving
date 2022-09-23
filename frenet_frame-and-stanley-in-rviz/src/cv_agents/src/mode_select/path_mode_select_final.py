@@ -90,6 +90,7 @@ if __name__ == "__main__":
 
 	parking_ind = 0
 	parking = False
+	parking_object = False
 	park_wp = 0
 	r = rospy.Rate(20)
 	mode='global'
@@ -111,28 +112,37 @@ if __name__ == "__main__":
 		else:
 			pass
 
-		parking_ind = 1 # 수평주차할 위치
+		if (not use_map.horizontal_parking_map_num==0) and (parking_object == False) and (global_wp <= use_map.horizontal_park_object_finish and global_wp >= use_map.horizontal_park_object_start): # 주차 칸 인식을 위한 flag
+			for park_i in range(use_map.horizontal_parking_map_num):
+				if collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==False:
+					parking_ind=park_i
+					parking_object = True
+					print("parking_choose: "+str(park_i))
+					break
+
+		#parking_ind = 2 # 수평주차할 위치
 		
 		######## mode select based waypoint #######
 		if (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
 			mode = 'delivery_A'
 		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
 			mode = 'delivery_B'
-		elif (global_wp >= use_map.glo_to_static_finish and global_wp >= use_map.glo_to_static_start):
-			mode = 'static_object'
-			if (global_wp > use_map.glo_to_static_finish):
-				mode = 'global'
+		#elif (global_wp <= use_map.glo_to_static_finish) and (global_wp >= use_map.glo_to_static_start):
+		#	mode = 'static_object'
+		#	if (global_wp >= use_map.glo_to_static_finish):
+		#		mode = 'global'
 		elif (not use_map.horizontal_parking_map_num==0) and (global_wp >= use_map.glo_to_horizontal_park_start[parking_ind]) and (global_wp <= use_map.glo_to_horizontal_park_finish[parking_ind]) and (parking == False): # horizontal parking mode
 			mode = 'horizontal_parking'
 			parking = True
 		else:
 			pass
-		#if mode == 'delivery_A' and (global_wp >= use_map.del_to_glo_start[0]):
-		#	mode = 'global'
-		#elif mode == 'delivery_B' and (global_wp >= use_map.del_to_glo_start[1]):
-		#	mode = 'global'
-		#else:
-		#	pass
+		if mode == 'delivery_A' and (global_wp >= use_map.del_to_glo_start[0]):
+			mode = 'global'
+		elif mode == 'delivery_B' and (global_wp >= use_map.del_to_glo_start[1]):
+			mode = 'global'
+		else:
+			pass
+
 
 		mode_msg.data = mode
 		mode_pub.publish(mode_msg)

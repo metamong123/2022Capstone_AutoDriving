@@ -92,14 +92,18 @@ class Path:
 			# 	self.waypoints['global'][i]=list(reversed(self.waypoints['global'][i]))
 			# self.waypoints['global']=get_s_yaw(self.waypoints['global']['x'],self.waypoints['global']['y'])
 		self.horizontal_parking_route=[] #parking pkl파일 경로
+		self.horizontal_parking_object_route=[]
 		self.diagonal_parking_route=[]
 		self.delivery_route=[] #delivery pkl파일 경로
+		self.horizontal_parking_object={}
 		self.horizontal_parking_path={}
 		self.diagonal_parking_path={}
 		self.delivery_path={}
 		self.w={}
 		self.horizontal_parking_map_num=0 # 주차 구역 수
 		self.diagonal_parking_map_num=0 # 주차 구역 수
+		self.horizontal_park_object_start=0
+		self.horizontal_park_object_finish=0
 		self.delivery_map_num=0 # 배달 구역 수
 		self.link_len={'global':[],'horizontal_parking':[],'diagonal_parking':[],'delivery':[]}
 		self.link_dir={'straight':[],'left':[],'right':[]}
@@ -293,6 +297,18 @@ class Path:
 				self.waypoints[mode][link]=interpolate_waypoints(self.waypoints[mode][link]['x'], self.waypoints[mode][link]['y'], 0,space=space)
 				self.set_other_link()
 	
+	def set_parking_area(self, pc_route="/src/frontier/parking_route.pkl", link=None):
+		if not link==None:
+			self.horizontal_parking_object[link]={}
+			with open(pc_route, 'rb') as f:
+				file=pickle.load(f)
+				self.horizontal_parking_object[link]=file[0]			
+		else:
+			self.horizontal_parking_object[0]={}
+			with open(pc_route, 'rb') as f:
+				file=pickle.load(f)
+				self.horizontal_parking_object[0]=file[0]
+
 	def set_dir(self, straight, left, right, uturn):
 		self.link_dir={'straight':straight,'left':left,'right':right,'uturn':uturn}
 	
@@ -390,35 +406,32 @@ class Path:
 			self.MAX_T[dir]=self.MIN_T[dir]+self.DT_T[dir]
 
 def delivery_test_cw():
-	del_space = 0.5
-	glo_space=0.5
+
 	# 0.5 (original) / 0.25 (x2) / 0.125 (x4) / 0.1 (x5)
-	delivery_test_cw=Path(path_map + "/src/delivery_test_cw/global_"+str(glo_space)+".pkl")
-	link_list=list(map(int,list(np.array([0,180,210,340,360,540,570,690,717])*float(0.5/1))))
+	delivery_test_cw=Path(path_map + "/src/delivery_test_cw/global_"+str(0.5)+".pkl")
+	link_list=list(map(int,list(np.array([0,180,210,340,360,540,570,690,717]))))
 	delivery_test_cw.set_global_link(link_list)
 	delivery_test_cw.set_dir([0,2,4,6,8],[],[1,3,5,7],[])
-	
+
 	delivery_test_cw.delivery_map_num=2
 	for i in range(delivery_test_cw.delivery_map_num):
-		del_route=path_map+"/src/delivery_test_cw/delivery_"+str(i)+"_"+str(del_space)+".pkl"
+		del_route=path_map+"/src/delivery_test_cw/delivery_"+str(i)+"_"+str(0.5)+".pkl"
 		delivery_test_cw.delivery_route.append(del_route)
 		delivery_test_cw.set_other_mode(mode='delivery', pc_route=del_route,link=i)	
 	delivery_test_cw.glo_to_del_start=[30,110]
 	delivery_test_cw.glo_to_del_finish=[40,120]
 	delivery_test_cw.del_to_glo_start=[80,160]
 	delivery_test_cw.del_to_glo_finish=[90,170]
-	# delivery_test_cw.glo_to_del_start=list(np.array([30, 110])*float(0.5/1))
-	# delivery_test_cw.glo_to_del_finish=list(np.array([40, 120])*float(0.5/1))
 	delivery_test_cw.glo_to_dynamic_start=400
 	delivery_test_cw.glo_to_dynamic_finish=500
 	
-	delivery_test_cw.target_speed={'global':{'straight':10/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':10/3.6}}
+	delivery_test_cw.target_speed={'global':{'straight':15/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':5/3.6}}
 	delivery_test_cw.set_other_link()
 	delivery_test_cw.delivery_path=delivery_test_cw.make_path('delivery',delivery_test_cw.delivery_map_num)
 
 	delivery_test_cw.lane_width={'none':{3.0:[i for i in range(10)]}}
 	delivery_test_cw.set_lanewidth()
-	delivery_test_cw.set_terminal_time()
+	# delivery_test_cw.set_terminal_time()
 
 	return delivery_test_cw
 
@@ -569,7 +582,7 @@ def uturn_test():
 	uturn_test.set_global_link([0,250,375,600])
 	uturn_test.set_dir([0,3,4],[1,2],[],[])
 	
-	uturn_test.target_speed={'global':{'straight':8/3.6, 'curve':8/3.6, 'uturn':8/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
+	uturn_test.target_speed={'global':{'straight':8/3.6, 'curve':8/3.6, 'uturn':8/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':5/3.6}}
 	uturn_test.lane_width={'none':{3.3:[0,1,2,3,4]}}
 
 	# uturn_test=Path(path_map + "/src/uturn_test/uturn_test2.pkl")
@@ -604,7 +617,7 @@ def playground():
 	# playground.glo_to_del_start=[12,169]
 	# playground.glo_to_del_finish=[14,171]
 	
-	playground.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6,'uturn':8/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
+	playground.target_speed={'global':{'straight':10/3.6, 'curve':10/3.6,'uturn':8/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':5/3.6}}
 	
 	playground.set_other_link()
 	playground.delivery_path=playground.make_path('delivery',playground.delivery_map_num)
@@ -632,7 +645,7 @@ def hightech_delivery():
 	hightech_delivery.del_to_glo_finish=[52, 10000]
 
 
-	hightech_delivery.target_speed={'global':{'straight':12/3.6, 'curve':10/3.6,'uturn':8/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':7/3.6},'dynamic_object':{'straight':10/3.6}}
+	hightech_delivery.target_speed={'global':{'straight':12/3.6, 'curve':10/3.6,'uturn':8/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':7/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':5/3.6}}
 	hightech_delivery.lane_width={'none':{3.0:[i for i in range(3)]}}
 	hightech_delivery.set_lanewidth()
 	hightech_delivery.set_other_link()
@@ -649,18 +662,26 @@ def hightech_parking():
 	hightech_parking.set_global_link([0,41,48,77,84])
 	hightech_parking.set_dir([0,2,4,5],[],[1,3],[])
 
-	hightech_parking.horizontal_parking_map_num=4
+	hightech_parking.horizontal_parking_map_num=3
 	for i in range(hightech_parking.horizontal_parking_map_num):
 		park_route=path_map+"/src/hightech_parking/parking_"+str(i)+".pkl"
 		hightech_parking.horizontal_parking_route.append(park_route)
 		hightech_parking.set_other_mode(mode='horizontal_parking', pc_route=park_route,link=2*i)
 
-	hightech_parking.glo_to_horizontal_park_start=[17,25,32,39]
-	hightech_parking.glo_to_horizontal_park_finish=[19,27,34,41]
+	for i in range(hightech_parking.horizontal_parking_map_num):
+		obj_route=path_map+"/src/hightech_parking/parking_cone_"+str(i)+".pkl"
+		hightech_parking.horizontal_parking_object_route.append(obj_route)
+		hightech_parking.set_parking_area(pc_route=obj_route, link=i)
+
+	hightech_parking.glo_to_horizontal_park_start=[25,32,39]
+	hightech_parking.glo_to_horizontal_park_finish=[27,34,41]
+	# hightech_parking.glo_to_static_start=14
+	# hightech_parking.glo_to_static_finish=
 	hightech_parking.horizontal_parking_stop=[58]
 	hightech_parking.horizontal_park_to_glo=[]
-	
-	hightech_parking.target_speed={'global':{'straight':12/3.6, 'curve':10/3.6,'uturn':8/3.6},'horizontal_parking':{'straight':5/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6}}
+	hightech_parking.horizontal_park_object_start=20
+	hightech_parking.horizontal_park_object_finish=41
+	hightech_parking.target_speed={'global':{'straight':7/3.6, 'curve':10/3.6,'uturn':5/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':5/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':5/3.6}}
 	hightech_parking.lane_width={'none':{2.0:[i for i in range(6)]}}
 	hightech_parking.set_lanewidth()
 	hightech_parking.set_other_link()
@@ -668,7 +689,7 @@ def hightech_parking():
 
 	return hightech_parking
 
-use_map=kcity()
+use_map=delivery_test_cw()
 start_index=0
 
 # use_map=kcity()

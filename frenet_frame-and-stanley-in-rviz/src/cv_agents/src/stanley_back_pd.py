@@ -107,5 +107,5 @@ class Stanley_back:
 
 		# steering
 		steer = self.w_yaw*yaw_term + self.yaw_dgain*d_yaw + self.w_cte*cte_term
-		steer = -(self.backward_yaw(steer))
+		# steer = -(self.backward_yaw(steer))
 		return steer, yaw_term, cte, map_yaw

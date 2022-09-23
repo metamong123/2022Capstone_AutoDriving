@@ -7,7 +7,8 @@
  	 <param name="ntrip_user" value="jaebum98"/>
  	 <param name="ntrip_pass" value="ngii"/>
  	 <param name="ntrip_stream" value="VRS-RTCM31"/>
- 	 <param name="nmea_gga" value="$GPGGA,024639.672,3714.358,N,12646.388,E,1,12,1.0,0.0,M,0.0,M,,*6C"/>
+ 	 <param name="nmea_gga" value="$GPGGA,080713.492,3737.912,N,12704.556,E,1,12,1.0,0.0,M,0.0,M,,*60
+"/>
   </node>
 </launch>
 

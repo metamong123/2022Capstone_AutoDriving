@@ -28,6 +28,9 @@ def backward_yaw(yaw):
         yaw = yaw - math.pi
     return yaw
 
+#backward_yaw(-0.2737548428152009)
+#-0.2737548428152009
+
 def pi_2_pi(angle):
 	return (angle + math.pi) % (2 * math.pi) - math.pi
 
@@ -120,17 +123,18 @@ def find_dir(link_dict, link_ind):
 if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	control_gain={'global':4,'diagonal_parking':4,'horizontal_parking':4,'delivery':4,'dynamic_object':4,'static_object':4}
-	cte_speed_gain={'global':{'straight':5/3.6, 'curve':7/3.6, 'uturn': 10/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':7/3.6},'dynamic_object':{'straight':5/3.6},'static_object':{'straight':5/3.6}}
+	control_gain={'global':1,'diagonal_parking':1,'horizontal_parking':2,'delivery':1,'dynamic_object':1,'static_object':1}
+	cte_speed_gain={'global':{'straight':0, 'curve':5, 'uturn': 5},'diagonal_parking':{'straight':5},'horizontal_parking':{'straight':3},'delivery':{'straight':5,'dynamic_object':{'straight':0}},'static_object':{'straight':5}}
 	yaw_weight=1
 	cte_weight=1
 	cte_thresh_hold=0
-	yaw_d_gain=0.5
-	dir = 'straight'
-	stanley_imu = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
-	stanley_imu_back = Stanley_back(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
+	yaw_d_gain={'global':0,'diagonal_parking':0,'horizontal_parking':0,'delivery':0,'dynamic_object':0,'static_object':0}
 	
-	f_imu = open("/home/mds/stanley/"+"imu_"+time.strftime('%Y%m%d_%H:%M')+"_k"+str(control_gain[mode])+"_sg"+str(cte_speed_gain[mode])+"_wy"+str(yaw_weight)+"_wc"+str(cte_weight)+"_thresh"+str(cte_thresh_hold)+"_dgain"+str(yaw_d_gain)+".csv", "w")
+	dir = 'straight'
+	stanley_imu = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain[mode], WB = 1.04)
+	stanley_imu_back = Stanley_back(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain[mode], WB = 1.04)
+	
+	f_imu = open("/home/mds/stanley/"+"imu_"+time.strftime('%Y%m%d_%H:%M')+"_k"+str(control_gain[mode])+"_sg"+str(cte_speed_gain[mode])+"_wy"+str(yaw_weight)+"_wc"+str(cte_weight)+"_thresh"+str(cte_thresh_hold)+"_dgain"+str(yaw_d_gain[mode])+".csv", "w")
 	f_imu.write('time' + ',' + 'x' + ',' + 'y' + ',' + 'map_yaw' + ',' + 'yaw' + ',' + 'yaw_term(degree)' + ',' + 'cte(cm)' + ',' + 'steering(degree)' + '\n')
 	
 	t1 = time.time()
@@ -155,8 +159,10 @@ if __name__ == "__main__":
 	road_yaw=0
 	park_ind=0
 	v=0
+	hz=20
+	dt=float(1/hz)
 
-	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=0.1)
+	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=dt)
 	# 수평 주차 할 때만 사용할 것.
 	# if mode == 'parking':
 	# 	yaw_reversed=backward_yaw(obj_msg.yaw)
@@ -168,8 +174,7 @@ if __name__ == "__main__":
 	error_pa=0
 	error_da=0
 	error_ia = 0
-	hz=20
-	dt=1/hz
+	
 	r = rospy.Rate(hz)
 	a = 0
 	steer_imu=0
@@ -236,10 +241,12 @@ if __name__ == "__main__":
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
             ##########################################################
 			if mode == 'horizontal_parking':
+				stanley_imu_back = Stanley_back(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain[mode], WB = 1.04)
 				steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu_back.stanley_control_pd(obj_msg.x, obj_msg.y, obj_msg.yaw, obj_msg.v, path_x, path_y, path_yaw)
+				steer_imu = -(backward_yaw(steer_imu))
 				gear = 2
 			else:
-				stanley_imu = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
+				stanley_imu = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain[mode], WB = 1.04)
 	
 				steer_imu, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu.stanley_control_pd(obj_msg.x, obj_msg.y, obj_msg.yaw, obj_msg.v, path_x, path_y, path_yaw)
 				gear=0
@@ -254,9 +261,15 @@ if __name__ == "__main__":
 			
 			f_imu.write(str(t2) + ',' + str(obj_msg.x) + ',' + str(obj_msg.y) + ',' + str(map_yaw_imu*180/math.pi) + ',' + str(obj_msg.yaw*180/math.pi) + ',' + str(yaw_term_imu*180/math.pi) + ',' + str(cte_imu*1e2) + ',' + str(steer_imu*180/math.pi) + '\n')
 
-		accel_msg.data = (state.v - prev_v)/dt
+		accel_msg.data = float(state.v - prev_v)/0.05
 
 		msg = state.get_ros_msg(a, steer_imu, v_com,gear)
+		if mode == 'global':
+			dir=find_dir(use_map.link_dir, link_ind)
+			if dir == 'right' or dir == 'left':
+				dir='curve'
+		else:
+			dir = 'straight'
 		v_com=use_map.target_speed[mode][dir]
 
 		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer_imu) + ",a = "+str(a))

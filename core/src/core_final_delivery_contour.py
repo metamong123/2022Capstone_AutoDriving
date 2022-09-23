@@ -7,6 +7,7 @@ from std_msgs.msg import Int32MultiArray, Float64, String, Int32
 from rocon_std_msgs.msg import StringArray 
 from ackermann_msgs.msg import AckermannDriveStamped
 from nav_msgs.msg import Odometry
+from object_msgs.msg import Object
 from darknet_ros_msgs.msg import BoundingBoxes
 
 import numpy as np
@@ -90,6 +91,12 @@ def forward_callback(msg):
 	traffic_light = msg.data[0]
 	person = msg.data[1]
 	car = msg.data[2]
+
+velocity=0
+def callback2(msg):
+	global velocity
+	obj_msg=msg
+	velocity=obj_msg.v * 3.6
 
 def odometry_callback(msg):
 	global yaw
@@ -194,11 +201,11 @@ def delivery_decision():
 
 	if car_mode == 'delivery_A':
 		if A_flag == False:
-			if A_x[delivery_ind] > 315:   #parameter
+			if A_x[delivery_ind] > 300:   #parameter
 				delivery_flag = 'wait'
 			else:
 				pass
-			if delivery_flag == 'wait' and (stopline > 400 and A_x[delivery_ind] > 315):  #parameter
+			if (delivery_flag == 'wait') and (stopline > 300):# and A_x[delivery_ind] > 315):  #parameter
 				delivery_flag = 'end'
 				A_flag = True
 			else:
@@ -207,11 +214,11 @@ def delivery_decision():
 			delivery_flag = 'going'
 	elif car_mode == 'delivery_B':
 		if B_flag == False:
-			if B_x[delivery_ind] > 315:   #parameter
+			if B_x[delivery_ind] > 300:   #parameter
 				delivery_flag = 'wait'
 			else:
 				pass
-			if delivery_flag == 'wait' and (stopline > 400 and B_x[delivery_ind] > 315):  #parameter
+			if (delivery_flag == 'wait') and (stopline > 300): # and B_x[delivery_ind] > 315):  #parameter
 				delivery_flag = 'end'
 				B_flag = True
 			else:
@@ -233,6 +240,7 @@ if __name__=='__main__':
 	rospy.Subscriber("/link_direction", StringArray, link_callback)
 	rospy.Subscriber("/stopline", Int32, delivery_stopline_callback)
 	rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
+	rospy.Subscriber("/objects/car_1", Object, callback2)
 	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
 
 	mode_status = 'going'
@@ -254,7 +262,7 @@ if __name__=='__main__':
 					cmd.drive.speed = frenet_speed/2
 					cmd.drive.steering_angle = frenet_angle
 					cmd.drive.acceleration = frenet_gear
-					cmd.drive.jerk = 50
+					cmd.drive.jerk = int(5.5 * velocity) if velocity >= 5 else 0
 					j=j+1
 				else:
 					cmd.drive.speed = frenet_speed
@@ -341,6 +349,7 @@ if __name__=='__main__':
 				cmd.drive.acceleration = 0
 				cmd.drive.jerk = 200  #full brake
 				final_cmd_Pub.publish(cmd)
+				stopline = 0
 				mode_status = 'end'   # global mode로 바꾸기위한 flag를 파라미터 서버로 전달
 				delivery_flag = 'going'
 				status_msg.data = mode_status

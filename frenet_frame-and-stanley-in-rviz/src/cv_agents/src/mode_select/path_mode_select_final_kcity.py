@@ -127,6 +127,14 @@ if __name__ == "__main__":
 
 		parking_ind = 1 # 수평주차할 위치
 
+		if (not use_map.horizontal_parking_map_num==0) and (parking_object == False) and (global_wp <= use_map.horizontal_park_object_finish and global_wp >= use_map.horizontal_park_object_start): # 주차 칸 인식을 위한 flag
+			for park_i in range(use_map.horizontal_parking_map_num):
+				if collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==False:
+					parking_ind=park_i
+					parking_object = True
+					print("parking_choose: "+str(park_i))
+					break
+
 		######## mode select based waypoint #######
 		if (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
 			mode = 'delivery_A'

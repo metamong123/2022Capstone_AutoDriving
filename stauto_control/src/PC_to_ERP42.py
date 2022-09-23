@@ -5,6 +5,7 @@ from locale import dcgettext
 import rospy
 from std_msgs.msg import String
 from ackermann_msgs.msg import AckermannDriveStamped
+from object_msgs.msg import Object
 from math import *
 import numpy as np
 
@@ -129,14 +130,21 @@ def mode_callback(msg):
 	global mode
 	mode = msg.data
 
+velocity=0
+def callback2(msg):
+	global velocity
+	obj_msg=msg
+	velocity=obj_msg.v * 3.6
+	print(velocity)
+
 if __name__ == '__main__':
     rospy.init_node('serial_node')	
     rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
     rospy.Subscriber('/mode_selector',String, mode_callback)
-
+    rospy.Subscriber("/objects/car_1", Object, callback2)
     rate = rospy.Rate(20)
 
-    port = str(rospy.get_param("~robot_port","/dev/ttyUSB3"))	
+    port = str(rospy.get_param("~robot_port","/dev/ttyUSB0"))	
     ser = serial.serial_for_url(port, baudrate=115200, timeout=1)
     prev_mode = 'global'
     j=0
@@ -146,7 +154,8 @@ if __name__ == '__main__':
     while (ser.isOpen() and (not rospy.is_shutdown())):
         # rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
         # rospy.Subscriber('/mode_selector',String, mode_callback)
-    #Send to Controller
+   		#Send to Controller
+        
         if mode == 'global':
             glo_speed = speed
         else:
@@ -159,9 +168,9 @@ if __name__ == '__main__':
             pass
         print(dc)
         if dc == True:
-            if i < 50:
+            if i < 70:
                 speed = 2
-                brake = int(5.5 * glo_speed * 3.6 - 27.5) if glo_speed > 1.36 else 0
+                brake = int(5.5 * velocity) if velocity >= 5 else 0
                 i = i + 1
             else:
                 i = 0

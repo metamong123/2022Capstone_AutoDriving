@@ -15,7 +15,8 @@ from std_msgs.msg import Float64, Int32MultiArray,String
 from rocon_std_msgs.msg import StringArray
 
 from frenet import *
-from stanley_pid import *
+from stanley_pd import *
+from stanley_back_pd import *
 
 rospack = rospkg.RosPack()
 path_frenet=rospack.get_path("cv_agents")
@@ -113,8 +114,6 @@ def callback_mode(msg):
 	global mode
 	if (msg.data == 'delivery_A') or (msg.data == 'delivery_B'):
 		mode = 'delivery'
-	elif (msg.data=='diagonal_parking') or (msg.data == 'horizontal_parking'):
-		mode = 'parking'
 	else:
 		mode = msg.data
 
@@ -141,30 +140,27 @@ def acceleration(ai):
 # 	obj_msg=msg
 
 dir='straight'
-def callback_dir(msg):
-	global dir
-	dir=msg.strings[0]
 
+def find_dir(link_dict, link_ind):
+	for i in link_dict.keys():
+		for j in link_dict[i]:
+			if link_ind == j:
+				return i
 
 if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
-	control_gain={'global':4,'diagonal_parking':4,'horizontal_parking':4,'delivery':4,'dynamic_object':4,'static_object':4}
-	cte_speed_gain={'global':{'straight':5/3.6, 'curve':7/3.6, 'uturn': 10/3.6},'diagonal_parking':{'straight':12/3.6},'horizontal_parking':{'straight':12/3.6},'delivery':{'straight':12/3.6},'dynamic_object':{'straight':5/3.6},'static_object':{'straight':5/3.6}}
+	control_gain={'global':1,'diagonal_parking':1,'horizontal_parking':1,'delivery':1,'dynamic_object':1,'static_object':1}
+	cte_speed_gain={'global':{'straight':0, 'curve':5, 'uturn': 10/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':5},'delivery':{'straight':7/3.6},'dynamic_object':{'straight':5/3.6},'static_object':{'straight':5/3.6}}
 	yaw_weight=1
 	cte_weight=1
 	cte_thresh_hold=0
-	yaw_d_gain=0.5
+	yaw_d_gain={'global':0,'diagonal_parking':0,'horizontal_parking':0,'delivery':0,'dynamic_object':0,'static_object':0}
+	
 	dir = 'straight'
-	# control_gain=4
-	# cte_speed_gain=5
-	# yaw_weight=0.8
-	# cte_weight=1
-	# cte_thresh_hold=0
-	# yaw_d_gain=0.5
-
-	stanley = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
-	#stanley = Stanley(0.5, 5, 0.9, 0.9,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
+	stanley_imu = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain[mode], WB = 1.04)
+	stanley_imu_back = Stanley_back(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain[mode], WB = 1.04)
+	
 	t1 = time.time()
 
 	rospy.init_node("control")
@@ -176,11 +172,11 @@ if __name__ == "__main__":
 
 
 	# state_sub = rospy.Subscriber("/objects/car_1", Object, callback_state, queue_size=1)
-	# path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=10)
-	path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
+	path_sub= rospy.Subscriber("/final_path", PathArray, callback_path, queue_size=10)
+	# path_sub= rospy.Subscriber("/optimal_frenet_path_global", PathArray, callback_path, queue_size=1)
 	# mode_sub= rospy.Subscriber("/mode_selector", String, callback_mode, queue_size=1)
 	waypoint_link_sub= rospy.Subscriber("/waypoint", Int32MultiArray, callback_wp_link_ind, queue_size=1)
-	dir_sub=rospy.Subscriber("/link_direction", StringArray, callback_dir, queue_size=1)
+	# dir_sub=rospy.Subscriber("/link_direction", StringArray, callback_dir, queue_size=1)
 
 	accel_msg = Float64()
 
@@ -203,11 +199,14 @@ if __name__ == "__main__":
 	a = 0
 
 	#f = open("/home/mds/stanley/k1.csv", "w")
-	if dir == 'right' or dir == 'left':
-		dir='curve'
+	if mode == 'global':
+		dir=find_dir(use_map.link_dir, link_ind)
+		if dir == 'right' or dir == 'left':
+			dir='curve'
+	else:
+		dir = 'straight'
 	
 	while not rospy.is_shutdown():
-
 		if not path_x: ## No solution
 			if mode == 'global':
 				s, d = get_frenet(state.x, state.y, use_map.waypoints[mode]['x'][:use_map.link_len[mode][link_ind+1]], use_map.waypoints[mode]['y'][:use_map.link_len[mode][link_ind+1]],my_wp)
@@ -217,8 +216,12 @@ if __name__ == "__main__":
 				a = 0
 		else:
 			## PID control
-			if dir == 'right' or dir == 'left':
-				dir='curve'
+			if mode == 'global':
+				dir=find_dir(use_map.link_dir, link_ind)
+				if dir == 'right' or dir == 'left':
+					dir='curve'
+			else:
+				dir = 'straight'
 			
 			if mode == 'global':
 				error_pa = use_map.target_speed[mode][dir] - state.v
@@ -234,10 +237,15 @@ if __name__ == "__main__":
 			ki_a = 0.01
 			
 			a = kp_a * error_pa + kd_a * error_da + ki_a * error_ia
+			if mode == 'horizontal_parking':
+				state_yaw=(backward_yaw(state.yaw))
+				stanley_imu_back = Stanley_back(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain[mode], WB = 1.04)
+				steer, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu_back.stanley_control_pd(state.x, state.y, state_yaw, state.v, path_x, path_y, path_yaw)
+				steer = -(backward_yaw(steer))
+			else:
+				stanley_imu = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain[mode], WB = 1.04)
+				steer, yaw_term_imu, cte_imu, map_yaw_imu = stanley_imu.stanley_control_pd(state.x, state.y, state.yaw, state.v, path_x, path_y, path_yaw)
 
-			stanley = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain, WB = 1.04)
-			# stanley_control / stanley_control_thresh / stanley_control_pid
-			steer, yaw_term, cte, map_yaw = stanley.stanley_control_pd(state.x, state.y, state.yaw, state.v, path_x, path_y, path_yaw)
 			# if mode == 'global':
 			# 	steer = stanley.stanley_control(state.x, state.y, state.yaw, state.v, path_x,path_y,path_yaw)
 			# elif mode == 'parking':
@@ -251,8 +259,19 @@ if __name__ == "__main__":
 		accel_msg.data = a
 
 		state.update(a, steer)
-		o_msg = ros_msg(state.x, state.y, state.yaw, state.v)
+		if mode == 'horizontal_parking':
+			o_msg = ros_msg(state.x, state.y, state_yaw, state.v)
+		else:
+			o_msg = ros_msg(state.x, state.y, state.yaw, state.v)
 		msg = state.get_ros_msg(a, steer, id=id)
+
+		if mode == 'global':
+			dir=find_dir(use_map.link_dir, link_ind)
+			if dir == 'right' or dir == 'left':
+				dir='curve'
+		else:
+			dir = 'straight'
+
 		print("현재 speed = " + str(state.v) + "명령 speed = " + str(msg.drive.speed) + ",steer = " + str(steer) + ",a = "+str(a))
 		prev_v = state.v
 

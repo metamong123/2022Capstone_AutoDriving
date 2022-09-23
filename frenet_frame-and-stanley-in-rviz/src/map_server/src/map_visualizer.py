@@ -1,11 +1,13 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 
-import rospy
+from operator import le
+import rospy, tf
 import rospkg
 import sys
 import numpy as np
 from visualization_msgs.msg import Marker, MarkerArray
+from geometry_msgs.msg import Quaternion
 from geometry_msgs.msg import Point
 import pickle
 
@@ -16,7 +18,7 @@ sys.path.append(path_frenet+"/src/path/")
 from path_map import *
 
 class Converter(object):
-	def __init__(self, file_=None, waypoints=None, start_id=0, r=255/255.0, g=255/255.0, b=255/255.0, a= 0.5, scale=0.1):
+	def __init__(self, file_=None, waypoints=None, obj=None,start_id=0, r=255/255.0, g=255/255.0, b=255/255.0, a= 0.5, scale=0.1):
 		self.r = r
 		self.g = g
 		self.b = b
@@ -24,6 +26,7 @@ class Converter(object):
 		self.scale = scale
 		self.start_id = start_id
 		self.ma = None
+		self.mo = None
 		if file_ is not None:
 			self.file = file_
 			with open(file_, "rb") as f:
@@ -32,6 +35,8 @@ class Converter(object):
 		elif waypoints is not None:
 			self.waypoints = waypoints
 			self.make_marker_array(self.waypoints)
+		elif obj is not None:
+			self.obj=obj
 		else:
 			self.waypoints = None
 
@@ -71,8 +76,42 @@ class Converter(object):
 			ma.markers.append(m)
 
 		self.ma = ma
-		
 
+def msg_pub(i, area):
+	x=(area['x'][0]+area['x'][2])/2
+	y=(area['y'][0]+area['y'][1])/2
+	a = np.sqrt((area['x'][0]-area['x'][1])**2+(area['y'][0]-area['y'][1])**2)
+	b = np.sqrt((area['x'][2]-area['x'][1])**2+(area['y'][2]-area['y'][1])**2)
+	if a > b:
+		Le=a
+		Wi=b
+	else:
+		Wi=a
+		Le=b
+	yaw=use_map.waypoints['horizontal_parking'][0]['yaw'][0]
+	yaw_quat = tf.transformations.quaternion_from_euler(0,0,yaw)
+
+	m = Marker()
+	m.header.frame_id = "/map"
+	m.header.stamp = rospy.Time.now()
+	m.id = 100+i
+	m.type = m.CUBE
+
+	m.pose.position.x = x
+	m.pose.position.y = y
+	m.pose.position.z = 0.1
+	m.pose.orientation = Quaternion(*yaw_quat)
+
+	m.scale.x = Le
+	m.scale.y = Wi
+	m.scale.z = 1
+
+	m.color.r = 100 / 255.0
+	m.color.g = 250 / 255.0
+	m.color.b = 177 / 255.0
+	m.color.a = 0.5
+
+	return m
 
 if __name__ == "__main__":
 	rospy.init_node("map_rviz_visualizer")
@@ -87,11 +126,14 @@ if __name__ == "__main__":
 	if not use_map.diagonal_parking_map_num==0:
 		for i in range(use_map.diagonal_parking_map_num):
 			globals()["diagonal_parking_wayp{}".format(i)]=use_map.waypoints['diagonal_parking'][i*2]
-	
 	if not use_map.delivery_map_num==0:
 		for i in range(use_map.delivery_map_num):
 			globals()["delivery_wayp{}".format(i)]=use_map.waypoints['delivery'][i]
 
+	if not use_map.horizontal_parking_map_num==0:
+		for i in range(use_map.horizontal_parking_map_num):
+			globals()["horizontal_parking_obj{}".format(i)]=use_map.horizontal_parking_object[i]
+		
 	global_cv = Converter(waypoints=global_wayp, r=255/255.0, g=236/255.0, b=139/255.0, a=0.8, scale=0.2)
 
 	if not use_map.horizontal_parking_map_num==0:
@@ -118,8 +160,11 @@ if __name__ == "__main__":
 		for i in range(use_map.delivery_map_num):
 			delivery_topic="/rviz/delivery_link_"+str(i)
 			globals()["delivery_pub_{}".format(i)]=rospy.Publisher(delivery_topic, MarkerArray, queue_size=1.2, latch=True)
+	if not use_map.horizontal_parking_map_num==0:
+		for i in range(use_map.horizontal_parking_map_num):
+			obj_topic="/rviz/horizontal_object_"+str(i)
+			globals()["horizontal_parking_obj_pub_{}".format(i)]=rospy.Publisher(obj_topic, Marker,queue_size=1)
 
-	rospy.sleep(1)
 	while not rospy.is_shutdown():
 		global_pub.publish(global_cv.ma)
 		if not use_map.horizontal_parking_map_num==0:
@@ -131,5 +176,9 @@ if __name__ == "__main__":
 		if not use_map.delivery_map_num==0:
 			for i in range(use_map.delivery_map_num):
 				globals()["delivery_pub_{}".format(i)].publish(globals()["delivery_cv_{}".format(i)].ma)
+		if not use_map.horizontal_parking_map_num==0:
+			for i in range(use_map.horizontal_parking_map_num):
+				m=msg_pub(i, use_map.horizontal_parking_object[i])
+				globals()["horizontal_parking_obj_pub_{}".format(i)].publish(m)
 		
 		rospy.sleep(1)

@@ -32,23 +32,6 @@ class ImuPub:
 	def msg_pub(self):
 		quat_imu = tf.transformations.quaternion_from_euler(0, 0, self.yaw_imu)
 		self.tf_broadcaster.sendTransform((self.x_imu, self.y_imu, 1.5), quat_imu,rospy.Time.now(),"/car_1", "/map")
-	
-		#o_gps = Object()
-		#o_gps.header.frame_id = "/map"
-		#o_gps.header.stamp = rospy.Time.now()
-		#o_gps.id = 1
-		#o_gps.classification = o_gps.CLASSIFICATION_CAR
-		#o_gps.x = self.x_gps
-		#o_gps.y = self.y_gps
-		#o_gps.yaw = self.yaw_gps
-		##o.yaw=1.28713
-		#########
-		#o_gps.v = self.v_gps
-		########
-		#o_gps.L = 1.600
-		#o_gps.W = 1.160
-		##o.WB = 1.06
-		#self.object_gps_pub.publish(o_gps)
 
 		o_imu = Object()
 		o_imu.header.frame_id = "/map"
@@ -119,7 +102,7 @@ class ImuPub:
 
 		orientation_list = [data.pose.pose.orientation.x, data.pose.pose.orientation.y, data.pose.pose.orientation.z, data.pose.pose.orientation.w] 
 		roll, pitch, self.yaw_imu = euler_from_quaternion(orientation_list) 
-		self.yaw_imu+=0.10
+		self.yaw_imu+=0.1
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ from std_msgs.msg import Int32MultiArray, Float64, String, Int32
 from rocon_std_msgs.msg import StringArray 
 from ackermann_msgs.msg import AckermannDriveStamped
 from nav_msgs.msg import Odometry
+from object_msgs.msg import Object
 from darknet_ros_msgs.msg import BoundingBoxes
 
 import numpy as np
@@ -67,6 +68,12 @@ park_ind_wp = [0,0]
 def parking_callback(msg):
 	global park_ind_wp
 	park_ind_wp = msg.data
+
+velocity=0
+def callback2(msg):
+	global velocity
+	obj_msg=msg
+	velocity=obj_msg.v * 3.6
 
 link_ind = 0
 global_wp = 0
@@ -183,7 +190,7 @@ def delivery_decision():
 
 	if car_mode == 'delivery_A':
 		#if A_flag == False:
-		if A_x[delivery_ind] > 100:   #parameter
+		if A_x[delivery_ind] > 400:   #parameter
 			delivery_flag = 'end'
 			#A_flag = True
 		else:
@@ -192,7 +199,7 @@ def delivery_decision():
 		#	delivery_flag = 'going'
 	elif car_mode == 'delivery_B':
 		#if B_flag == False:
-		if B_x[delivery_ind] > 450:   #parameter
+		if B_x[delivery_ind] > 400:   #parameter
 			delivery_flag = 'end'
 			#B_flag = True
 		else:
@@ -214,6 +221,7 @@ if __name__=='__main__':
 	rospy.Subscriber("/mode_selector",String,mode_callback,queue_size=10)
 	rospy.Subscriber("/link_direction", StringArray, link_callback)
 	rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
+	rospy.Subscriber("/objects/car_1", Object, callback2)
 	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
 
 	
@@ -227,6 +235,7 @@ if __name__=='__main__':
 		cmd=AckermannDriveStamped()
 		cmd.header.stamp=rospy.Time.now()
 		if car_mode == 'global':
+			print(velocity)
 			#if move_mode == 'finish':
 			#	cmd.drive.speed, cmd.drive.steering_angle, cmd.drive.acceleration, cmd.drive.jerk = traffic_decision()
 			#else:
@@ -235,7 +244,7 @@ if __name__=='__main__':
 					cmd.drive.speed = frenet_speed/2
 					cmd.drive.steering_angle = frenet_angle
 					cmd.drive.acceleration = frenet_gear
-					cmd.drive.jerk = 80
+					cmd.drive.jerk = int(5.5 * velocity) if velocity >= 5 else 0
 					j=j+1
 				else:
 					cmd.drive.speed = frenet_speed
@@ -327,6 +336,11 @@ if __name__=='__main__':
 				print('delivery finish!!! stop!!')
 				rospy.sleep(5) # 4sec
 			print('delivery mode')
+		elif car_mode == 'static_object':
+			cmd.drive.speed = frenet_speed
+			cmd.drive.steering_angle = frenet_angle
+			cmd.drive.acceleration = frenet_gear
+			cmd.drive.jerk = 0		
 
 		status_msg.data = mode_status
 		status_Pub.publish(status_msg)
