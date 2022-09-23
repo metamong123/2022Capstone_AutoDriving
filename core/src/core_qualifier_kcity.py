@@ -7,6 +7,7 @@ from std_msgs.msg import Int32MultiArray, Float64, String, Int32
 from rocon_std_msgs.msg import StringArray 
 from ackermann_msgs.msg import AckermannDriveStamped
 from nav_msgs.msg import Odometry
+from object_msgs.msg import Object
 from darknet_ros_msgs.msg import BoundingBoxes
 
 import numpy as np
@@ -101,6 +102,12 @@ park_ind_wp = [0,0]
 def parking_callback(msg):
 	global park_ind_wp
 	park_ind_wp = msg.data
+
+velocity=0
+def callback2(msg):
+	global velocity
+	obj_msg=msg
+	velocity=obj_msg.v * 3.6
 
 col = 0
 def col_callback(msg):
@@ -243,7 +250,7 @@ if __name__=='__main__':
 	rospy.Subscriber("/col", Int32, col_callback)
 	rospy.Subscriber("/traffic_mode", String, traffic_callback)	
 	rospy.Subscriber("/traffic_slow", String, slow_callback)
- 
+	rospy.Subscriber("/objects/car_1", Object, callback2)
 	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
 	
 	r = rospy.Rate(20)
@@ -277,7 +284,7 @@ if __name__=='__main__':
 							cmd.drive.speed = frenet_speed/2
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = 20
+							cmd.drive.jerk = int(5 * velocity) if velocity >= 5 else 0
 							j=j+1
 						else:
 							cmd.drive.speed = frenet_speed
@@ -302,7 +309,7 @@ if __name__=='__main__':
 							cmd.drive.speed = frenet_speed/2
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = 20  # 예선은 고정! 바꾸지말기
+							cmd.drive.jerk = int(5 * velocity) if velocity >= 5 else 0  # 예선은 고정! 바꾸지말기
 							j=j+1
 						else:
 							cmd.drive.speed = frenet_speed
@@ -354,7 +361,7 @@ if __name__=='__main__':
 						cmd.drive.speed = frenet_speed
 						cmd.drive.steering_angle = frenet_angle
 						cmd.drive.acceleration = frenet_gear
-						cmd.drive.jerk = 20
+						cmd.drive.jerk = int(5 * velocity) if velocity >= 5 else 0
 						j=j+1
 					else:
 						cmd.drive.speed = frenet_speed

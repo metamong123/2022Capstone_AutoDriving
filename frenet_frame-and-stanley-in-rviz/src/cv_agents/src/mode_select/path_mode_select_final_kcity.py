@@ -125,7 +125,6 @@ if __name__ == "__main__":
 		else:
 			pass
 
-		parking_ind = 1 # 수평주차할 위치
 
 		if (not use_map.horizontal_parking_map_num==0) and (parking_object == False) and (global_wp <= use_map.horizontal_park_object_finish and global_wp >= use_map.horizontal_park_object_start): # 주차 칸 인식을 위한 flag
 			for park_i in range(use_map.horizontal_parking_map_num):
@@ -229,16 +228,16 @@ if __name__ == "__main__":
 			path_msg.x.data = fp.x  # parking final path
 			path_msg.y.data = fp.y
 			path_msg.yaw.data = fp.yaw
+			park_pub.publish(park_msg)
 			 
 		else: # mode = 'global' or 'dynamic_object' or 'static_object'
 			path_msg.x.data = global_path_x
 			path_msg.y.data = global_path_y
 			path_msg.yaw.data = global_path_yaw
 
-			park_msg.data=[0,0]
+			
 
 		path_pub.publish(path_msg)
-		park_pub.publish(park_msg)
 		traffic_pub.publish(traffic_msg)	
 		slow_pub.publish(traffic_slow_msg)
     	
