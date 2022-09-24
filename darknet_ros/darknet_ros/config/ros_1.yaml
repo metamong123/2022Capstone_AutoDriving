@@ -14,12 +14,12 @@ publishers:
   object_detector:
     topic: /camera1/darknet_ros/found_object
     queue_size: 1
-    latch: false
+    latch: true
 
   bounding_boxes:
     topic: /camera1/darknet_ros/bounding_boxes
     queue_size: 1
-    latch: false
+    latch: true
 
   detection_image:
     topic: /camera1/darknet_ros/detection_image

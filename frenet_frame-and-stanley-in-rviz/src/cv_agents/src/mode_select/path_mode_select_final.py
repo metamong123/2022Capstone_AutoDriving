@@ -90,7 +90,6 @@ if __name__ == "__main__":
 
 	parking_ind = 0
 	parking = False
-	parking_object = False
 	park_wp = 0
 	r = rospy.Rate(20)
 	mode='global'
@@ -111,16 +110,34 @@ if __name__ == "__main__":
 			mode_status = 'going'
 		else:
 			pass
+				#and (parking_object == False)
+		# if (not use_map.horizontal_parking_map_num==0) and (global_wp <= use_map.horizontal_park_object_finish and global_wp >= use_map.horizontal_park_object_start): # 주차 칸 인식을 위한 flag
+		# 	coll_check=[True, True, True]
+		# 	for park_i in range(use_map.horizontal_parking_map_num):
+		# 		if collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==False:
+		# 			coll_check[park_i]=False
+		# 			#parking_object = True
+		# 	parking_ind = coll_check.index(True)
+		# 	print("parking_choose: "+str(parking_ind))
+		# print(parking_ind)
+		#parking_ind = 2 # 수평주차할 위치
 
-		if (not use_map.horizontal_parking_map_num==0) and (parking_object == False) and (global_wp <= use_map.horizontal_park_object_finish and global_wp >= use_map.horizontal_park_object_start): # 주차 칸 인식을 위한 flag
+		if (not use_map.horizontal_parking_map_num==0) and (global_wp <= use_map.horizontal_park_object_finish and global_wp >= use_map.horizontal_park_object_start): # 주차 칸 인식을 위한 flag
 			for park_i in range(use_map.horizontal_parking_map_num):
 				if collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==False:
 					parking_ind=park_i
-					parking_object = True
+					parking = True
 					print("parking_choose: "+str(park_i))
 					break
 
-		#parking_ind = 2 # 수평주차할 위치
+			if (global_wp <= glo_to_horizontal_park_start[parking_ind]-5) and (collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==True):
+				parking = False
+				for park_i in range(parking_ind, use_map.horizontal_parking_map_num, 1):
+					if collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==False:
+						parking_ind=park_i
+						parking = True
+						print("parking_choose: "+str(park_i))
+						break
 		
 		######## mode select based waypoint #######
 		if (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
@@ -131,9 +148,9 @@ if __name__ == "__main__":
 		#	mode = 'static_object'
 		#	if (global_wp >= use_map.glo_to_static_finish):
 		#		mode = 'global'
-		elif (not use_map.horizontal_parking_map_num==0) and (global_wp >= use_map.glo_to_horizontal_park_start[parking_ind]) and (global_wp <= use_map.glo_to_horizontal_park_finish[parking_ind]) and (parking == False): # horizontal parking mode
+		elif (not use_map.horizontal_parking_map_num==0) and (global_wp >= use_map.glo_to_horizontal_park_start[parking_ind]) and (global_wp <= use_map.glo_to_horizontal_park_finish[parking_ind]) and (parking == True):  # and (parking == False): # horizontal parking mode
 			mode = 'horizontal_parking'
-			parking = True
+			# parking = True
 		else:
 			pass
 		if mode == 'delivery_A' and (global_wp >= use_map.del_to_glo_start[0]):

@@ -45,8 +45,8 @@ def euler_from_quaternion(x, y, z, w):
         return yaw_z
 
 # parking 시작하기전에 수정해야할 파라미터 값들 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-parking_finish_wp=[56,56,56] # 각 parking index마다의 finish waypoint임
-parking_cmd_wp = [12,26,33,52]
+parking_finish_wp=[53,53,53] # 각 parking index마다의 finish waypoint임
+parking_cmd_wp = [12,26,33,50]
 ###########################################################################
 
 car_mode = 'global'
@@ -120,6 +120,11 @@ traffic_slow = 'no'
 def slow_callback(msg):
     global traffic_slow
     traffic_slow = msg.data
+
+park_slow = 'no'
+def park_slow_callback(msg):
+	global park_slow
+	park_slow = msg.data
 
 def traffic_decision():
 	global next_dir
@@ -200,12 +205,12 @@ def delivery_decision():
 		pass
 
 	if car_mode == 'delivery_A':
-		if A_x[delivery_ind] > 315:   #parameter
+		if A_x[delivery_ind] > 300:   #parameter
 			delivery_flag = 'end'
 		else:
 			delivery_flag = 'going'
 	elif car_mode == 'delivery_B':
-		if B_x[delivery_ind] > 315:   #parameter
+		if B_x[delivery_ind] > 300:   #parameter
 			delivery_flag = 'end'
 		else:
 			delivery_flag = 'going'
@@ -226,13 +231,15 @@ if __name__=='__main__':
 	rospy.Subscriber("/traffic_mode", String, traffic_callback)
 	rospy.Subscriber("/traffic_slow", String, slow_callback)
 	rospy.Subscriber("/objects/car_1", Object, callback2)
+	rospy.Subscriber("/park_slow", String, park_slow_callback)
 
 	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
 
 	mode_status = 'going'
 	parking_start = False
+	parking_flag = False
 	notraffic_status = False
-	park_yaw= use_map.waypoints['horizontal_parking'][1]['yaw'][0]
+	park_yaw= -2.05735833
 	j = 0
 	r=rospy.Rate(20)
 	while not rospy.is_shutdown():
@@ -280,24 +287,37 @@ if __name__=='__main__':
 					cmd.drive.acceleration = frenet_gear
 					cmd.drive.jerk = 40
 				else:
-					if abs(frenet_angle) > 0.1: #각도 파라미터
+					if park_slow == 'no':
+						if abs(frenet_angle) > 0.1: #각도 파라미터
+							if j<100:  #감속
+								cmd.drive.speed = frenet_speed/2
+								cmd.drive.steering_angle = frenet_angle
+								cmd.drive.acceleration = frenet_gear
+								cmd.drive.jerk = int(5 * velocity) if velocity >= 5 else 0
+								j=j+1
+							else:
+								cmd.drive.speed = frenet_speed
+								cmd.drive.steering_angle = frenet_angle
+								cmd.drive.acceleration = frenet_gear
+								cmd.drive.jerk = 0	
+						else:	
+							cmd.drive.speed = frenet_speed
+							cmd.drive.steering_angle = frenet_angle
+							cmd.drive.acceleration = frenet_gear
+							cmd.drive.jerk = 0
+							j = 0
+					else:
 						if j<100:  #감속
 							cmd.drive.speed = frenet_speed/2
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = int(5 * velocity) if velocity >= 5 else 0
+							cmd.drive.jerk = int(5.5 * velocity) if velocity >= 5 else 0
 							j=j+1
 						else:
-							cmd.drive.speed = frenet_speed
+							cmd.drive.speed = 5 / 3.6
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = 0	
-					else:	
-						cmd.drive.speed = frenet_speed
-						cmd.drive.steering_angle = frenet_angle
-						cmd.drive.acceleration = frenet_gear
-						cmd.drive.jerk = 0
-						j = 0
+							cmd.drive.jerk = 0
 				notraffic_status = False # notraffic 구간이 여러번 있으니 바꿔줘야함
 				print('global mode!!!')
 			mode_status = 'going'
@@ -313,63 +333,53 @@ if __name__=='__main__':
 				rospy.sleep(2)
 				parking_start = True
 			else:
-				if park_ind_wp[1] <= parking_cmd_wp[0]:
-					cmd.drive.speed = 5/3.6
-					cmd.drive.steering_angle = 0
-					cmd.drive.acceleration = 2
-					cmd.drive.jerk = 0
-				elif park_ind_wp[1] <= parking_cmd_wp[1]:
-					cmd.drive.speed = 5/3.6
-					cmd.drive.steering_angle = -28*np.pi/180
-					cmd.drive.acceleration = 2
-					cmd.drive.jerk = 0
-				elif park_ind_wp[1] <= parking_cmd_wp[2]:
-					cmd.drive.speed = 5/3.6
-					cmd.drive.steering_angle = 0
-					cmd.drive.acceleration = 2
-					cmd.drive.jerk = 0	
-				else:
-					if (yaw >= park_yaw-2*np.pi/180) and (yaw <= park_yaw+2*np.pi/180):
+				if parking_flag == False:
+					if park_ind_wp[1] <= parking_cmd_wp[0]:
 						cmd.drive.speed = 5/3.6
 						cmd.drive.steering_angle = 0
 						cmd.drive.acceleration = 2
-						cmd.drive.jerk = 0						
+						cmd.drive.jerk = 0
+					elif park_ind_wp[1] <= parking_cmd_wp[1]:
+						cmd.drive.speed = 5/3.6
+						cmd.drive.steering_angle = -28*np.pi/180
+						cmd.drive.acceleration = 2
+						cmd.drive.jerk = 0
+					elif park_ind_wp[1] <= parking_cmd_wp[2]:
+						cmd.drive.speed = 5/3.6
+						cmd.drive.steering_angle = 0
+						cmd.drive.acceleration = 2
+						cmd.drive.jerk = 0	
+					else:
+						if (yaw >= park_yaw-2*np.pi/180) and (yaw <= park_yaw+2*np.pi/180):
+							cmd.drive.speed = 5/3.6
+							cmd.drive.steering_angle = 0
+							cmd.drive.acceleration = 2
+							cmd.drive.jerk = 0						
+						else:
+							cmd.drive.speed = 5/3.6
+							cmd.drive.steering_angle = 28*np.pi/180
+							cmd.drive.acceleration = 2
+							cmd.drive.jerk = 0
+
+					if park_ind_wp[1] >= parking_finish_wp[park_ind_wp[0]]:
+						cmd.drive.speed = 0
+						cmd.drive.steering_angle = 0
+						cmd.drive.acceleration = 0
+						cmd.drive.jerk = 200  #full brake
+						parking_flag = True
+						final_cmd_Pub.publish(cmd)
+						print('parking finish!!! stop!!')
+						rospy.sleep(5) # 4sec
+				else:
+					if park_ind_wp[1] <= parking_cmd_wp[3]:
+						mode_status = 'end'
+						status_msg.data = mode_status
+						status_Pub.publish(status_msg)
 					else:
 						cmd.drive.speed = 5/3.6
 						cmd.drive.steering_angle = 28*np.pi/180
-						cmd.drive.acceleration = 2
+						cmd.drive.acceleration = 0
 						cmd.drive.jerk = 0
-
-				if park_ind_wp[1] >= parking_finish_wp[park_ind_wp[0]]:
-					cmd.drive.speed = 0
-					cmd.drive.steering_angle = 0
-					cmd.drive.acceleration = 0
-					cmd.drive.jerk = 200  #full brake
-					final_cmd_Pub.publish(cmd)
-					mode_status = 'end' 
-					status_msg.data = mode_status
-					status_Pub.publish(status_msg)
-					print('parking finish!!! stop!!')
-					rospy.sleep(5) # 4sec
-				#else:
-				#	if abs(frenet_angle) > 0.1: #각도 파라미터
-				#		if j<100:  #감속
-				#			cmd.drive.speed = frenet_speed
-				#			cmd.drive.steering_angle = frenet_angle
-				#			cmd.drive.acceleration = frenet_gear
-				#			cmd.drive.jerk = 20
-				#			j=j+1
-				#		else:
-				#			cmd.drive.speed = frenet_speed
-				#			cmd.drive.steering_angle = frenet_angle
-				#			cmd.drive.acceleration = frenet_gear
-				#			cmd.drive.jerk = 0	
-				#	else:	
-				#		cmd.drive.speed = frenet_speed
-				#		cmd.drive.steering_angle = frenet_angle
-				#		cmd.drive.acceleration = frenet_gear
-				#		cmd.drive.jerk = 0
-				#		j = 0
 
 		elif car_mode == 'delivery_A' or car_mode == 'delivery_B':
 			delivery_flag = delivery_decision()

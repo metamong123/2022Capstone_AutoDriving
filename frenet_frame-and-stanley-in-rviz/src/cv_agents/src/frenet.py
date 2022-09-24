@@ -618,23 +618,47 @@ def collision_check(fp, obs_info, mapx, mapy, maps):
 				return True
 
 	return False
+def comparison(area):
+	a = np.sqrt((area['x'][0]-area['x'][1])**2+(area['y'][0]-area['y'][1])**2)
+	b = np.sqrt((area['x'][2]-area['x'][1])**2+(area['y'][2]-area['y'][1])**2)
+	c = np.sqrt((area['x'][2]-area['x'][0])**2+(area['y'][2]-area['y'][0])**2)
+	if a > b > c:
+		x=(area['x'][0]+area['x'][1])/2
+		y=(area['y'][0]+area['y'][1])/2
+		Le=b
+		Wi=c
+	elif a > c > b:
+		x=(area['x'][0]+area['x'][1])/2
+		y=(area['y'][0]+area['y'][1])/2
+		Le=c
+		Wi=b
+	elif b > a > c:
+		x=(area['x'][2]+area['x'][1])/2
+		y=(area['y'][2]+area['y'][1])/2
+		Le=a
+		Wi=c
+	elif b > c > a:
+		x=(area['x'][2]+area['x'][1])/2
+		y=(area['y'][2]+area['y'][1])/2
+		Le=c
+		Wi=a
+	elif c > a > b:
+		x=(area['x'][0]+area['x'][2])/2
+		y=(area['y'][0]+area['y'][2])/2
+		Le=a
+		Wi=b
+	elif c > b > a:
+		x=(area['x'][0]+area['x'][2])/2
+		y=(area['y'][0]+area['y'][2])/2
+		Le=b
+		Wi=a
+	return x,y,Le,Wi
 
 def collision_check_for_parking(area, obs_info):
 	
-	# get obstacle's position (x,y)
-	#obs_xy = get_cartesian( obs[i, 0], obs[i, 1], mapx, mapy, maps)
-	x=(area['x'][0]+area['x'][2])/2
-	y=(area['y'][0]+area['y'][1])/2
-	a = np.sqrt((area['x'][0]-area['x'][1])**2+(area['y'][0]-area['y'][1])**2)
-	b = np.sqrt((area['x'][2]-area['x'][1])**2+(area['y'][2]-area['y'][1])**2)
-	if a > b:
-		Le=a
-		Wi=b
-	else:
-		Wi=a
-		Le=b
-	yaw=use_map.waypoints['horizontal_parking'][0]['yaw'][0]
+	x,y,Le,Wi = comparison(area)
 
+	yaw=use_map.waypoints['horizontal_parking'][0]['yaw'][0]
 	col=0
 	car1=[x, y, yaw, Le, Wi]
 	# car1s = [[f[0], f[1], f[2], 1.600, 1.160] for f in zip(fp.x, fp.y, fp.yaw)]
@@ -647,7 +671,7 @@ def collision_check_for_parking(area, obs_info):
 		if is_collide:
 			col+=1
 
-	if col >= 1:
+	if col >= 2:
 		print("라바콘 " + str(col) + "개")
 		return True
 	

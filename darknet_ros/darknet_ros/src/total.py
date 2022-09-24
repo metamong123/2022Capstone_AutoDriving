@@ -88,17 +88,18 @@ class YoloPub():
 		# append new bounding boxes data
 		for bounding_box in data.bounding_boxes:
 			if bounding_box.probability >= self.threshold:
-				if bounding_box.id in (6, 7, 8, 9, 10): # traffic_light
-					self.id_to_queue_list[-1].append(bounding_box.id - 6)
-				else:
+				xmean=(bounding_box.xmin+bounding_box.xmax)/2
+				if xmean >= 0 and xmean < 640:
+					if bounding_box.id in (6, 7, 8, 9, 10): # traffic_light
+						self.id_to_queue_list[-1].append(bounding_box.id - 6)
+				elif xmean >= 640 and xmean < 1280:
 					width=bounding_box.xmax - bounding_box.xmin
 					height=bounding_box.ymax - bounding_box.ymin
-					if width < 200 and height < 200:
+					if width < 300 and height < 300:
 						if bounding_box.id in (0, 1, 2): # find A number
 							self.id_to_queue_list[0].append(bounding_box.id)
 						else:
-							xmean=(bounding_box.xmin+bounding_box.xmax)/2
-							self.id_to_queue_list[bounding_box.id+3].append(xmean)
+							self.id_to_queue_list[bounding_box.id+3].append(xmean - 640)
         
 		for queue in self.queue_list:
 			if len(queue) == queue_size: # append -1 to an undetected classes
@@ -118,7 +119,7 @@ if __name__ == '__main__':
 		("B1",),
 		("B2",),
 		("B3",),
-        	("green", "left", "red", "straightleft", "yellow",)
+        ("green", "left", "red", "straightleft", "yellow",)
 	)
 	QUEUE_SIZE = 13
 	ACCURACY_THRESHOLD = 0.7

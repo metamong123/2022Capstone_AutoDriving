@@ -1,0 +1,16 @@
+yolo_model:
+
+  config_file:
+    name: delivery_v4.cfg
+  weight_file:
+    name: delivery_v4.weights
+  threshold:
+    value: 0.6
+  detection_classes:
+    names:
+      - A1
+      - A2
+      - A3
+      - B1
+      - B2
+      - B3

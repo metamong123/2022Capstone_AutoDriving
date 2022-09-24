@@ -82,14 +82,10 @@ def waypoint_callback(msg):
 	link_ind = msg.data[0]   #link index
 	global_wp = msg.data[1]  #global waypoint
 
-traffic_light = 0 
-person = 0 
-car = 0
+traffic_light = -1
 def forward_callback(msg):
 	global  traffic_light, person, car
 	traffic_light = msg.data[0]
-	#person = msg.data[1]
-	#car = msg.data[2]
 
 def odometry_callback(msg):
 	global yaw
@@ -190,7 +186,7 @@ def delivery_decision():
 
 	if car_mode == 'delivery_A':
 		#if A_flag == False:
-		if A_x[delivery_ind] > 400:   #parameter
+		if A_x[delivery_ind] > 300:   #parameter
 			delivery_flag = 'end'
 			#A_flag = True
 		else:
@@ -199,7 +195,7 @@ def delivery_decision():
 		#	delivery_flag = 'going'
 	elif car_mode == 'delivery_B':
 		#if B_flag == False:
-		if B_x[delivery_ind] > 400:   #parameter
+		if B_x[delivery_ind] > 300:   #parameter
 			delivery_flag = 'end'
 			#B_flag = True
 		else:

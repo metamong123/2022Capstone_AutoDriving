@@ -77,17 +77,44 @@ class Converter(object):
 
 		self.ma = ma
 
-def msg_pub(i, area):
-	x=(area['x'][0]+area['x'][2])/2
-	y=(area['y'][0]+area['y'][1])/2
+def comparison(area):
 	a = np.sqrt((area['x'][0]-area['x'][1])**2+(area['y'][0]-area['y'][1])**2)
 	b = np.sqrt((area['x'][2]-area['x'][1])**2+(area['y'][2]-area['y'][1])**2)
-	if a > b:
+	c = np.sqrt((area['x'][2]-area['x'][0])**2+(area['y'][2]-area['y'][0])**2)
+	if a > b > c:
+		x=(area['x'][0]+area['x'][1])/2
+		y=(area['y'][0]+area['y'][1])/2
+		Le=b
+		Wi=c
+	elif a > c > b:
+		x=(area['x'][0]+area['x'][1])/2
+		y=(area['y'][0]+area['y'][1])/2
+		Le=c
+		Wi=b
+	elif b > a > c:
+		x=(area['x'][2]+area['x'][1])/2
+		y=(area['y'][2]+area['y'][1])/2
+		Le=a
+		Wi=c
+	elif b > c > a:
+		x=(area['x'][2]+area['x'][1])/2
+		y=(area['y'][2]+area['y'][1])/2
+		Le=c
+		Wi=a
+	elif c > a > b:
+		x=(area['x'][0]+area['x'][2])/2
+		y=(area['y'][0]+area['y'][2])/2
 		Le=a
 		Wi=b
-	else:
-		Wi=a
+	elif c > b > a:
+		x=(area['x'][0]+area['x'][2])/2
+		y=(area['y'][0]+area['y'][2])/2
 		Le=b
+		Wi=a
+	return x,y,Le,Wi
+
+def msg_pub(i, area):
+	x,y,Le,Wi = comparison(area)
 	yaw=use_map.waypoints['horizontal_parking'][0]['yaw'][0]
 	yaw_quat = tf.transformations.quaternion_from_euler(0,0,yaw)
 

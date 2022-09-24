@@ -97,10 +97,12 @@ if __name__ == "__main__":
 	park_pub = rospy.Publisher("/park_ind_wp", Int32MultiArray, queue_size=1)
 	traffic_pub = rospy.Publisher("/traffic_mode", String, queue_size=1)
 	slow_pub = rospy.Publisher("/traffic_slow", String, queue_size=1)
+	park_slow_pub = rospy.Publisher("/park_slow", String, queue_size=1)
 
 	parking_ind = 0
 	park_wp = 0
 	parking = False
+	parking_object = False
 	mode='global'
 	traffic_mode = 'no'
 	dist = 0
@@ -116,6 +118,7 @@ if __name__ == "__main__":
 		park_msg = Int32MultiArray()
 		traffic_msg = String()
 		traffic_slow_msg = String()
+		park_slow_msg = String()
 
         ### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
 		if mode_status == 'end':
@@ -126,13 +129,32 @@ if __name__ == "__main__":
 			pass
 
 
-		if (not use_map.horizontal_parking_map_num==0) and (parking_object == False) and (global_wp <= use_map.horizontal_park_object_finish and global_wp >= use_map.horizontal_park_object_start): # 주차 칸 인식을 위한 flag
+		# if (not use_map.horizontal_parking_map_num==0) and (global_wp <= use_map.horizontal_park_object_finish and global_wp >= use_map.horizontal_park_object_start): # 주차 칸 인식을 위한 flag
+		# 	coll_check=[True, True, True]
+		# 	for park_i in range(use_map.horizontal_parking_map_num):
+		# 		if collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==False:
+		# 			coll_check[park_i]=False
+		# 			#parking_object = True
+		# 	parking_ind = coll_check.index(True)
+		# 	print("parking_choose: "+str(parking_ind))
+		# print(parking_ind)
+
+		if (not use_map.horizontal_parking_map_num==0) and (global_wp <= use_map.horizontal_park_object_finish and global_wp >= use_map.horizontal_park_object_start): # 주차 칸 인식을 위한 flag
 			for park_i in range(use_map.horizontal_parking_map_num):
 				if collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==False:
 					parking_ind=park_i
-					parking_object = True
+					parking = True
 					print("parking_choose: "+str(park_i))
 					break
+
+			if (global_wp <= glo_to_horizontal_park_start[parking_ind]-5) and (collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==True):
+				parking = False
+				for park_i in range(parking_ind, use_map.horizontal_parking_map_num, 1):
+					if collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==False:
+						parking_ind=park_i
+						parking = True
+						print("parking_choose: "+str(park_i))
+						break
 
 		######## mode select based waypoint #######
 		if (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
@@ -140,12 +162,13 @@ if __name__ == "__main__":
 		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
 			mode = 'delivery_B'
 		elif (global_wp <= use_map.glo_to_static_finish and global_wp >= use_map.glo_to_static_start):
-			mode = 'static_object'
-			if (global_wp <= use_map.glo_to_static_finish-5):
+			if (global_wp >= use_map.glo_to_static_finish-5):
 				mode = 'global'
-		elif (not use_map.horizontal_parking_map_num==0) and (global_wp <= use_map.glo_to_horizontal_park_finish) and (global_wp >= use_map.glo_to_horizontal_park_start):  # horizontal mode
+			else:
+				mode = 'static_object'
+		elif (not use_map.horizontal_parking_map_num==0) and (global_wp >= use_map.glo_to_horizontal_park_start[parking_ind]) and (global_wp <= use_map.glo_to_horizontal_park_finish[parking_ind]) and (parking==True): # and (parking == False):
 			mode = 'horizontal_parking'
-			parking = True
+			# parking = True
 		else:
 			pass
 		if mode == 'delivery_A' and (global_wp >= use_map.del_to_glo_start[0]):
@@ -205,8 +228,14 @@ if __name__ == "__main__":
 		traffic_msg.data = traffic_mode
 		##############################################
 
+		if (global_wp <= use_map.horizontal_park_object_finish) and (global_wp >= use_map.horizontal_park_object_start):
+			park_slow_msg.data = 'slow'
+		else:
+			park_slow_msg.data = 'no'
+
 		mode_msg.data = mode
 		mode_pub.publish(mode_msg)
+
 
 		if mode == 'delivery_A':
 			path_msg.x.data = use_map.delivery_path[0][0]  # A path
@@ -240,5 +269,6 @@ if __name__ == "__main__":
 		path_pub.publish(path_msg)
 		traffic_pub.publish(traffic_msg)	
 		slow_pub.publish(traffic_slow_msg)
-    	
+		park_slow_pub.publish(park_slow_msg)
+
 		r.sleep()

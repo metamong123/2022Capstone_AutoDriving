@@ -48,8 +48,8 @@ def euler_from_quaternion(x, y, z, w):
         return yaw_z
 
 # parking 시작하기전에 수정해야할 파라미터 값들 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-parking_finish_wp=[56,56,56,56] # 각 parking index마다의 finish waypoint임
-parking_cmd_wp = [12,26,33,52]
+parking_finish_wp=[53,53,53,53] # 각 parking index마다의 finish waypoint임
+parking_cmd_wp = [12,26,33,50]
 ###########################################################################
 
 car_mode = 'global'
@@ -92,13 +92,10 @@ def waypoint_callback(msg):
 	global_wp = msg.data[1]  #global waypoint
 
 traffic_light = 0 
-person = 0 
-car = 0
 def forward_callback(msg):
-	global  traffic_light, person, car
+	global  traffic_light
 	traffic_light = msg.data[0]
-	#person = msg.data[1]
-	#car = msg.data[2]
+
 
 def odometry_callback(msg):
 	global yaw
@@ -236,7 +233,7 @@ if __name__=='__main__':
 	parking_flag = False
 	mode_status = 'going'
 	parking_start = False
-	park_yaw= use_map.waypoints['horizontal_parking'][1]['yaw'][0] #euler_from_quaternion(-0.030700430274, -0.0343153327703, 0.954455971718, 0.294777542353)
+	park_yaw= euler_from_quaternion(-0.030700430274, -0.0343153327703, 0.954455971718, 0.294777542353)
 	j = 0
 	r=rospy.Rate(20)
 	while not rospy.is_shutdown():
@@ -320,7 +317,7 @@ if __name__=='__main__':
 						rospy.sleep(4) # 4sec
 				
 				else:
-					if park_ind_wp[1] <= parking_cmd_wp[2]:
+					if park_ind_wp[1] <= parking_cmd_wp[3]:
 						mode_status = 'end'
 						status_msg.data = mode_status
 						status_Pub.publish(status_msg)
@@ -329,6 +326,8 @@ if __name__=='__main__':
 						cmd.drive.steering_angle = 28*np.pi/180
 						cmd.drive.acceleration = 0
 						cmd.drive.jerk = 0
+
+					
 
 				#else:
 				#	if abs(frenet_angle) > 0.1: #각도 파라미터
