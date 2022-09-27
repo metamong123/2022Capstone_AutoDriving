@@ -34,8 +34,8 @@ def pi_2_pi(angle):
 
 class State:
 	def __init__(self, x=0.0, y=0.0, yaw=0.0, v=0.0, dt=0.1, WB=1.04):
-		self.x = x
-		self.y = y
+		self.x = x+(WB/2)* np.cos(yaw)
+		self.y = y+(WB/2)* np.sin(yaw)
 		self.yaw = yaw
 		self.v = v
 		self.rear_x = self.x - ((WB / 2) * math.cos(self.yaw))
@@ -388,7 +388,7 @@ if __name__ == "__main__":
 
 		waypoint_msg=my_state_array(link_ind['global'], my_wp['global'])
 		# waypoint_msg=my_state_array(link_ind['global'], my_wp['global'], my_wp['parking'][0], my_wp['parking'][1],my_wp['parking'][2],my_wp['parking'][3],my_wp['parking'][4],my_wp['parking'][5])
-
+		print(state.x, state.y)
 		opt_frenet_pub.publish(opt_frenet_path.ma)
 		cand_frenet_pub.publish(cand_frenet_paths.ma)
 		dir_pub.publish(mode_msg)

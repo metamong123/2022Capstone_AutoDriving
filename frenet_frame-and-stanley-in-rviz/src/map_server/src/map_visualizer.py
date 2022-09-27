@@ -111,6 +111,8 @@ def comparison(area):
 		y=(area['y'][0]+area['y'][2])/2
 		Le=b
 		Wi=a
+	#x=x+0.4152730000205338
+	#y=y-0.6049099999945611
 	return x,y,Le,Wi
 
 def msg_pub(i, area):

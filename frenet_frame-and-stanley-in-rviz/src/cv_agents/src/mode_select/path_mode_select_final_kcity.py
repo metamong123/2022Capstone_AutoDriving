@@ -98,6 +98,7 @@ if __name__ == "__main__":
 	traffic_pub = rospy.Publisher("/traffic_mode", String, queue_size=1)
 	slow_pub = rospy.Publisher("/traffic_slow", String, queue_size=1)
 	park_slow_pub = rospy.Publisher("/park_slow", String, queue_size=1)
+	uturn_pub = rospy.Publisher("/uturn", String, queue_size=1)
 
 	parking_ind = 0
 	park_wp = 0
@@ -119,6 +120,7 @@ if __name__ == "__main__":
 		traffic_msg = String()
 		traffic_slow_msg = String()
 		park_slow_msg = String()
+		uturn_msg = String()
 
         ### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
 		if mode_status == 'end':
@@ -143,19 +145,19 @@ if __name__ == "__main__":
 			for park_i in range(use_map.horizontal_parking_map_num):
 				if collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==False:
 					parking_ind=park_i
-					parking = True
+					#parking = True
 					print("parking_choose: "+str(park_i))
 					break
 
-			if (global_wp <= glo_to_horizontal_park_start[parking_ind]-5) and (collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==True):
-				parking = False
-				for park_i in range(parking_ind, use_map.horizontal_parking_map_num, 1):
-					if collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==False:
-						parking_ind=park_i
-						parking = True
-						print("parking_choose: "+str(park_i))
-						break
-
+			# if (global_wp <= glo_to_horizontal_park_start[parking_ind]-5) and (collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==True):
+			# 	parking = False
+			# 	for park_i in range(parking_ind, use_map.horizontal_parking_map_num, 1):
+			# 		if collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==False:
+			# 			parking_ind=park_i
+			# 			parking = True
+			# 			print("parking_choose: "+str(park_i))
+			# 			break
+		#parking_ind = 2
 		######## mode select based waypoint #######
 		if (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[0] and global_wp >= use_map.glo_to_del_start[0]):  # delivery mode A
 			mode = 'delivery_A'
@@ -166,9 +168,9 @@ if __name__ == "__main__":
 				mode = 'global'
 			else:
 				mode = 'static_object'
-		elif (not use_map.horizontal_parking_map_num==0) and (global_wp >= use_map.glo_to_horizontal_park_start[parking_ind]) and (global_wp <= use_map.glo_to_horizontal_park_finish[parking_ind]) and (parking==True): # and (parking == False):
+		elif (not use_map.horizontal_parking_map_num==0) and (global_wp >= use_map.glo_to_horizontal_park_start[parking_ind]) and (global_wp <= use_map.glo_to_horizontal_park_finish[parking_ind]) and (parking == False): #and (parking==True): # and (parking == False):
 			mode = 'horizontal_parking'
-			# parking = True
+			parking = True
 		else:
 			pass
 		if mode == 'delivery_A' and (global_wp >= use_map.del_to_glo_start[0]):
@@ -200,10 +202,10 @@ if __name__ == "__main__":
 		#else:
 		#	traffic_interval = 3
 		#####################
-		traffic_interval = 7
+		traffic_interval = 4
 
 		for number in range(len(use_map.trafficlight_list)):
-			if (global_wp <= use_map.trafficlight_list[number1]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number1]-traffic_interval-3):
+			if (global_wp <= use_map.trafficlight_list[number]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number]-traffic_interval-5):
 				traffic_slow = 'slow'
 				break
 			else:
@@ -216,7 +218,7 @@ if __name__ == "__main__":
 				break
 			else:
 				for number2 in range(len(use_map.notrafficlight_list)):
-					if (global_wp <= use_map.notrafficlight_list[number2]) and (global_wp >= use_map.notrafficlight_list[number2]-5):
+					if (global_wp <= use_map.notrafficlight_list[number2]) and (global_wp >= use_map.notrafficlight_list[number2]-10):
 						traffic_mode = 'notraffic'
 						super_break = True
 						break
@@ -232,6 +234,11 @@ if __name__ == "__main__":
 			park_slow_msg.data = 'slow'
 		else:
 			park_slow_msg.data = 'no'
+		
+		if (global_wp <= use_map.uturn_list[0]) and (global_wp >= use_map.uturn_list[0]-5):
+			uturn_msg.data = 'slow'
+		else:
+			uturn_msg.data = 'no'
 
 		mode_msg.data = mode
 		mode_pub.publish(mode_msg)
@@ -270,5 +277,6 @@ if __name__ == "__main__":
 		traffic_pub.publish(traffic_msg)	
 		slow_pub.publish(traffic_slow_msg)
 		park_slow_pub.publish(park_slow_msg)
+		uturn_pub.publish(uturn_msg)
 
 		r.sleep()

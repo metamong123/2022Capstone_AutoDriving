@@ -155,7 +155,7 @@ if __name__ == "__main__":
 		#else:
 		#	traffic_interval = 3
 		######################
-		traffic_interval = 7
+		traffic_interval = 5
 
 		for number in range(len(use_map.trafficlight_list)):
 			if (global_wp <= use_map.trafficlight_list[number]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number]-traffic_interval-3):
@@ -171,7 +171,7 @@ if __name__ == "__main__":
 				break
 			else:
 				for number2 in range(len(use_map.notrafficlight_list)):
-					if (global_wp <= use_map.notrafficlight_list[number2]) and (global_wp >= use_map.notrafficlight_list[number2]-2):
+					if (global_wp <= use_map.notrafficlight_list[number2]) and (global_wp >= use_map.notrafficlight_list[number2]-3):
 						traffic_mode = 'notraffic'
 						super_break = True
 						break
@@ -187,7 +187,7 @@ if __name__ == "__main__":
 		mode_pub.publish(mode_msg)
 		
 		if mode == 'diagonal_parking':
-			parking_ind=0
+			parking_ind=1
 
 			fp=MakingPath()
 			fp.x=use_map.diagonal_parking_path[parking_ind][0]

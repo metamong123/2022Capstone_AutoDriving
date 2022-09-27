@@ -124,15 +124,15 @@ if __name__ == "__main__":
 	WB = 1.04
 	# stanley = Stanley(k, speed_gain, w_yaw, w_cte,  cte_thresh = 0.5, p_gain = 1, i_gain = 1, d_gain = 1, WB = 1.04)
 	control_gain={'global':1,'diagonal_parking':1,'horizontal_parking':2,'delivery':1,'dynamic_object':1,'static_object':1}
-	cte_speed_gain={'global':{'straight':0, 'curve':5, 'uturn': 5},'diagonal_parking':{'straight':5},'horizontal_parking':{'straight':3},'delivery':{'straight':5,'dynamic_object':{'straight':0}},'static_object':{'straight':5}}
+	cte_speed_gain={'global':{'straight':0, 'curve':0, 'uturn': 5},'diagonal_parking':{'straight':5},'horizontal_parking':{'straight':3},'delivery':{'straight':5},'dynamic_object':{'straight':0},'static_object':{'straight':5}}
 	yaw_weight=1
 	cte_weight=1
 	cte_thresh_hold=0
 	yaw_d_gain={'global':0,'diagonal_parking':0,'horizontal_parking':0,'delivery':0,'dynamic_object':0,'static_object':0}
 	
 	dir = 'straight'
-	stanley_imu = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain[mode], WB = 1.04)
-	stanley_imu_back = Stanley_back(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain[mode], WB = 1.04)
+	stanley_imu = Stanley(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain[mode], WB = 1.06)
+	stanley_imu_back = Stanley_back(k=control_gain[mode], speed_gain=cte_speed_gain[mode][dir], w_yaw=yaw_weight, w_cte=cte_weight,  cte_thresh = cte_thresh_hold, yaw_dgain = yaw_d_gain[mode], WB = 1.06)
 	
 	f_imu = open("/home/mds/stanley/"+"imu_"+time.strftime('%Y%m%d_%H:%M')+"_k"+str(control_gain[mode])+"_sg"+str(cte_speed_gain[mode])+"_wy"+str(yaw_weight)+"_wc"+str(cte_weight)+"_thresh"+str(cte_thresh_hold)+"_dgain"+str(yaw_d_gain[mode])+".csv", "w")
 	f_imu.write('time' + ',' + 'x' + ',' + 'y' + ',' + 'map_yaw' + ',' + 'yaw' + ',' + 'yaw_term(degree)' + ',' + 'cte(cm)' + ',' + 'steering(degree)' + '\n')
