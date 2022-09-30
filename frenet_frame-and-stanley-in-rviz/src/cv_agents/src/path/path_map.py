@@ -104,6 +104,8 @@ class Path:
 		self.diagonal_parking_map_num=0 # 주차 구역 수
 		self.horizontal_park_object_start=0
 		self.horizontal_park_object_finish=0
+		self.diagonal_park_object_start=0
+		self.diagonal_park_object_finish=0
 		self.delivery_map_num=0 # 배달 구역 수
 		self.link_len={'global':[],'horizontal_parking':[],'diagonal_parking':[],'delivery':[]}
 		self.link_dir={'straight':[],'left':[],'right':[]}
@@ -380,23 +382,24 @@ class Path:
 	
 	def set_lanewidth(self):
 		for i in self.lane_width.keys(): #left, light, none
+			car_length=1.2
 			if i == 'left':
 				for j in self.lane_width[i]: # j=lane_width
-					LANE_WIDTH = j
+					LANE_WIDTH = j-car_length
 					for k in self.lane_width[i][j]: # k=left_width, left_width+lanewidth/2 ~ lanewidth/2
-						width = k
+						width = k-car_length
 						for l in self.lane_width[i][j][k]: # l = link_index
 							self.DF_SET[l]=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, width])
 			elif i =='right':
 				for j in self.lane_width[i]: # j=lane_width
-					LANE_WIDTH = j
+					LANE_WIDTH = j-car_length
 					for k in self.lane_width[i][j]: # k=left_width, left_width+lanewidth/2 ~ lanewidth/2
-						width = k
+						width = k-car_length
 						for l in self.lane_width[i][j][k]: # l = link_index
 							self.DF_SET[l]=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2, -width])
 			elif i =='none':
 				for j in self.lane_width[i]: # j=lane_width
-					LANE_WIDTH = j
+					LANE_WIDTH = j-car_length
 					for l in self.lane_width[i][j]: # l = link_index
 						self.DF_SET[l]=np.array([0, LANE_WIDTH/2, -LANE_WIDTH/2])
 	def set_terminal_time(self):
@@ -688,7 +691,7 @@ def hightech_parking():
 	hightech_parking.horizontal_park_to_glo=[]
 	hightech_parking.horizontal_park_object_start=14
 	hightech_parking.horizontal_park_object_finish=41
-	hightech_parking.target_speed={'global':{'straight':7/3.6, 'curve':7/3.6,'uturn':5/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':5/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':5/3.6}}
+	hightech_parking.target_speed={'global':{'straight':12/3.6, 'curve':7/3.6,'uturn':5/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':5/3.6},'delivery':{'straight':10/3.6},'dynamic_object':{'straight':10/3.6},'static_object':{'straight':5/3.6}}
 	hightech_parking.lane_width={'none':{2.0:[i for i in range(6)]}}
 	hightech_parking.set_lanewidth()
 	hightech_parking.set_other_link()
@@ -697,10 +700,7 @@ def hightech_parking():
 	return hightech_parking
 
 use_map=kcity()
-start_index=14
-
-# use_map=kcity()
-# start_index=12
+start_index=20
 
 if start_index==0:
     obj_msg=Object(x=use_map.waypoints['global']['x'][:use_map.link_len['global'][start_index]][0],y=use_map.waypoints['global']['y'][:use_map.link_len['global'][start_index]][0],yaw=use_map.waypoints['global']['yaw'][:use_map.link_len['global'][start_index]][0],v=0,L=1.600,W=1.04)

@@ -144,7 +144,7 @@ if __name__ == '__main__':
     rospy.Subscriber("/objects/car_1", Object, callback2)
     rate = rospy.Rate(20)
 
-    port = str(rospy.get_param("~robot_port","/dev/ttyUSB0"))	
+    port = str(rospy.get_param("~robot_port","/dev/ttyUSB1"))	
     ser = serial.serial_for_url(port, baudrate=115200, timeout=1)
     prev_mode = 'global'
     j=0

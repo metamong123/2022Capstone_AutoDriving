@@ -7,7 +7,7 @@
  	 <param name="ntrip_user" value="jaebum98@naver.com"/>
  	 <param name="ntrip_pass" value="gnss"/>
  	 <param name="ntrip_stream" value="SOUL-RTCM31"/>
- 	 <param name="nmea_gga" value="$GPGGA,080713.492,3737.912,N,12704.556,E,1,12,1.0,0.0,M,0.0,M,,*60
+ 	 <param name="nmea_gga" value="$GPGGA,111955.821,3737.913,N,12704.601,E,1,12,1.0,0.0,M,0.0,M,,*61
 "/>
   </node>
 </launch>

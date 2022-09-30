@@ -285,6 +285,7 @@ if __name__ == "__main__":
 		df_dd = 0
 		
 		path, opt_ind, col = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints['global']['x'], use_map.waypoints['global']['y'],use_map.waypoints['global']['s'], opt_d, use_map.target_speed[mode][dir], use_map.DF_SET[link_ind['global']], dir)
+		print(use_map.DF_SET[link_ind['global']])
 		col_msg.data=col
 		
 		if opt_ind == -1:
@@ -388,7 +389,6 @@ if __name__ == "__main__":
 
 		waypoint_msg=my_state_array(link_ind['global'], my_wp['global'])
 		# waypoint_msg=my_state_array(link_ind['global'], my_wp['global'], my_wp['parking'][0], my_wp['parking'][1],my_wp['parking'][2],my_wp['parking'][3],my_wp['parking'][4],my_wp['parking'][5])
-		print(state.x, state.y)
 		opt_frenet_pub.publish(opt_frenet_path.ma)
 		cand_frenet_pub.publish(cand_frenet_paths.ma)
 		dir_pub.publish(mode_msg)

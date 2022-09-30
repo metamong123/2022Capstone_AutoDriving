@@ -55,7 +55,7 @@ WB = 1.04
 MIN_T = 2.0 # minimum terminal time [s]
 MAX_T = 4.0 # maximum terminal time [s], default = 2
 DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
-DT = 0.1 # timestep for update
+DT = 0.2 # timestep for update
 
 
 # MIN_T = 8.0 # minimum terminal time [s]
@@ -454,58 +454,7 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 
 	return frenet_paths
 
-def calc_frenet_paths__(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET, dir):
-# def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, dir):
-	frenet_paths = []
-
-	# generate path to each offset goal
-	for df in DF_SET:
-
-		# Lateral motion planning
-		# for T in np.arange(MIN_T[dir], MAX_T[dir]+DT_T[dir], DT_T[dir]):
-		for T in np.arange(MIN_T, MAX_T+DT_T, DT_T):
-			fp = FrenetPath()
-			lat_traj = QuinticPolynomial(di, di_d, di_dd, df, df_d, df_dd, T)
-
-			fp.t = [t for t in np.arange(0.0, T, DT)] ## delta time
-			fp.d = [lat_traj.calc_pos(t) for t in fp.t]
-			fp.d_d = [lat_traj.calc_vel(t) for t in fp.t]
-			fp.d_dd = [lat_traj.calc_acc(t) for t in fp.t]
-			fp.d_ddd = [lat_traj.calc_jerk(t) for t in fp.t]
-
-			# Longitudinal motion planning (velocity keeping)
-			for tv in np.arange(target_speed - D_T_S * N_S_SAMPLE, target_speed + D_T_S * N_S_SAMPLE, D_T_S):
-				tfp = deepcopy(fp)
-				lon_traj = QuarticPolynomial(si, si_d, si_dd, tv, sf_dd, T)
-
-				tfp.s = [lon_traj.calc_pos(t) for t in fp.t]
-				tfp.s_d = [lon_traj.calc_vel(t) for t in fp.t]
-				tfp.s_dd = [lon_traj.calc_acc(t) for t in fp.t]
-				tfp.s_ddd = [lon_traj.calc_jerk(t) for t in fp.t]
-
-				J_lat = sum(np.power(tfp.d_ddd, 2))  # lateral jerk
-				J_lon = sum(np.power(tfp.s_ddd, 2))  # longitudinal jerk
-
-				# cost for consistency
-				d_diff = (tfp.d[-1] - opt_d) ** 2
-				# cost for target speed
-				v_diff = (target_speed - tfp.s_d[-1]) ** 2
-				#cost for global path tracking
-				d_track = (tfp.d[-1]) ** 2 
-				# print("cost for global path tracking",d_track)
-				# lateral cost
-				tfp.c_lat = K_J * J_lat + K_T * T + K_D * d_diff + K_GD * d_track 
-				# logitudinal cost
-				tfp.c_lon = K_J * J_lon + K_T * T + K_V * v_diff
-
-				# total cost combined
-				tfp.c_tot = K_LAT * tfp.c_lat + K_LON * tfp.c_lon
-
-				frenet_paths.append(tfp)
-
-	return frenet_paths
-
-def calc_frenet_paths___(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET, dir):
+def calc_frenet_paths_(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET, dir):
 # def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, dir):
 	frenet_paths = []
 
@@ -617,6 +566,7 @@ def collision_check(fp, obs_info, mapx, mapy, maps):
 				return True
 
 	return False
+
 def comparison(area):
 	a = np.sqrt((area['x'][0]-area['x'][1])**2+(area['y'][0]-area['y'][1])**2)
 	b = np.sqrt((area['x'][2]-area['x'][1])**2+(area['y'][2]-area['y'][1])**2)
@@ -673,9 +623,9 @@ def collision_check_for_parking(area, obs_info):
 	if col >= 2:
 		print("라바콘 " + str(col) + "개")
 		return True
-	
-	print("라바콘 " + str(col) + "개")
-	return False
+	else:
+		print("라바콘 " + str(col) + "개")
+		return False
 
 
 def check_path(fplist, obs_info, mapx, mapy, maps):
