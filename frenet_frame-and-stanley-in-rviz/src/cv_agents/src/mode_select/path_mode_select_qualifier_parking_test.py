@@ -87,11 +87,9 @@ if __name__ == "__main__":
 	rospy.Subscriber("/objects/car_1", Object, state_callback, queue_size=1)
 	mode_pub = rospy.Publisher("/mode_selector", String, queue_size=10)
 	path_pub = rospy.Publisher("/final_path", PathArray, queue_size=1)
-	park_slow_pub = rospy.Publisher("/park_slow", String, queue_size=1)
 	park_pub = rospy.Publisher("/park_ind_wp", Int32MultiArray, queue_size=1)
 
 	parking_ind = 0
-	parking = False
 	park_wp = 0
 	mode='global'
 	dist = 0
@@ -103,7 +101,6 @@ if __name__ == "__main__":
 		path_msg = PathArray()
 		mode_msg = String()
 		park_msg = Int32MultiArray()
-		park_slow_msg = String()
 
         ### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
 		if mode_status == 'end':
@@ -119,32 +116,21 @@ if __name__ == "__main__":
 					print(str(park_i)+"번 주차 공간 인식 중")
 					if (collision_check_for_parking(use_map.diagonal_parking_object[park_i],obs_info)==False):
 						parking_ind=park_i
-						parking = True
 						print("parking_choose: "+str(park_i))
 						flag=1
 						break
 			else:
-				''' use_map.glo_to_diagonal_park_finish[parking_ind]는 
-				주차 가능으로 인식한 구역에 장애물이 없는지 
-				마지막까지 확인하기 위한 waypoint로
-				테스트 하며 조절해야할 것 같습니다 '''
-				if (global_wp <= use_map.glo_to_diagonal_park_finish[parking_ind]) and (collision_check_for_parking(use_map.diagonal_parking_object[park_i],obs_info)==True):
+				if (global_wp <= use_map.diagonal_park_check[parking_ind]) and (collision_check_for_parking(use_map.diagonal_parking_object[park_i],obs_info)==True):
 					parking = False
 					for park_i in range(parking_ind, use_map.diagonal_parking_map_num, 1):
 						print(str(park_i)+"번 주차 공간 인식 중")
 						if collision_check_for_parking(use_map.diagonal_parking_object[park_i],obs_info)==False:
 							parking_ind=park_i
-							parking = True
 							print("parking_choose: "+str(park_i))
 							break
-		
-		if (global_wp <= use_map.diagonal_park_object_finish) and (global_wp >= use_map.diagonal_park_object_start):
-			park_slow_msg.data = 'slow'
-		else:
-			park_slow_msg.data = 'no'
 
 		######## mode select based waypoint #######
-		if (not use_map.diagonal_parking_map_num==0) and (global_wp <= use_map.glo_to_diagonal_park_finish[parking_ind] and global_wp >=use_map.glo_to_diagonal_park_start[parking_ind])and (parking==True):#and (parking == False):
+		if (not use_map.diagonal_parking_map_num==0) and (global_wp <= use_map.glo_to_diagonal_park_finish and global_wp >=use_map.glo_to_diagonal_park_start):#and (parking == False):
 			mode = 'diagonal_parking'
 		elif (global_wp <= use_map.glo_to_dynamic_finish and global_wp >= use_map.glo_to_dynamic_start):  # dynamic_object
 			mode = 'dynamic_object'
@@ -185,5 +171,4 @@ if __name__ == "__main__":
 
 		park_pub.publish(park_msg)
 		path_pub.publish(path_msg)
-		park_slow_pub.publish(park_slow_msg)
 		r.sleep()

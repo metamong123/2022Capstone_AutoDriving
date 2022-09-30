@@ -136,6 +136,7 @@ class Path:
 		self.horizontal_park_to_glo=[] # parking->global 변경 waypoint 지점
 		self.diagonal_parking_stop=[] # 주차 구역마다 주차 정지 waypoint 설정
 		self.diagonal_park_to_glo=[] # parking->global 변경 waypoint 지점
+		self.diagonal_park_check=[] ## 사선주차 curve 들어가기 전 waypoint
 		self.lane_width={} # example lane_width={'left':3.3(우리 차선 width):2.2(왼쪽으로 갈 수 있는 width):0, 'right':3.3:2.2:1, 'none':3.3:2}        {'3.3':[0],'3.8':[1],'4.1':[2], '6.6':[3]...}
 		self.DF_SET={}
 
@@ -578,13 +579,13 @@ def qualifier():
 	qualifier.glo_to_dynamic_start=667
 	qualifier.glo_to_dynamic_finish=742
 
-	'''주차공간 인식 test를 위해 list로 수정해주세요'''
 	qualifier.glo_to_diagonal_park_start=85 # 바꿀예정 90
 	qualifier.glo_to_diagonal_park_finish=93
 	qualifier.diagonal_parking_stop=[]
 	qualifier.diagonal_park_to_glo=[] 
-	qualifier.diagonal_park_object_start=80
-	qualifier.diagonal_park_object_finish=0 # 100
+	qualifier.diagonal_park_object_start=0 # 70?
+	qualifier.diagonal_park_object_finish=0 # 
+	qualifier.diagonal_park_check=[] ## 사선주차 curve 들어가기 전 waypoint
 	
 	qualifier.target_speed={'global':{'straight':13/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':12/3.6},'static_object':{'straight':5/3.6}}
 	qualifier.lane_width={'left':{3.3:{3.3:[5]}}, 'right':{}, 'none':{3.3:[4,6,7,8], 3.8:[0,1,2,3,9,10]}}
