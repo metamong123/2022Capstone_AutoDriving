@@ -564,6 +564,11 @@ def qualifier():
 		qualifier.diagonal_parking_route.append(park_route)
 		qualifier.set_other_mode(mode='diagonal_parking', pc_route=park_route,link=2*i)
 
+	for i in range(qualifier.diagonal_parking_map_num):
+		obj_route=path_map+"/src/qualifier/parking_cone_"+str(i)+".pkl"
+		qualifier.diagonal_parking_object_route.append(obj_route)
+		qualifier.set_parking_area(pc_route=obj_route, link=i)
+
 	qualifier.notrafficlight_list=[476,749]
 	qualifier.trafficlight_list=[203]
 
@@ -573,10 +578,13 @@ def qualifier():
 	qualifier.glo_to_dynamic_start=667
 	qualifier.glo_to_dynamic_finish=742
 
+	'''주차공간 인식 test를 위해 list로 수정해주세요'''
 	qualifier.glo_to_diagonal_park_start=85 # 바꿀예정 90
 	qualifier.glo_to_diagonal_park_finish=93
 	qualifier.diagonal_parking_stop=[]
 	qualifier.diagonal_park_to_glo=[] 
+	qualifier.diagonal_park_object_start=80
+	qualifier.diagonal_park_object_finish=0 # 100
 	
 	qualifier.target_speed={'global':{'straight':13/3.6, 'curve':12/3.6},'diagonal_parking':{'straight':7/3.6},'horizontal_parking':{'straight':7/3.6},'delivery':{'straight':5/3.6},'dynamic_object':{'straight':12/3.6},'static_object':{'straight':5/3.6}}
 	qualifier.lane_width={'left':{3.3:{3.3:[5]}}, 'right':{}, 'none':{3.3:[4,6,7,8], 3.8:[0,1,2,3,9,10]}}

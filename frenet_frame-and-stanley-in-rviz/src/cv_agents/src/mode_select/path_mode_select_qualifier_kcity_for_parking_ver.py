@@ -134,7 +134,11 @@ if __name__ == "__main__":
 						flag=1
 						break
 			else:
-				if (global_wp <= use_map.glo_to_diagonal_park_start[parking_ind]-5) and (collision_check_for_parking(use_map.diagonal_parking_object[park_i],obs_info)==True):
+				''' use_map.glo_to_diagonal_park_finish[parking_ind]는 
+				주차 가능으로 인식한 구역에 장애물이 없는지 
+				마지막까지 확인하기 위한 waypoint로
+				테스트 하며 조절해야할 것 같습니다 '''
+				if (global_wp <= glo_to_diagonal_park_finish[parking_ind]) and (collision_check_for_parking(use_map.diagonal_parking_object[park_i],obs_info)==True):
 					parking = False
 					for park_i in range(parking_ind, use_map.diagonal_parking_map_num, 1):
 						print(str(park_i)+"번 주차 공간 인식 중")
