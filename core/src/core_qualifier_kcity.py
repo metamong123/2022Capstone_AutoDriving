@@ -189,7 +189,7 @@ def traffic_decision():
 			traffic_brake = 40
 			print("traffic mode : none")
 		else :
-			traffic_speed = 2 * frenet_speed / 3
+			traffic_speed = frenet_speed
 			traffic_angle = frenet_angle
 			traffic_gear = 0
 			traffic_brake = 20
@@ -209,7 +209,7 @@ def traffic_decision():
 			traffic_brake = 40
 			print("traffic mode : none")
 		else :
-			traffic_speed = 2 * frenet_speed / 3
+			traffic_speed = frenet_speed
 			traffic_angle = frenet_angle
 			traffic_gear = 0
 			traffic_brake = 20
@@ -228,7 +228,7 @@ def traffic_decision():
 			traffic_brake = 40
 			print("traffic mode : none")
 		else :
-			traffic_speed = 2 * frenet_speed / 3
+			traffic_speed = frenet_speed
 			traffic_angle = frenet_angle
 			traffic_gear = 0
 			traffic_brake = 20
@@ -253,7 +253,7 @@ if __name__=='__main__':
 	rospy.Subscriber("/objects/car_1", Object, callback2)
 	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
 	
-	r = rospy.Rate(20)
+	r = rospy.Rate(10)
 	j = 0
 	mode_status = 'going'
 	notraffic_status =  False
@@ -279,8 +279,8 @@ if __name__=='__main__':
 					print('no traffic mode')
 					rospy.sleep(4) # 4sec
 				elif notraffic_status == True:
-					if abs(frenet_angle) > 0.1: #각도 파라미터
-						if j<100:  #감속
+					if abs(frenet_angle) > 0.05: #각도 파라미터
+						if j<15:  #감속
 							cmd.drive.speed = frenet_speed/2
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
@@ -304,8 +304,8 @@ if __name__=='__main__':
 					cmd.drive.acceleration = frenet_gear
 					cmd.drive.jerk = 40
 				else:
-					if abs(frenet_angle) > 0.1: #각도 파라미터
-						if j<100:  #감속
+					if abs(frenet_angle) > 0.05: #각도 파라미터
+						if j<15:  #감속
 							cmd.drive.speed = frenet_speed/2
 							cmd.drive.steering_angle = frenet_angle
 							cmd.drive.acceleration = frenet_gear
@@ -356,8 +356,8 @@ if __name__=='__main__':
 
 		elif car_mode == 'dynamic_object':
 			if col == 0:
-				if abs(frenet_angle) > 0.1: #각도 파라미터
-					if j<100:  #감속
+				if abs(frenet_angle) > 0.05: #각도 파라미터
+					if j<15:  #감속
 						cmd.drive.speed = frenet_speed
 						cmd.drive.steering_angle = frenet_angle
 						cmd.drive.acceleration = frenet_gear
@@ -389,5 +389,4 @@ if __name__=='__main__':
 		status_msg.data = mode_status
 		status_Pub.publish(status_msg)
 		final_cmd_Pub.publish(cmd)
-
 		r.sleep()

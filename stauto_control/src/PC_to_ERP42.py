@@ -142,9 +142,9 @@ if __name__ == '__main__':
     rospy.Subscriber("/ackermann_cmd",AckermannDriveStamped,acker_callback)
     rospy.Subscriber('/mode_selector',String, mode_callback)
     rospy.Subscriber("/objects/car_1", Object, callback2)
-    rate = rospy.Rate(20)
+    rate = rospy.Rate(10)
 
-    port = str(rospy.get_param("~robot_port","/dev/ttyUSB1"))	
+    port = str(rospy.get_param("~robot_port","/dev/ttyUSB0"))	
     ser = serial.serial_for_url(port, baudrate=115200, timeout=1)
     prev_mode = 'global'
     j=0

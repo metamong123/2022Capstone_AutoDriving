@@ -102,7 +102,7 @@ if __name__ == "__main__":
 	traffic_interval = 0
 	target_speed = 0
 	traffic_slow = 'no'
-	r = rospy.Rate(20)
+	r = rospy.Rate(10)
 	while not rospy.is_shutdown():
 
 		path_msg = PathArray()
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 				mode = 'global'
 		elif (global_wp <= use_map.glo_to_static_finish and global_wp >= use_map.glo_to_static_start):
 			mode = 'static_object'
-			if (global_wp >= use_map.glo_to_static_finish-4):
+			if (global_wp >= use_map.glo_to_static_finish-3):
 				mode = 'global'
 		else:
 			pass
@@ -155,10 +155,10 @@ if __name__ == "__main__":
 		#else:
 		#	traffic_interval = 3
 		######################
-		traffic_interval = 5
+		traffic_interval = 4
 
 		for number in range(len(use_map.trafficlight_list)):
-			if (global_wp <= use_map.trafficlight_list[number]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number]-traffic_interval-3):
+			if (global_wp <= use_map.trafficlight_list[number]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number]-traffic_interval-5):
 				traffic_slow = 'slow'
 				break
 			else:

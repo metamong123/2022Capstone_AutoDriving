@@ -111,7 +111,7 @@ if __name__ == "__main__":
 	target_speed = 0
 	traffic_slow = 'no'
 	flag=0
-	r = rospy.Rate(20)
+	r = rospy.Rate(10)
 	while not rospy.is_shutdown():
 
 		path_msg = PathArray()
@@ -169,7 +169,7 @@ if __name__ == "__main__":
 		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
 			mode = 'delivery_B'
 		elif (global_wp <= use_map.glo_to_static_finish and global_wp >= use_map.glo_to_static_start):
-			if (global_wp >= use_map.glo_to_static_finish-5):
+			if (global_wp >= use_map.glo_to_static_finish-3):
 				mode = 'global'
 			else:
 				mode = 'static_object'

@@ -99,7 +99,7 @@ def waypoint_callback(msg):
 	link_ind = msg.data[0]   #link index
 	global_wp = msg.data[1]  #global waypoint
 
-traffic_light = 0 
+traffic_light = -1
 def forward_callback(msg):
 	global  traffic_light
 	traffic_light = msg.data[0]
@@ -132,11 +132,6 @@ def park_slow_callback(msg):
 	global park_slow
 	park_slow = msg.data
 
-steer = 0
-def steer_callback(msg):
-	global steer
-	steer = msg.data
-
 uturn = 'no'
 def uturn_callback(msg):
 	global uturn
@@ -159,7 +154,7 @@ def traffic_decision():
 			traffic_brake = 40
 			print("traffic mode : none")
 		else :
-			traffic_speed = frenet_speed/2
+			traffic_speed = frenet_speed
 			traffic_angle = frenet_angle
 			traffic_gear = 0
 			traffic_brake = 20
@@ -179,7 +174,7 @@ def traffic_decision():
 			traffic_brake = 40
 			print("traffic mode : none")
 		else :
-			traffic_speed = frenet_speed/2
+			traffic_speed = frenet_speed
 			traffic_angle = frenet_angle
 			traffic_gear = 0
 			traffic_brake = 20
@@ -198,7 +193,7 @@ def traffic_decision():
 			traffic_brake = 40
 			print("traffic mode : none")
 		else :
-			traffic_speed = frenet_speed/2
+			traffic_speed = frenet_speed
 			traffic_angle = frenet_angle
 			traffic_gear = 0
 			traffic_brake = 20
@@ -284,7 +279,7 @@ if __name__=='__main__':
 							cmd.drive.speed = frenet_speed/2#7/3.6
 							cmd.drive.steering_angle = frenet_angle#steer
 							cmd.drive.acceleration = frenet_gear
-							cmd.drive.jerk = 70#int(5 * velocity) if velocity >= 5 else 0
+							cmd.drive.jerk = int(5 * velocity) if velocity >= 5 else 0
 							j=j+1
 						else:
 							cmd.drive.speed = frenet_speed#15/3.6
@@ -311,7 +306,7 @@ if __name__=='__main__':
 									cmd.drive.speed = frenet_speed/2#7/3.6
 									cmd.drive.steering_angle = frenet_angle#steer
 									cmd.drive.acceleration = frenet_gear
-									cmd.drive.jerk = 70#int(5.5 * velocity) if velocity >= 5 else 0
+									cmd.drive.jerk = int(5.5 * velocity) if velocity >= 5 else 0
 									j=j+1
 								else:
 									cmd.drive.speed = frenet_speed#15/3.6
@@ -336,7 +331,7 @@ if __name__=='__main__':
 									cmd.drive.speed = frenet_speed/2#7/3.6
 									cmd.drive.steering_angle = frenet_angle#steer
 									cmd.drive.acceleration = frenet_gear
-									cmd.drive.jerk = 70#int(5 * velocity) if velocity >= 5 else 0
+									cmd.drive.jerk = int(5 * velocity) if velocity >= 5 else 0
 									j=j+1
 								else:
 									cmd.drive.speed = frenet_speed#15/3.6
@@ -350,11 +345,11 @@ if __name__=='__main__':
 								cmd.drive.jerk = 0
 								j = 0
 						else:
-							if i < 50:
+							if i < 30:
 								cmd.drive.speed = 7/3.6
 								cmd.drive.steering_angle = frenet_angle#steer
 								cmd.drive.acceleration = frenet_gear
-								cmd.drive.jerk = 70#int(5.5 * velocity) if velocity >= 5 else 0
+								cmd.drive.jerk = int(5.5 * velocity) if velocity >= 5 else 0
 								i = i+1
 							else:
 								if abs(frenet_angle) > 0.05:
@@ -362,7 +357,7 @@ if __name__=='__main__':
 										cmd.drive.speed = 7/3.6
 										cmd.drive.steering_angle = frenet_angle#steer
 										cmd.drive.acceleration = frenet_gear
-										cmd.drive.jerk = 50#int(5.5 * velocity) if velocity >= 5 else 0
+										cmd.drive.jerk = int(5.5 * velocity) if velocity >= 5 else 0
 										j=j+1
 									else:
 										cmd.drive.speed = 7/3.6
@@ -432,6 +427,7 @@ if __name__=='__main__':
 						mode_status = 'end'
 						status_msg.data = mode_status
 						status_Pub.publish(status_msg)
+						rospy.sleep(0.5)
 					else:
 						cmd.drive.speed = 5/3.6
 						cmd.drive.steering_angle = 28*np.pi/180

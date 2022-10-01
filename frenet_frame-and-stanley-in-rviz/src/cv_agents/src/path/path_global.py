@@ -232,13 +232,13 @@ if __name__ == "__main__":
 	yawi = state.yaw - road_yaw
 	si = s
 	si_d = state.v * math.cos(yawi)
-	si_dd = ai * math.cos(yawi)
+	si_dd = ai * math.cos(yawi) #
 	sf_d = use_map.target_speed[mode][dir]
 	sf_dd = 0
 
 	di = d
 	di_d = state.v * math.sin(yawi)
-	di_dd = ai * math.sin(yawi)
+	di_dd = ai * math.sin(yawi) #
 	df_d = 0
 	df_dd = 0
 	
@@ -274,13 +274,13 @@ if __name__ == "__main__":
 		yawi = state.yaw - road_yaw
 		si = s
 		si_d = state.v * math.cos(yawi)
-		si_dd = ai * math.cos(yawi)
+		si_dd = ai * math.cos(yawi) #
 		sf_d = use_map.target_speed[mode][dir]
 		sf_dd = 0
 	
 		di = d
 		di_d = state.v * math.sin(yawi)
-		di_dd = ai * math.sin(yawi)
+		di_dd = ai * math.sin(yawi) #
 		df_d = 0
 		df_dd = 0
 		

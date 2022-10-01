@@ -95,6 +95,11 @@ def odometry_callback(msg):
 	w = msg.pose.pose.orientation.w
 	yaw = euler_from_quaternion(x, y, z, w)
 
+uturn = 'no'
+def uturn_callback(msg):
+	global uturn
+	uturn = msg.data
+
 park_slow = 'no'
 def park_slow_callback(msg):
 	global park_slow
@@ -191,7 +196,7 @@ def delivery_decision():
 
 	if car_mode == 'delivery_A':
 		#if A_flag == False:
-		if A_x[delivery_ind] > 300:   #parameter
+		if A_x[delivery_ind] > 270:   #parameter
 			delivery_flag = 'end'
 			#A_flag = True
 		else:
@@ -200,7 +205,7 @@ def delivery_decision():
 		#	delivery_flag = 'going'
 	elif car_mode == 'delivery_B':
 		#if B_flag == False:
-		if B_x[delivery_ind] > 300:   #parameter
+		if B_x[delivery_ind] > 270:   #parameter
 			delivery_flag = 'end'
 			#B_flag = True
 		else:
@@ -224,6 +229,7 @@ if __name__=='__main__':
 	rospy.Subscriber("/park_ind_wp", Int32MultiArray, parking_callback)
 	rospy.Subscriber("/objects/car_1", Object, callback2)
 	rospy.Subscriber("/park_slow", String, park_slow_callback)
+	rospy.Subscriber("/uturn", String, uturn_callback)
 	final_cmd_Pub = rospy.Publisher('/ackermann_cmd',AckermannDriveStamped,queue_size=1)
 
 	
@@ -233,7 +239,7 @@ if __name__=='__main__':
 	j = 0
 	i = 0
 	park_yaw= euler_from_quaternion(-0.030700430274, -0.0343153327703, 0.954455971718, 0.294777542353)
-	r=rospy.Rate(20)
+	r=rospy.Rate(10)
 	while not rospy.is_shutdown():
 		status_Pub = rospy.Publisher('/mission_status', String, queue_size=10)
 		status_msg = String()
@@ -300,7 +306,7 @@ if __name__=='__main__':
 				cmd.drive.jerk = 200  #full brake
 				final_cmd_Pub.publish(cmd)
 				print('parking start')
-				rospy.sleep(3)
+				rospy.sleep(2)
 				parking_start = True
 			else:
 				if parking_flag == False:

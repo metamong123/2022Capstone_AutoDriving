@@ -88,11 +88,13 @@ if __name__ == "__main__":
 	path_pub = rospy.Publisher("/final_path", PathArray, queue_size=1)
 	park_slow_pub = rospy.Publisher("/park_slow", String, queue_size=1)
 	park_pub = rospy.Publisher("/park_ind_wp", Int32MultiArray, queue_size=1)
+	uturn_pub = rospy.Publisher("/uturn", String, queue_size=1)
 
 	parking_ind = 0
 	parking = False
+	parking_object = False
 	park_wp = 0
-	r = rospy.Rate(20)
+	r = rospy.Rate(10)
 	mode='global'
 	dist = 0
 	flag=0
@@ -104,7 +106,7 @@ if __name__ == "__main__":
 		mode_msg = String()
 		park_msg = Int32MultiArray()
 		park_slow_msg = String()
-		dc_msg = String()
+		uturn_msg = String()
 
 		### 미션이 끝나면 end flag를 받아 global path 로 복귀 ##
 		if mode_status == 'end':
@@ -113,7 +115,6 @@ if __name__ == "__main__":
 			mode_status = 'going'
 		else:
 			pass
-				#and (parking_object == False)
 
 		# if (not use_map.horizontal_parking_map_num==0) and (global_wp <= use_map.horizontal_park_object_finish and global_wp >= use_map.horizontal_park_object_start): # 주차 칸 인식을 위한 flag
 		# 	coll_check=[True, True, True]
@@ -156,10 +157,11 @@ if __name__ == "__main__":
 			mode = 'delivery_A'
 		elif (not use_map.delivery_map_num==0) and (global_wp <= use_map.glo_to_del_finish[1] and global_wp >= use_map.glo_to_del_start[1]):  # delivery mode B
 			mode = 'delivery_B'
-		#elif (global_wp <= use_map.glo_to_static_finish) and (global_wp >= use_map.glo_to_static_start):
-		#	mode = 'static_object'
-		#	if (global_wp >= use_map.glo_to_static_finish):
-		#		mode = 'global'
+		elif (global_wp <= use_map.glo_to_static_finish and global_wp >= use_map.glo_to_static_start):
+			if (global_wp >= use_map.glo_to_static_finish-3):
+				mode = 'global'
+			else:
+				mode = 'static_object'
 		elif (not use_map.horizontal_parking_map_num==0) and (global_wp >= use_map.glo_to_horizontal_park_start[parking_ind]) and (global_wp <= use_map.glo_to_horizontal_park_finish[parking_ind]) and (parking==True):#and (parking == False):
 			mode = 'horizontal_parking'
 			# parking = True
@@ -172,6 +174,16 @@ if __name__ == "__main__":
 		else:
 			pass
 
+
+		if (global_wp <= use_map.horizontal_park_object_finish) and (global_wp >= use_map.horizontal_park_object_start):
+			park_slow_msg.data = 'slow'
+		else:
+			park_slow_msg.data = 'no'
+		
+		if (global_wp <= use_map.uturn_list[0]) and (global_wp >= use_map.uturn_list[0]-5):
+			uturn_msg.data = 'slow'
+		else:
+			uturn_msg.data = 'no'
 
 		mode_msg.data = mode
 		mode_pub.publish(mode_msg)
@@ -204,5 +216,6 @@ if __name__ == "__main__":
 
 		path_pub.publish(path_msg)
 		park_slow_pub.publish(park_slow_msg)
+		uturn_pub.publish(uturn_msg)
 		
 		r.sleep()

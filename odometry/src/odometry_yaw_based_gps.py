@@ -14,7 +14,7 @@ from nav_msgs.msg import Odometry
 
 import numpy as np
 
-vo_Pub=rospy.Publisher('/odom_gps',Odometry,queue_size=1)
+vo_Pub=rospy.Publisher('/odom_imu',Odometry,queue_size=1)
 
 
 heading_array = []
@@ -73,10 +73,10 @@ def callback1(msg):
 	heading_array.insert(0,heading)   # heading value save
 	qx=0
 	qy=0
-	if len(heading_array) == 5:   # save number
+	if len(heading_array) == 3:   # save number
 		heading_array.pop()
-	filtered_heading=heading
-	#filtered_heading = (sum(heading_array)/len(heading_array))   # moving average
+	#filtered_heading=heading
+	filtered_heading = (sum(heading_array)/len(heading_array))   # moving average
 	# filtered_heading = np.median(heading_array)  #moving median
  
 	if i==0:

@@ -130,7 +130,7 @@ if __name__ == "__main__":
 						flag=1
 						break
 			else:
-				if (global_wp <= use_map.diagonal_park_check[parking_ind]) and (collision_check_for_parking(use_map.diagonal_parking_object[park_i],obs_info)==True):
+				if (global_wp <= use_map.diagonal_park_check[parking_ind]-2) and (collision_check_for_parking(use_map.diagonal_parking_object[park_i],obs_info)==True):
 					for park_i in range(parking_ind, use_map.diagonal_parking_map_num, 1):
 						print(str(park_i)+"번 주차 공간 인식 중")
 						if collision_check_for_parking(use_map.diagonal_parking_object[park_i],obs_info)==False:

@@ -159,7 +159,7 @@ if __name__ == "__main__":
 	road_yaw=0
 	park_ind=0
 	v=0
-	hz=20
+	hz=10
 	dt=float(1/hz)
 
 	state=State(x=obj_msg.x, y=obj_msg.y, yaw=obj_msg.yaw, v=obj_msg.v, dt=dt)

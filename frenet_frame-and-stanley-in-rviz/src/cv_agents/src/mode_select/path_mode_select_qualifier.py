@@ -94,7 +94,7 @@ if __name__ == "__main__":
 	mode='global'
 	dist = 0
 
-	r = rospy.Rate(20)
+	r = rospy.Rate(10)
 	while not rospy.is_shutdown():
 
 		path_msg = PathArray()
@@ -118,7 +118,7 @@ if __name__ == "__main__":
 				mode = 'global'
 		elif (global_wp >= use_map.glo_to_static_finish and global_wp >= use_map.glo_to_static_start):
 			mode = 'static_object'
-			if (global_wp > use_map.glo_to_static_finish):
+			if (global_wp >= use_map.glo_to_static_finish-3):
 				mode = 'global'
 		else:
 			pass
