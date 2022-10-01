@@ -607,7 +607,12 @@ def collision_check_for_parking(area, obs_info):
 	
 	x,y,Le,Wi = comparison(area)
 
-	yaw=use_map.waypoints['horizontal_parking'][0]['yaw'][0]
+	# 본선때 사용
+	#yaw=use_map.waypoints['horizontal_parking'][0]['yaw'][0]
+	
+	# 예선때 사용
+	yaw=use_map.waypoints['diagonal_parking'][0]['yaw'][-1]
+	
 	col=0
 	car1=[x, y, yaw, Le, Wi]
 	# car1s = [[f[0], f[1], f[2], 1.600, 1.160] for f in zip(fp.x, fp.y, fp.yaw)]

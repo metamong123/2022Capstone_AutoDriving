@@ -9,8 +9,10 @@ Panels:
         - /Grid1
         - /MarkerArray1
         - /MarkerArray2
+        - /MarkerArray3
+        - /MarkerArray5
         - /MarkerArray6
-        - /MarkerArray12
+        - /MarkerArray8
       Splitter Ratio: 0.5
     Tree Height: 697
   - Class: rviz/Selection
@@ -32,7 +34,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -123,44 +125,12 @@ Visualization Manager:
       Marker Topic: /adaptive_clustering_v1/markers
       Name: MarkerArray
       Namespaces:
-        adaptive_clustering_v1: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /objects/marker/obstacles
-      Name: MarkerArray
-      Namespaces:
-        "": true
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /rviz/parking_link_1
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /rviz/parking_link_2
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /rviz/parking_link_3
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /rviz/parking_link_4
       Name: MarkerArray
       Namespaces:
         {}
@@ -195,7 +165,7 @@ Visualization Manager:
       Marker Topic: /rviz/horizontal_object_0
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -203,7 +173,7 @@ Visualization Manager:
       Marker Topic: /rviz/horizontal_object_1
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -211,7 +181,7 @@ Visualization Manager:
       Marker Topic: /rviz/horizontal_object_2
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -219,7 +189,7 @@ Visualization Manager:
       Marker Topic: /rviz/horizontal_parking_link_0
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -227,12 +197,108 @@ Visualization Manager:
       Marker Topic: /rviz/horizontal_parking_link_1
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /rviz/horizontal_parking_link_2
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /rviz/diagonal_object_0
+      Name: Marker
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /rviz/diagonal_object_1
+      Name: Marker
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /rviz/diagonal_object_2
+      Name: Marker
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /rviz/diagonal_object_3
+      Name: Marker
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /rviz/diagonal_object_4
+      Name: Marker
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /rviz/diagonal_object_5
+      Name: Marker
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /rviz/diagonal_parking_link_0
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /rviz/diagonal_parking_link_1
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /rviz/diagonal_parking_link_2
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /rviz/diagonal_parking_link_3
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /rviz/diagonal_parking_link_4
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /rviz/diagonal_parking_link_5
       Name: MarkerArray
       Namespaces:
         "": true
@@ -266,16 +332,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 48.83932876586914
+      Distance: 122.3592529296875
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -18.0898494720459
-        Y: 6.9825239181518555
-        Z: -13.795517921447754
+        X: 33.331546783447266
+        Y: -0.6570559740066528
+        Z: -13.847258567810059
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
@@ -303,4 +369,4 @@ Window Geometry:
     collapsed: false
   Width: 1267
   X: 161
-  Y: 49
+  Y: 27

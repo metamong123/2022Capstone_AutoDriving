@@ -1,5 +1,4 @@
 <launch>
-	<!-- <param name="mission_status" type="string" value="going"/> -->
 	<node name="state" pkg="update" type="state.py"/>
 	
 	<node name="map_visualizer" pkg="map_server" type="map_visualizer.py" />
@@ -8,12 +7,12 @@
 	<node name="collision_check" pkg="obstacles" type="collision_check_with_visualizing_car.py" />
 
 	<node name="path" pkg="cv_agents" type="path_global.py" output="screen"/>
-	<node name="path_select" pkg="cv_agents" type="path_mode_select_final.py" output="screen"/>
+	<node name="path_select" pkg="cv_agents" type="path_mode_select_qualifier_kcity_parking.py" output="screen"/>
 	
 	
 	<node name="control" pkg="cv_agents" type="control.py"/>
-	<node name='core_controller' pkg='core' type='core_final.py'/>
+	<node name='core_controller' pkg='core' type='core_qualifier_kcity.py'/>
 
-	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find cv_agents)/rviz/kcity.rviz"/>
+	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find cv_agents)/rviz/frontier.rviz"/>
 	
 </launch>

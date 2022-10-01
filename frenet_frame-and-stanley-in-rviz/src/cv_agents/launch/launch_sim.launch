@@ -1,6 +1,6 @@
 <launch>
 	<param name="mission_status" type="string" value="going" />
-	<node name="map_visualizer" pkg="map_server" type="map_visualizer.py" />
+	<node name="map_visualizer" pkg="map_server" type="map_visualizer_park.py" />
 
 	<node name="state" pkg="update" type="state_sim.py"/>
 	<node name="parking_car" pkg="obstacles" type="parking_car.py" />

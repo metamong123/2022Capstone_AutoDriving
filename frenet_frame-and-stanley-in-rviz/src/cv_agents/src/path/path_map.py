@@ -94,9 +94,11 @@ class Path:
 		self.horizontal_parking_route=[] #parking pkl파일 경로
 		self.horizontal_parking_object_route=[]
 		self.diagonal_parking_route=[]
+		self.diagonal_parking_object_route=[]
 		self.delivery_route=[] #delivery pkl파일 경로
 		self.horizontal_parking_object={}
 		self.horizontal_parking_path={}
+		self.diagonal_parking_object={}
 		self.diagonal_parking_path={}
 		self.delivery_path={}
 		self.w={}
@@ -301,16 +303,29 @@ class Path:
 				self.set_other_link()
 	
 	def set_parking_area(self, pc_route="/src/frontier/parking_route.pkl", link=None):
-		if not link==None:
-			self.horizontal_parking_object[link]={}
-			with open(pc_route, 'rb') as f:
-				file=pickle.load(f)
-				self.horizontal_parking_object[link]=file[0]			
-		else:
-			self.horizontal_parking_object[0]={}
-			with open(pc_route, 'rb') as f:
-				file=pickle.load(f)
-				self.horizontal_parking_object[0]=file[0]
+		# 본선 때 사용
+		# if not link==None:	
+		# 	self.horizontal_parking_object[link]={}	
+		# 	with open(pc_route, 'rb') as f:	
+		# 		file=pickle.load(f)	
+		# 		self.horizontal_parking_object[link]=file[0]				
+		# else:	
+		# 	self.horizontal_parking_object[0]={}	
+		# 	with open(pc_route, 'rb') as f:	
+		# 		file=pickle.load(f)	
+		# 		self.horizontal_parking_object[0]=file[0]
+	
+		# 예선 때 사용	
+		if not link==None:	
+			self.diagonal_parking_object[link]={}	
+			with open(pc_route, 'rb') as f:	
+				file=pickle.load(f)	
+				self.diagonal_parking_object[link]=file[0]				
+		else:	
+			self.diagonal_parking_object[0]={}	
+			with open(pc_route, 'rb') as f:	
+				file=pickle.load(f)	
+				self.diagonal_parking_object[0]=file[0]	
 
 	def set_dir(self, straight, left, right, uturn):
 		self.link_dir={'straight':straight,'left':left,'right':right,'uturn':uturn}
@@ -724,6 +739,8 @@ def boong_finals():
 	boong_finals.trafficlight_list=[1125]
 	boong_finals.notrafficlight_list=[407,557,724]
 
+	boong_finals.uturn_list=[5]
+
 	boong_finals.glo_to_del_start=[1075, 1897]
 	boong_finals.glo_to_del_finish=[1085, 1907]
 	boong_finals.del_to_glo_start=[1113,1958]
@@ -782,7 +799,7 @@ def boong_qualifier():
 	# boong_qualifier.set_terminal_time()
 	return boong_qualifier
 
-use_map=boong_finals()
+use_map=boong_qualifier()
 start_index=0
 
 if start_index==0:
