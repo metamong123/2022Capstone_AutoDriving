@@ -216,12 +216,12 @@ def delivery_decision():
 		pass
 
 	if car_mode == 'delivery_A':
-		if A_x[delivery_ind] > 265:   #parameter
+		if A_x[delivery_ind] > 300:   #parameter
 			delivery_flag = 'end'
 		else:
 			delivery_flag = 'going'
 	elif car_mode == 'delivery_B':
-		if B_x[delivery_ind] > 265:   #parameter
+		if B_x[delivery_ind] > 300:   #parameter
 			delivery_flag = 'end'
 		else:
 			delivery_flag = 'going'
@@ -370,8 +370,8 @@ if __name__=='__main__':
 									cmd.drive.acceleration = frenet_gear
 									cmd.drive.jerk = 0
 									j = 0
-				notraffic_status = False # notraffic 구간이 여러번 있으니 바꿔줘야함
-				print('global mode!!!')
+			notraffic_status = False # notraffic 구간이 여러번 있으니 바꿔줘야함
+			print('global mode!!!')
 			mode_status = 'going'
 			
 		elif car_mode == 'horizontal_parking':

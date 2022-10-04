@@ -207,7 +207,7 @@ if __name__ == "__main__":
 		#else:
 		#	traffic_interval = 3
 		#####################
-		traffic_interval = 4
+		traffic_interval = 6
 
 		for number in range(len(use_map.trafficlight_list)):
 			if (global_wp <= use_map.trafficlight_list[number]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number]-traffic_interval-5):

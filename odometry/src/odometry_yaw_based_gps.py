@@ -126,6 +126,8 @@ if __name__=='__main__':
 	b=0
 	heading=0
 	i=0
+	before_qz = 0
+	before_qw = 1
 	rpose=Odometry()
 	rpose.header.frame_id="odom"
 

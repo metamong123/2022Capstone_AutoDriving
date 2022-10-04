@@ -63,10 +63,11 @@ WB = 1.04
 # DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
 # DT = 0.1 # timestep for update
 
-MIN_T = 1.0 # minimum terminal time [s]
-MAX_T = 4.0 # maximum terminal time [s], default = 2
-DT_T = 0.5 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
-DT = 0.5 # timestep for update
+####### 사용중
+# MIN_T = 3.0 # minimum terminal time [s]
+# MAX_T = 5.0 # maximum terminal time [s], default = 2
+# DT_T = 1.0 # dt for terminal time [s] : MIN_T 에서 MAX_T 로 어떤 dt 로 늘려갈지를 나타냄
+DT = 0.2 # timestep for update
 
 ## 경로는 잘 생기나 DT가 너무 안 맞음
 # MIN_T = 2.0 # minimum terminal time [s]
@@ -93,7 +94,7 @@ K_MAX = STEER_MAX / WB	 # maximum curvature [1/m]
 K_J = 0.1 # weight for jerk, default = 0.1 (가가속도를 위한 웨이트)
 K_T = 0.1 # weight for terminal time (터미널 타임을 위한 웨이트)
 K_D = 1.0 # weight for consistency, default = 1.0 (일관성을 위한 웨이트?)
-K_GD = 7.0 # weight for global path tracking (글로벌 패스를 따르는 것에 대한 웨이트)
+K_GD = 7.0# weight for global path tracking (글로벌 패스를 따르는 것에 대한 웨이트)
 K_V = 1.0 # weight for getting to target speed (목표 속도로 도달하는 것을 위한 웨이트)
 K_LAT = 1.5 # weight for lateral direction, default = 1.0 (횡방향을 위한 웨이트)
 K_LON = 1.0 # weight for longitudinal direction (종방향을 위한 웨이트)
@@ -389,16 +390,16 @@ class FrenetPath:
 		self.ds = []
 		self.kappa = []
 
-def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET, dir):
+def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, DF_SET, mode, dir):
 # def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed, dir):
 	frenet_paths = []
 
 	# generate path to each offset goal
 	for df in DF_SET:
-
+		print(use_map.MIN_T[mode][dir], use_map.MAX_T[mode][dir], use_map.DT_T[mode][dir])
 		# Lateral motion planning
-		# for T in np.arange(MIN_T[dir], MAX_T[dir]+DT_T[dir], DT_T[dir]):
-		for T in np.arange(MIN_T, MAX_T+DT_T, DT_T):
+		for T in np.arange(use_map.MIN_T[mode][dir], use_map.MAX_T[mode][dir]+use_map.DT_T[mode][dir], use_map.DT_T[mode][dir]):
+		# for T in np.arange(MIN_T, MAX_T+DT_T, DT_T):
 			fp = FrenetPath()
 			lat_traj = QuinticPolynomial(di, di_d, di_dd, df, df_d, df_dd, T)
 
@@ -418,7 +419,8 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 			tfp.s_ddd = [lon_traj.calc_jerk(t) for t in fp.t]
 
 			# 경로 늘려주기 (In case T < MAX_T)
-			for _t in np.arange(T, MAX_T, DT): ## delta time
+			for _t in np.arange(T, use_map.MAX_T[mode][dir]+use_map.DT_T[mode][dir], DT):
+			# for _t in np.arange(T, MAX_T, DT): ## delta time
 				tfp.t.append(_t)
 				tfp.d.append(tfp.d[-1])
 				_s = tfp.s[-1] + tfp.s_d[-1] * DT ## delta time
@@ -462,7 +464,7 @@ def calc_frenet_paths_(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_d
 	for df in DF_SET:
 
 		# Lateral motion planning
-		# for T in np.arange(MIN_T[dir], MAX_T[dir]+DT_T[dir], DT_T[dir]):
+		# for T in np.arange(MIN_T[mode][dir], MAX_T[mode][dir]+DT_T[mode][dir], DT_T[mode][dir]):
 		for T in np.arange(MIN_T, MAX_T+DT_T, DT_T):
 			fp = FrenetPath()
 			lat_traj = QuinticPolynomial(di, di_d, di_dd, df, df_d, df_dd, T)
@@ -484,7 +486,7 @@ def calc_frenet_paths_(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_d
 				tfp.s_ddd = [lon_traj.calc_jerk(t) for t in fp.t]
 
 				# 경로 늘려주기 (In case T < MAX_T)
-				# for _t in np.arange(T, MAX_T[dir], DT): ## delta time
+				# for _t in np.arange(T, MAX_T[mode][dir], DT): ## delta time
 				for _t in np.arange(T, MAX_T, DT): ## delta time
 					tfp.t.append(_t)
 					tfp.d.append(tfp.d[-1])
@@ -536,6 +538,7 @@ def calc_global_paths(fplist, mapx, mapy, maps):
 			dx = fp.x[i + 1] - fp.x[i]
 			dy = fp.y[i + 1] - fp.y[i]
 			fp.yaw.append(np.arctan2(dy, dx))
+			# fp.ds.append(math.sqrt(dx**2 + dy**2))
 			fp.ds.append(np.hypot(dx, dy))
 
 		fp.yaw.append(fp.yaw[-1])
@@ -611,7 +614,7 @@ def collision_check_for_parking(area, obs_info):
 	#yaw=use_map.waypoints['horizontal_parking'][0]['yaw'][0]
 	
 	# 예선때 사용
-	yaw=use_map.waypoints['diagonal_parking'][0]['yaw'][-1]
+	yaw=use_map.object_yaw
 	
 	col=0
 	car1=[x, y, yaw, Le, Wi]
@@ -632,13 +635,15 @@ def collision_check_for_parking(area, obs_info):
 		print("라바콘 " + str(col) + "개")
 		return False
 
-
+import time
 def check_path(fplist, obs_info, mapx, mapy, maps):
 	ok_ind = []
 	vel = 0
 	a = 0
 	curv = 0
 	col = 0
+	# fp = open("/home/mds/"+"path_"+time.strftime('%Y%m%d_%H:%M')+".csv", "w")
+	# fp.write('kappa' + ',' + 'yaw' + ',' + 's' + ',' + 'ds' + ',' + 'x' + ',' + 'y' + '\n')
 	for i, _path in enumerate(fplist):
 		acc_squared = [(abs(a_s**2 + a_d**2)) for (a_s, a_d) in zip(_path.s_dd, _path.d_dd)]
 		# print("kappa:" + str(fplist[i].kappa))
@@ -650,8 +655,14 @@ def check_path(fplist, obs_info, mapx, mapy, maps):
 			a += 1
 			#print("a:" + str(a))
 			continue
-		if any([abs(kappa) > K_MAX for kappa in fplist[i].kappa]):  # Max curvature check
-			#print("curv:"+str(abs(kappa)))
+		elif any([abs(kappa) > K_MAX for kappa in fplist[i].kappa]):  # Max curvature check
+			# fp.write(str(fplist[i].kappa) + ',' + str(fplist[i].yaw) + ',' + str(fplist[i].s) + ',' + str(fplist[i].ds) + ',' + str(fplist[i].x) + ',' + str(fplist[i].y) + '\n')
+			# print("x:"+str([abs(x) for x in fplist[i].x]))
+			# print("y:"+str([abs(y) for y in fplist[i].y]))
+			# print("yaw:"+str([abs(yaw) for yaw in fplist[i].yaw]))
+			# print("s:"+str([abs(s) for s in fplist[i].s]))
+			# print("ds:"+str([abs(ds) for ds in fplist[i].ds]))
+			# print("curv:"+str([abs(kappa) for kappa in fplist[i].kappa]))
 			curv += 1
 			continue
 		elif collision_check(_path, obs_info, mapx, mapy, maps):
@@ -664,13 +675,14 @@ def check_path(fplist, obs_info, mapx, mapy, maps):
 	return [fplist[i] for i in ok_ind], col
 	# return fplist, col
 
-def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed, DF_SET, dir):
+def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed, DF_SET,mode, dir):
 # def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, mapx, mapy, maps, opt_d, target_speed):
-	fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed,DF_SET,dir)
+	fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed,DF_SET,mode,dir)
 	# fplist = calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, opt_d, target_speed)
 	fplist = calc_global_paths(fplist, mapx, mapy, maps)
 	col=0
 	fplist, col = check_path(fplist, obs_info, mapx, mapy, maps)
+	print(si)
 	# find minimum cost path
 	min_cost = float("inf")
 	opt_traj = None

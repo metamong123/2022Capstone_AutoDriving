@@ -117,7 +117,7 @@ def comparison(area):
 
 def msg_pub(i, area):
 	x,y,Le,Wi = comparison(area)
-	yaw=use_map.waypoints['horizontal_parking'][0]['yaw'][0]
+	yaw=use_map.object_yaw
 	yaw_quat = tf.transformations.quaternion_from_euler(0,0,yaw)
 
 	m = Marker()
@@ -193,6 +193,10 @@ if __name__ == "__main__":
 		for i in range(use_map.horizontal_parking_map_num):
 			obj_topic="/rviz/horizontal_object_"+str(i)
 			globals()["horizontal_parking_obj_pub_{}".format(i)]=rospy.Publisher(obj_topic, Marker,queue_size=1)
+	if not use_map.diagonal_parking_map_num==0:
+		for i in range(use_map.diagonal_parking_map_num):
+			obj_topic="/rviz/diagonal_object_"+str(i)
+			globals()["diagonal_parking_obj_pub_{}".format(i)]=rospy.Publisher(obj_topic, Marker,queue_size=1)
 
 	while not rospy.is_shutdown():
 		global_pub.publish(global_cv.ma)
@@ -209,5 +213,9 @@ if __name__ == "__main__":
 			for i in range(use_map.horizontal_parking_map_num):
 				m=msg_pub(i, use_map.horizontal_parking_object[i])
 				globals()["horizontal_parking_obj_pub_{}".format(i)].publish(m)
+		if not use_map.diagonal_parking_map_num==0:
+			for i in range(use_map.diagonal_parking_map_num):
+				m=msg_pub(i, use_map.diagonal_parking_object[i])
+				globals()["diagonal_parking_obj_pub_{}".format(i)].publish(m)
 		
 		rospy.sleep(1)

@@ -284,8 +284,8 @@ if __name__ == "__main__":
 		df_d = 0
 		df_dd = 0
 		
-		path, opt_ind, col = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints['global']['x'], use_map.waypoints['global']['y'],use_map.waypoints['global']['s'], opt_d, use_map.target_speed[mode][dir], use_map.DF_SET[link_ind['global']], dir)
-		print(use_map.DF_SET[link_ind['global']])
+		path, opt_ind, col = frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd, obs_info, use_map.waypoints['global']['x'], use_map.waypoints['global']['y'],use_map.waypoints['global']['s'], opt_d, use_map.target_speed[mode][dir], use_map.DF_SET[link_ind['global']], mode,dir)
+		# print(use_map.DF_SET[link_ind['global']])
 		col_msg.data=col
 		
 		if opt_ind == -1:

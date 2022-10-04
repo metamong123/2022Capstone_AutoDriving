@@ -17,7 +17,7 @@ class ObstaclePub():
 		self.mode = 'global'
 		self.msg = MarkerArray()
 
-		self.pub = rospy.Publisher('/obstacles', ObjectArray, queue_size=1)
+		self.pub = rospy.Publisher('/obstacles_1', ObjectArray, queue_size=1)
 		self.sub_cluster = rospy.Subscriber('/adaptive_clustering_v1/markers', MarkerArray, self.cluster_callback)
 		self.sub_mode = rospy.Subscriber("/mode_selector", String, self.mode_callback)
 		self.listener = tf.TransformListener()
