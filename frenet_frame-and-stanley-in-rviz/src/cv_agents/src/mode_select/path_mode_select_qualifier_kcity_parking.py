@@ -123,16 +123,16 @@ if __name__ == "__main__":
 			if (flag == 0):
 				for park_i in range(use_map.diagonal_parking_map_num):
 					print(str(park_i)+"번 주차 공간 인식 중")
-					if (collision_check_for_parking(use_map.diagonal_parking_object[park_i],obs_info)==False):
+					if (collision_check_for_parking(park_i, use_map.diagonal_parking_object[park_i],obs_info)==False):
 						parking_ind=park_i
 						print("parking_choose: "+str(park_i))
 						flag=1
 						break
 			else:
-				if (global_wp <= use_map.diagonal_park_check[parking_ind]-2) and (collision_check_for_parking(use_map.diagonal_parking_object[park_i],obs_info)==True):
+				if (global_wp <= use_map.diagonal_park_check[parking_ind]-2) and (collision_check_for_parking(park_i, use_map.diagonal_parking_object[park_i],obs_info)==True):
 					for park_i in range(parking_ind, use_map.diagonal_parking_map_num, 1):
 						print(str(park_i)+"번 주차 공간 인식 중")
-						if collision_check_for_parking(use_map.diagonal_parking_object[park_i],obs_info)==False:
+						if collision_check_for_parking(park_i, use_map.diagonal_parking_object[park_i],obs_info)==False:
 							parking_ind=park_i
 							print("parking_choose: "+str(park_i))
 							break
@@ -176,7 +176,7 @@ if __name__ == "__main__":
 		traffic_interval = 4
 
 		for number in range(len(use_map.trafficlight_list)):
-			if (global_wp <= use_map.trafficlight_list[number]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number]-traffic_interval-5):
+			if (global_wp <= use_map.trafficlight_list[number]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number]-traffic_interval-8):
 				traffic_slow = 'slow'
 				break
 			else:
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 				break
 			else:
 				for number2 in range(len(use_map.notrafficlight_list)):
-					if (global_wp <= use_map.notrafficlight_list[number2]) and (global_wp >= use_map.notrafficlight_list[number2]-3):
+					if (global_wp <= use_map.notrafficlight_list[number2]) and (global_wp >= use_map.notrafficlight_list[number2]-4):
 						traffic_mode = 'notraffic'
 						super_break = True
 						break
@@ -205,7 +205,7 @@ if __name__ == "__main__":
 		mode_pub.publish(mode_msg)
 		
 		if mode == 'diagonal_parking':
-			#parking_ind=1
+			# parking_ind=4 # 차량 인식 못 할 것 같을때
 
 			fp=MakingPath()
 			fp.x=use_map.diagonal_parking_path[parking_ind][0]

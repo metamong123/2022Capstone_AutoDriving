@@ -52,7 +52,7 @@ def euler_from_quaternion(x, y, z, w):
 
 # parking 시작하기전에 수정해야할 파라미터 값들 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 parking_finish_wp=[51,51,51] # 각 parking index마다의 finish waypoint임
-parking_cmd_wp = [11,27,32,48]
+parking_cmd_wp = [11,27,32,46]#48]
 ###########################################################################
 
 car_mode = 'global'
@@ -216,12 +216,12 @@ def delivery_decision():
 		pass
 
 	if car_mode == 'delivery_A':
-		if A_x[delivery_ind] > 300:   #parameter
+		if A_x[delivery_ind] > 315:   #parameter
 			delivery_flag = 'end'
 		else:
 			delivery_flag = 'going'
 	elif car_mode == 'delivery_B':
-		if B_x[delivery_ind] > 300:   #parameter
+		if B_x[delivery_ind] > 315:   #parameter
 			delivery_flag = 'end'
 		else:
 			delivery_flag = 'going'
@@ -272,7 +272,7 @@ if __name__=='__main__':
 					notraffic_status = True
 					final_cmd_Pub.publish(cmd)
 					print('no traffic mode')
-					rospy.sleep(4) # 4sec
+					rospy.sleep(3) # 4sec
 				elif notraffic_status == True:
 					if abs(frenet_angle) > 0.05: #각도 파라미터
 						if j<15:  #감속
@@ -297,25 +297,25 @@ if __name__=='__main__':
 					cmd.drive.speed = frenet_speed#15/3.6
 					cmd.drive.steering_angle = frenet_angle#steer
 					cmd.drive.acceleration = frenet_gear
-					cmd.drive.jerk = 40
+					cmd.drive.jerk = 60
 				else:
 					if uturn == 'slow':
 						if traffic_light == 1:
 							if abs(frenet_angle) > 0.05:
 								if j<15:  #감속
-									cmd.drive.speed = frenet_speed/2#7/3.6
-									cmd.drive.steering_angle = frenet_angle#steer
+									cmd.drive.speed = frenet_speed/2
+									cmd.drive.steering_angle = frenet_angle
 									cmd.drive.acceleration = frenet_gear
 									cmd.drive.jerk = int(5.5 * velocity) if velocity >= 5 else 0
 									j=j+1
 								else:
-									cmd.drive.speed = frenet_speed#15/3.6
-									cmd.drive.steering_angle = frenet_angle#steer
+									cmd.drive.speed = frenet_speed
+									cmd.drive.steering_angle = frenet_angle
 									cmd.drive.acceleration = frenet_gear
 									cmd.drive.jerk = 0
 							else:
-								cmd.drive.speed = frenet_speed#15/3.6
-								cmd.drive.steering_angle = frenet_angle#steer
+								cmd.drive.speed = frenet_speed
+								cmd.drive.steering_angle = frenet_angle
 								cmd.drive.acceleration = frenet_gear
 								cmd.drive.jerk = 0
 								j = 0
@@ -328,50 +328,50 @@ if __name__=='__main__':
 						if park_slow == 'no':
 							if abs(frenet_angle) > 0.05: #각도 파라미터
 								if j<15:  #감속
-									cmd.drive.speed = frenet_speed/2#7/3.6
-									cmd.drive.steering_angle = frenet_angle#steer
+									cmd.drive.speed = frenet_speed/2
+									cmd.drive.steering_angle = frenet_angle
 									cmd.drive.acceleration = frenet_gear
 									cmd.drive.jerk = int(5 * velocity) if velocity >= 5 else 0
 									j=j+1
 								else:
-									cmd.drive.speed = frenet_speed#15/3.6
-									cmd.drive.steering_angle = frenet_angle#steer
+									cmd.drive.speed = frenet_speed
+									cmd.drive.steering_angle = frenet_angle
 									cmd.drive.acceleration = frenet_gear
 									cmd.drive.jerk = 0	
 							else:	
-								cmd.drive.speed = frenet_speed#15/3.6
-								cmd.drive.steering_angle = frenet_angle#steer
+								cmd.drive.speed = frenet_speed
+								cmd.drive.steering_angle = frenet_angle
 								cmd.drive.acceleration = frenet_gear
 								cmd.drive.jerk = 0
 								j = 0
 						else:
 							if i < 30:
 								cmd.drive.speed = 7/3.6
-								cmd.drive.steering_angle = frenet_angle#steer
+								cmd.drive.steering_angle = frenet_angle
 								cmd.drive.acceleration = frenet_gear
-								cmd.drive.jerk = int(5.5 * velocity) if velocity >= 5 else 0
+								cmd.drive.jerk = int(6.5 * velocity) if velocity >= 5 else 0
 								i = i+1
 							else:
 								if abs(frenet_angle) > 0.05:
 									if j<15:  #감속
 										cmd.drive.speed = 7/3.6
-										cmd.drive.steering_angle = frenet_angle#steer
+										cmd.drive.steering_angle = frenet_angle
 										cmd.drive.acceleration = frenet_gear
 										cmd.drive.jerk = int(5.5 * velocity) if velocity >= 5 else 0
 										j=j+1
 									else:
 										cmd.drive.speed = 7/3.6
-										cmd.drive.steering_angle = frenet_angle#steer
+										cmd.drive.steering_angle = frenet_angle
 										cmd.drive.acceleration = frenet_gear
 										cmd.drive.jerk = 0
 								else:
 									cmd.drive.speed = 7/3.6
-									cmd.drive.steering_angle = frenet_angle#steer
+									cmd.drive.steering_angle = frenet_angle
 									cmd.drive.acceleration = frenet_gear
 									cmd.drive.jerk = 0
 									j = 0
-			notraffic_status = False # notraffic 구간이 여러번 있으니 바꿔줘야함
-			print('global mode!!!')
+				notraffic_status = False # notraffic 구간이 여러번 있으니 바꿔줘야함
+				print('global mode!!!')
 			mode_status = 'going'
 			
 		elif car_mode == 'horizontal_parking':
@@ -421,7 +421,7 @@ if __name__=='__main__':
 						parking_flag = True
 						final_cmd_Pub.publish(cmd)
 						print('parking finish!!! stop!!')
-						rospy.sleep(5) # 4sec
+						rospy.sleep(10) # 4sec
 				else:
 					if park_ind_wp[1] <= parking_cmd_wp[3]:
 						mode_status = 'end'
@@ -442,7 +442,7 @@ if __name__=='__main__':
 						cmd.drive.speed = frenet_speed
 						cmd.drive.steering_angle = frenet_angle
 						cmd.drive.acceleration = frenet_gear
-						cmd.drive.jerk = 20
+						cmd.drive.jerk = int(5.5 * velocity) if velocity >= 2 else 0
 						j=j+1
 					else:
 						cmd.drive.speed = frenet_speed

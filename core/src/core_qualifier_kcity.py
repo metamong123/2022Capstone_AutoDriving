@@ -335,7 +335,7 @@ if __name__=='__main__':
 				cmd.drive.jerk = 200  #full brake
 				final_cmd_Pub.publish(cmd)
 				print('parking finish!!! stop!!')
-				rospy.sleep(5) # 10sec
+				rospy.sleep(10) # 10sec
 				parking_flag = 'backward'
 			elif parking_flag == 'end':
 				cmd.drive.speed = 0

@@ -396,7 +396,7 @@ def calc_frenet_paths(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d, df_dd
 
 	# generate path to each offset goal
 	for df in DF_SET:
-		print(use_map.MIN_T[mode][dir], use_map.MAX_T[mode][dir], use_map.DT_T[mode][dir])
+		# print(use_map.MIN_T[mode][dir], use_map.MAX_T[mode][dir], use_map.DT_T[mode][dir])
 		# Lateral motion planning
 		for T in np.arange(use_map.MIN_T[mode][dir], use_map.MAX_T[mode][dir]+use_map.DT_T[mode][dir], use_map.DT_T[mode][dir]):
 		# for T in np.arange(MIN_T, MAX_T+DT_T, DT_T):
@@ -610,10 +610,6 @@ def collision_check_for_parking(area, obs_info):
 	
 	x,y,Le,Wi = comparison(area)
 
-	# 본선때 사용
-	#yaw=use_map.waypoints['horizontal_parking'][0]['yaw'][0]
-	
-	# 예선때 사용
 	yaw=use_map.object_yaw
 	
 	col=0
@@ -628,7 +624,35 @@ def collision_check_for_parking(area, obs_info):
 		if is_collide:
 			col+=1
 
-	if col >= 2:
+	if col >= 1:
+		print("라바콘 " + str(col) + "개")
+		return True
+	else:
+		print("라바콘 " + str(col) + "개")
+		return False
+
+def collision_check_for_diagonal_parking(i, area, obs_info):
+	
+	x,y,Le,Wi = comparison(area)
+
+	x = use_map.waypoints['diagonal_parking'][i*2]['x'][56]
+	y = use_map.waypoints['diagonal_parking'][i*2]['y'][56]
+
+	yaw=use_map.object_yaw
+	
+	col=0
+	car1=[x, y, yaw, Le, Wi]
+	# car1s = [[f[0], f[1], f[2], 1.600, 1.160] for f in zip(fp.x, fp.y, fp.yaw)]
+	
+	for obs in obs_info:
+		car_vertices = get_vertice_rect(car1)
+		obs_vertices = get_vertice_rect(obs)
+
+		is_collide = separating_axis_theorem(car_vertices, obs_vertices)
+		if is_collide:
+			col+=1
+
+	if col >= 1:
 		print("라바콘 " + str(col) + "개")
 		return True
 	else:
@@ -682,7 +706,7 @@ def frenet_optimal_planning(si, si_d, si_dd, sf_d, sf_dd, di, di_d, di_dd, df_d,
 	fplist = calc_global_paths(fplist, mapx, mapy, maps)
 	col=0
 	fplist, col = check_path(fplist, obs_info, mapx, mapy, maps)
-	print(si)
+	# print(si)
 	# find minimum cost path
 	min_cost = float("inf")
 	opt_traj = None

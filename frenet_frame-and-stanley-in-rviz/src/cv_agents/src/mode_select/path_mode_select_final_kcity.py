@@ -153,7 +153,7 @@ if __name__ == "__main__":
 						break
 			else:
 				#global_wp <= use_map.glo_to_horizontal_park_start[parking_ind]-5 였는데 start 지점이 이상한 것 같아 수정..
-				if (global_wp <= use_map.glo_to_horizontal_park_start[parking_ind]) and (collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==True):
+				if (global_wp <= use_map.glo_to_horizontal_park_start[parking_ind]-7) and (collision_check_for_parking(use_map.horizontal_parking_object[park_i],obs_info)==True):
 					parking = False
 					for park_i in range(parking_ind, use_map.horizontal_parking_map_num, 1):
 						print(str(park_i)+"번 주차 공간 인식 중")
@@ -207,10 +207,10 @@ if __name__ == "__main__":
 		#else:
 		#	traffic_interval = 3
 		#####################
-		traffic_interval = 6
+		traffic_interval = 4
 
 		for number in range(len(use_map.trafficlight_list)):
-			if (global_wp <= use_map.trafficlight_list[number]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number]-traffic_interval-5):
+			if (global_wp <= use_map.trafficlight_list[number]-traffic_interval) and (global_wp >= use_map.trafficlight_list[number]-traffic_interval-8):
 				traffic_slow = 'slow'
 				break
 			else:
@@ -223,7 +223,7 @@ if __name__ == "__main__":
 				break
 			else:
 				for number2 in range(len(use_map.notrafficlight_list)):
-					if (global_wp <= use_map.notrafficlight_list[number2]) and (global_wp >= use_map.notrafficlight_list[number2]-10):
+					if (global_wp <= use_map.notrafficlight_list[number2]) and (global_wp >= use_map.notrafficlight_list[number2]-15):
 						traffic_mode = 'notraffic'
 						super_break = True
 						break
@@ -240,7 +240,7 @@ if __name__ == "__main__":
 		else:
 			park_slow_msg.data = 'no'
 		
-		if (global_wp <= use_map.uturn_list[0]) and (global_wp >= use_map.uturn_list[0]-5):
+		if (global_wp <= use_map.uturn_list[0]) and (global_wp >= use_map.uturn_list[0]-15):
 			uturn_msg.data = 'slow'
 		else:
 			uturn_msg.data = 'no'
@@ -269,15 +269,15 @@ if __name__ == "__main__":
 			path_msg.x.data = fp.x  # parking final path
 			path_msg.y.data = fp.y
 			path_msg.yaw.data = fp.yaw
-			park_pub.publish(park_msg)
+			
 			 
 		else: # mode = 'global' or 'dynamic_object' or 'static_object'
 			path_msg.x.data = global_path_x
 			path_msg.y.data = global_path_y
 			path_msg.yaw.data = global_path_yaw
 
-			
-
+			park_msg.data=[0,0]
+		park_pub.publish(park_msg)
 		path_pub.publish(path_msg)
 		traffic_pub.publish(traffic_msg)	
 		slow_pub.publish(traffic_slow_msg)

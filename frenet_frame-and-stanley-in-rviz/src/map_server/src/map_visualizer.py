@@ -126,6 +126,11 @@ def msg_pub(i, area):
 	m.id = 100+i
 	m.type = m.CUBE
 
+	# 사선주차 중심에 맞추기
+	# m.pose.position.x = use_map.waypoints['diagonal_parking'][i*2]['x'][56]
+	# m.pose.position.y = use_map.waypoints['diagonal_parking'][i*2]['y'][56]
+
+	# 수평주차
 	m.pose.position.x = x
 	m.pose.position.y = y
 	m.pose.position.z = 0.1

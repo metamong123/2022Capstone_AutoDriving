@@ -68,7 +68,7 @@ heading_array = []
 heading = 0
 filtered_heading = 0
 i=0
-yaw_offset = -0.27  #초기 offset
+yaw_offset = -0.24  #초기 offset
 before_qz = 0
 before_qw = 1
 def callback(gps, imu, vel):
@@ -117,14 +117,17 @@ def callback(gps, imu, vel):
 		gps_qw = before_qw
 
 	velocity = np.sqrt(vel.twist.twist.linear.x ** 2 + vel.twist.twist.linear.y ** 2)
-	if velocity > 2:
+	if velocity > 3:
 		gpose.pose.pose.orientation.x= 0
 		gpose.pose.pose.orientation.y= 0
 		gpose.pose.pose.orientation.z= gps_qz
 		gpose.pose.pose.orientation.w= gps_qw
 		gps_yaw = euler_from_quaternion(0,0,gps_qz,gps_qw)
 		imu_yaw = euler_from_quaternion(imu.quaternion.x, imu.quaternion.y, imu.quaternion.z, imu.quaternion.w)
-		yaw_offset = imu_yaw - gps_yaw
+		if abs(imu_yaw - gps_yaw) < np.pi/2:
+			yaw_offset = imu_yaw - gps_yaw
+		else:
+			pass
 	else:
 		imu_yaw = euler_from_quaternion(imu.quaternion.x, imu.quaternion.y, imu.quaternion.z, imu.quaternion.w)
 		final_imu_yaw = normalize_angle(imu_yaw - yaw_offset)  # -180 ~ 180 넘어가는부분?어떻게 하더라

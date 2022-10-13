@@ -9,6 +9,7 @@
 	<include file="$(find usb_cam)/launch/forward_cam.launch" />
 	<include file="$(find usb_cam)/launch/side_cam.launch" />
 
-	<node name="odom_imu" pkg="odometry" type="odometry_yaw_based_xsensimu.py" />
+	<node name="odom_imu" pkg="odometry" type="odometry.py" />
+	<!-- <node name="odom_imu" pkg="odometry" type="odometry_yaw_based_xsensimu.py" /> -->
 
 </launch>

@@ -156,32 +156,9 @@ if __name__ == '__main__':
         # rospy.Subscriber('/mode_selector',String, mode_callback)
    		#Send to Controller
         
-        if mode == 'global':
-            glo_speed = speed
-        else:
-            glo_speed = glo_speed
-
-		######### mode 변경시 일정시간 감속 #######
-        if (mode != 'global') and (mode != 'horizontal_parking') and (mode != prev_mode):
-            dc = True
-        else:
-            pass
-        print(dc)
-        if dc == True:
-            if i < 70:
-                speed = 2
-                brake = int(5.5 * velocity) if velocity >= 5 else 0
-                i = i + 1
-            else:
-                i = 0
-                dc = False
-        else:
-            pass
-    	#####################################
-        prev_mode = mode
 
 
-        Send_to_ERP42(gear, speed, steer, brake)
+        Send_to_ERP42(0, 1, 0, 0)
 		
     #print(speed)
         rate.sleep()

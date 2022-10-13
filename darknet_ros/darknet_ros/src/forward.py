@@ -81,7 +81,7 @@ if __name__ == '__main__':
         ("green", "left", "red", "straightleft", "yellow",),
 	("traffic",)
     )
-    QUEUE_SIZE = 13
+    QUEUE_SIZE = 7
     ACCURACY_THRESHOLD = 0.7
 
     rospy.init_node('forwrad_yolo')

@@ -168,9 +168,9 @@ if __name__ == '__main__':
             pass
         print(dc)
         if dc == True:
-            if i < 70:
+            if i < 40:
                 speed = 2
-                brake = int(5.5 * velocity) if velocity >= 5 else 0
+                brake = int(7.5 * velocity) if velocity >= 5 else 0
                 i = i + 1
             else:
                 i = 0

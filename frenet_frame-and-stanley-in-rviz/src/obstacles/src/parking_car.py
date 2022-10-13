@@ -17,7 +17,7 @@ class ObstaclePub():
 		self.mode = 'global'
 		self.msg = MarkerArray()
 
-		self.pub = rospy.Publisher('/obstacles_1', ObjectArray, queue_size=1)
+		self.pub = rospy.Publisher('/obstacles', ObjectArray, queue_size=1)
 		self.sub_cluster = rospy.Subscriber('/adaptive_clustering_v1/markers', MarkerArray, self.cluster_callback)
 		self.sub_mode = rospy.Subscriber("/mode_selector", String, self.mode_callback)
 		self.listener = tf.TransformListener()
@@ -52,7 +52,7 @@ class ObstaclePub():
 		o.W = abs(obs.points[4].y - obs.points[3].y)
 
 		# object x, y, yaw
-		x = (obs.points[0].x + obs.points[1].x)/2
+		x = (obs.points[0].x + obs.points[1].x)/2 + 0.3
 		y = (obs.points[4].y + obs.points[3].y)/2
 		yaw = 0
 
